@@ -1,0 +1,16 @@
+@font-face {
+    font-family: seasonVFFont;
+    src: url(../media/cbbaca93bd6f298b.p.woff2) format("woff2");
+    font-display: swap;
+    font-weight: 100 900;
+    font-style: normal
+}
+
+.__className_1c2889 {
+    font-family: seasonVFFont;
+    font-style: normal
+}
+
+.__variable_1c2889 {
+    --font-seasonvf: "seasonVFFont"
+}
