@@ -19,8 +19,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <VwVhProvider />
         <Nav />
-             <main className="container mx-auto w-full max-w-6xl flex-1 px-4">{children}</main>
-        <Footer />
+        <div className="w-full pt-20">
+            <main className="container mx-auto w-full max-w-6xl flex-1 px-4">{children}</main>
+
+        </div>
+        {/*<Footer />*/}
         </body>
         </html>
     );
