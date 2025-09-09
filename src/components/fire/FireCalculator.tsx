@@ -191,46 +191,40 @@ export default function FireCalculator() {
     ]);
 
     return (
-        <div className="mx-auto grid gap-8 py-16 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
+        <div className="mx-auto py-6 grid gap-8 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
             <div className="relative flex flex-col">
                 <div className="flex flex-col gap-10">
                     <div className="flex flex-col gap-2">
-                        <div className="flex flex-col items-end">
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    className="decoration-none relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none text-content-interactive-tertiary [--bg:rgb(var(--background-interactive-tertiary-normal))] hover:[--bg2:rgb(var(--background-interactive-tertiary-hoverPress))] disabled:text-content-interactive-tertiary-disabled disabled:[--bg:rgb(var(--background-interactive-tertiary-disabled))] h-8 px-3"
-                                    style={{ "--xPos": "50%", "--yPos": "50%" } as any}
-                                >
-                                    {currency === "EUR" ? "Euro" : currency === "USD" ? "US Dollar" : "British Pound"}
-                                </button>
-                                <select
-                                    className="h-8 rounded-full bg-background-interactive-tertiary text-title-small px-3"
-                                    value={currency}
-                                    onChange={(e) => setCurrency(e.target.value as Currency)}
-                                >
-                                    <option value="EUR">EUR</option>
-                                    <option value="USD">USD</option>
-                                    <option value="GBP">GBP</option>
-                                </select>
-                            </div>
-                        </div>
+                        {/*<div className="flex flex-col items-end">*/}
+                        {/*    <div className="flex items-center gap-2">*/}
+                        {/*        <button*/}
+                        {/*            type="button"*/}
+                        {/*            className="decoration-none relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none text-content-interactive-tertiary [--bg:rgb(var(--background-interactive-tertiary-normal))] hover:[--bg2:rgb(var(--background-interactive-tertiary-hoverPress))] disabled:text-content-interactive-tertiary-disabled disabled:[--bg:rgb(var(--background-interactive-tertiary-disabled))] h-8 px-3"*/}
+                        {/*            style={{ "--xPos": "50%", "--yPos": "50%" } as any}*/}
+                        {/*        >*/}
+                        {/*            {currency === "EUR" ? "Euro" : currency === "USD" ? "US Dollar" : "British Pound"}*/}
+                        {/*        </button>*/}
+                        {/*        <select*/}
+                        {/*            className="h-8 rounded-full bg-background-interactive-tertiary text-title-small px-3"*/}
+                        {/*            value={currency}*/}
+                        {/*            onChange={(e) => setCurrency(e.target.value as Currency)}*/}
+                        {/*        >*/}
+                        {/*            <option value="EUR">EUR</option>*/}
+                        {/*            <option value="USD">USD</option>*/}
+                        {/*            <option value="GBP">GBP</option>*/}
+                        {/*        </select>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         <div className="flex flex-col items-center gap-4 pb-4 pt-20">
-                            <h1 className="text-center text-display-large text-content max-mobile:text-headline-medium">FIRE calculator</h1>
-                            <div className="mb-2 text-center text-body-large text-content-secondary">
-                                <span>FIRE stands for Financial Independence Retire Early. Our calculator helps plan savings and investments with inflation, dividends and sharing.</span>
+                            <h1 className="text-7xl">FIRE calculator</h1>
+                            <div className="mb-2 text-center">
+                                <span>FIRE stands for Financial Independence Retire Early. Our calculator will help you work out an investment and savings strategy that could help you join the growing movement of people who aim to retire years earlier than expected.</span>
                             </div>
                         </div>
                     </div>
 
-                    <ResultsHeader
-                        currency={currency}
-                        currencySymbol={currencySymbol[currency]}
-                        target={resolvedTarget}
-                        retirementAge={retirementAge}
-                        annualSavings={annualSavings}
-                    />
+
 
                     <div className="grid grid-cols-1 gap-10">
                         <div className="rounded-2xl bg-background-screen p-6 shadow-prominent-card">
