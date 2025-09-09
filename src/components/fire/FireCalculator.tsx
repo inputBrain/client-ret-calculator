@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import {useEffect, useMemo, useState} from "react";
+import {useSearchParams} from "next/navigation";
 import ResultsHeader from "./ResultsHeader";
 import NumberField from "./NumberField";
 import AllocationSliders from "./AllocationSliders";
@@ -9,7 +9,7 @@ import GrowthRateInputs from "./GrowthRateInputs";
 import ToggleGroup from "./ToggleGroup";
 import JourneyChart from "./JourneyChart";
 import DividendInflationChart from "./DividendInflationChart";
-import { currencyFormat } from "@/lib/format";
+import {currencyFormat} from "@/lib/format";
 import {
     effectiveAnnualRate,
     realReturnFromNominalAndInflation,
@@ -19,6 +19,7 @@ import {
     pvAtRetirementPerpetualReal,
     pvAtRetirementFiniteGrowing,
 } from "@/lib/finance";
+import {AllocationRow} from "@/components/ui/AllocationRow";
 
 type Currency = "EUR" | "USD" | "GBP";
 
@@ -81,8 +82,8 @@ export default function FireCalculator() {
     const annRate = useMemo(
         () =>
             effectiveAnnualRate(
-                { stocks: stocksPct / 100, fixed: fixedPct / 100, cash: cashPct / 100 },
-                { stocks: stocksRate / 100, fixed: fixedRate / 100, cash: cashRate / 100 }
+                {stocks: stocksPct / 100, fixed: fixedPct / 100, cash: cashPct / 100},
+                {stocks: stocksRate / 100, fixed: fixedRate / 100, cash: cashRate / 100}
             ),
         [stocksPct, fixedPct, cashPct, stocksRate, fixedRate, cashRate]
     );
@@ -131,7 +132,7 @@ export default function FireCalculator() {
         return pvAtRetirementFiniteGrowing(atRetSpending, annRate, inflationRate / 100, nYears);
     }, [calcMode, fireTarget, yearsToFI, lifeExpectancyAge, currentAge, annualSpending, annRate, inflationRate]);
 
-    const currencySymbol: Record<Currency, string> = { EUR: "€", USD: "$", GBP: "£" };
+    const currencySymbol: Record<Currency, string> = {EUR: "€", USD: "$", GBP: "£"};
 
     const series = useMemo(() => {
         const horizonMonths = Number.isFinite(monthsToFI) ? Math.min(12 * 60, Math.ceil(monthsToFI)) : 12 * 60;
@@ -146,7 +147,7 @@ export default function FireCalculator() {
             const dividend = value * (dividendYield / 100);
             const years = m / 12;
             const spending = annualSpending * Math.pow(1 + inflationRate / 100, years);
-            out.push({ month: m, dividend, spending });
+            out.push({month: m, dividend, spending});
         }
         return out;
     }, [series, currentSavings, monthlySavings, annRate, dividendYield, annualSpending, inflationRate]);
@@ -191,30 +192,10 @@ export default function FireCalculator() {
     ]);
 
     return (
-        <div className="mx-auto py-6 grid gap-8 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
-            <div className="relative flex flex-col">
-                <div className="flex flex-col gap-10">
-                    <div className="flex flex-col gap-2">
-                        {/*<div className="flex flex-col items-end">*/}
-                        {/*    <div className="flex items-center gap-2">*/}
-                        {/*        <button*/}
-                        {/*            type="button"*/}
-                        {/*            className="decoration-none relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none text-content-interactive-tertiary [--bg:rgb(var(--background-interactive-tertiary-normal))] hover:[--bg2:rgb(var(--background-interactive-tertiary-hoverPress))] disabled:text-content-interactive-tertiary-disabled disabled:[--bg:rgb(var(--background-interactive-tertiary-disabled))] h-8 px-3"*/}
-                        {/*            style={{ "--xPos": "50%", "--yPos": "50%" } as any}*/}
-                        {/*        >*/}
-                        {/*            {currency === "EUR" ? "Euro" : currency === "USD" ? "US Dollar" : "British Pound"}*/}
-                        {/*        </button>*/}
-                        {/*        <select*/}
-                        {/*            className="h-8 rounded-full bg-background-interactive-tertiary text-title-small px-3"*/}
-                        {/*            value={currency}*/}
-                        {/*            onChange={(e) => setCurrency(e.target.value as Currency)}*/}
-                        {/*        >*/}
-                        {/*            <option value="EUR">EUR</option>*/}
-                        {/*            <option value="USD">USD</option>*/}
-                        {/*            <option value="GBP">GBP</option>*/}
-                        {/*        </select>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
+        <>
+            <div className="mx-auto py-6 grid gap-8 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
+                <div className="relative flex flex-col">
+                    <div className="flex flex-col items-center gap-12">
 
                         <div className="flex flex-col items-center gap-4 pb-4 pt-20">
                             <h1 className="text-7xl">FIRE calculator</h1>
@@ -223,174 +204,408 @@ export default function FireCalculator() {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
 
-
-                    <div className="grid grid-cols-1 gap-10">
-                        <div className="rounded-2xl bg-background-screen p-6 shadow-prominent-card">
-                            <div className="flex flex-col gap-6">
-                                <div className="text-title-small text-content">Add some information about yourself today:</div>
-                                <div className="grid grid-cols-1 gap-4 max-tablet:grid-cols-1 tablet:grid-cols-2">
-                                    <NumberField label="Age" value={currentAge} onChange={setCurrentAge} min={0} max={100} suffix="years" />
-                                    <NumberField
-                                        label="Current savings"
-                                        value={currentSavings}
-                                        onChange={setCurrentSavings}
-                                        min={0}
-                                        step={100}
-                                        format={(v) => currencyFormat(v, currency)}
-                                        parse={(s) => Number(String(s).replace(/[^\d.-]/g, ""))}
-                                    />
-                                    <NumberField
-                                        label="Monthly savings"
-                                        value={monthlySavings}
-                                        onChange={setMonthlySavings}
-                                        min={0}
-                                        step={50}
-                                        format={(v) => currencyFormat(v, currency)}
-                                        parse={(s) => Number(String(s).replace(/[^\d.-]/g, ""))}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="rounded-2xl bg-background-screen p-6 shadow-prominent-card">
-                            <div className="flex flex-col gap-6">
-                                <div className="text-title-small text-content">Set your retirement spending and target</div>
-                                <div className="grid grid-cols-1 gap-4 tablet:grid-cols-3 max-tablet:grid-cols-1">
-                                    <div className="col-span-2 grid grid-cols-1 gap-4">
-                                        <NumberField
-                                            label="Annual retirement spending (today)"
-                                            value={annualSpending}
-                                            onChange={setAnnualSpending}
-                                            min={0}
-                                            step={500}
-                                            format={(v) => currencyFormat(v, currency)}
-                                            parse={(s) => Number(String(s).replace(/[^\d.-]/g, ""))}
-                                        />
-                                        <ToggleGroup
-                                            options={[
-                                                { value: "withdrawal", label: "Withdrawal mode" },
-                                                { value: "lifeexp", label: "Life expectancy mode" },
-                                            ]}
-                                            value={calcMode}
-                                            onChange={(v) => setCalcMode(v as any)}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 grid grid-cols-1 gap-4">
-                                        {calcMode === "withdrawal" ? (
-                                            <div className="grid grid-cols-1 gap-3">
-                                                <ToggleGroup
-                                                    options={[
-                                                        { value: "realReturn", label: "Real-return formula" },
-                                                        { value: "safeRate", label: "Safe withdrawal %" },
-                                                    ]}
-                                                    value={targetMode}
-                                                    onChange={(v) => setTargetMode(v as any)}
-                                                />
-                                                {targetMode === "safeRate" ? (
-                                                    <NumberField label="Withdrawal rate" value={withdrawalRate} onChange={setWithdrawalRate} min={1} max={10} step={0.1} suffix="% p/a" />
-                                                ) : null}
-                                            </div>
-                                        ) : (
-                                            <NumberField label="Life expectancy age" value={lifeExpectancyAge} onChange={setLifeExpectancyAge} min={currentAge + 1} max={120} suffix="years" />
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="text-body-small text-content-secondary">
-                                    Real-return formula uses P = W / r where r = (1+R)/(1+i) − 1, withdrawals grow with inflation. Safe withdrawal uses your chosen % on today’s spending.
-                                </div>
-                                {!realRatePositive && calcMode === "withdrawal" && targetMode === "realReturn" ? (
-                                    <div className="rounded bg-background-interactive-tertiary px-3 py-2 text-body-small text-content-interactive-secondary">
-                                        Real return ≤ 0 with current inputs. Target is calculated using Safe withdrawal % instead.
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
-
-                        <div className="rounded-2xl bg-background-screen p-6 shadow-prominent-card">
-                            <div className="flex flex-col gap-6">
-                                <div className="text-title-small text-content">Configure your investment strategy:</div>
-                                <AllocationSliders
-                                    stocksPct={stocksPct}
-                                    fixedPct={fixedPct}
-                                    onChange={(s, f) => {
-                                        setStocksPct(s);
-                                        setFixedPct(f);
-                                    }}
-                                />
-                                <GrowthRateInputs
-                                    stocksRate={stocksRate}
-                                    fixedRate={fixedRate}
-                                    cashRate={cashRate}
-                                    onChange={(a) => {
-                                        setStocksRate(a.stocksRate);
-                                        setFixedRate(a.fixedRate);
-                                        setCashRate(a.cashRate);
-                                    }}
-                                />
-                                <div className="grid grid-cols-1 gap-4 tablet:grid-cols-3 max-tablet:grid-cols-1">
-                                    <NumberField label="Inflation" value={inflationRate} onChange={setInflationRate} min={0} max={20} step={0.1} suffix="% p/a" />
-                                    <NumberField label="Dividend yield" value={dividendYield} onChange={setDividendYield} min={0} max={20} step={0.1} suffix="% p/a" />
-                                    <div className="flex items-center text-title-small text-content">Effective overall rate: {(annRate * 100).toFixed(1)}% • Real rate: {(realRate * 100).toFixed(1)}%</div>
-                                </div>
-                                <div className="text-body-small text-content-secondary">Returns, dividend yield and inflation are inputs only. Calculations ignore taxes, fees and slippage.</div>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-8 rounded-2xl bg-background-screen p-10 shadow-prominent-card max-tablet:gap-6 max-tablet:p-4">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center"><span>The journey ahead</span></div>
-                                <h2 className="text-headline-small text-content">Projection</h2>
-                            </div>
-                            <JourneyChart
-                                currency={currency}
-                                currencySymbol={currencySymbol[currency]}
-                                series={series}
-                                target={Number.isFinite(resolvedTarget) ? resolvedTarget : undefined}
-                            />
-                            <DividendInflationChart
-                                currency={currency}
-                                currencySymbol={currencySymbol[currency]}
-                                series={divInflSeries}
-                            />
-                            <div className="flex gap-3">
-                                <button
-                                    type="button"
-                                    className="decoration-none relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none blur-4 text-content-interactive-secondary [--bg:rgb(var(--background-interactive-secondary-normal))] hover:[--bg2:rgb(var(--background-interactive-secondary-hoverPress))] disabled:text-content-interactive-secondary-disabled disabled:[--bg:rgb(var(--background-interactive-secondary-disabled))] h-12 px-4 w-full"
-                                    style={{ "--xPos": "50%", "--yPos": "50%" } as any}
-                                    onClick={() => navigator.clipboard.writeText(shareUrl)}
-                                >
-                                    Share
+            <div className="mx-auto grid gap-8 py-16 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
+                <div className="relative flex flex-col">
+                    <div className="flex flex-col gap-10">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex flex-col items-end">
+                                <button className="relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small decoration-none transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none text-content-interactive-tertiary [--bg:rgb(var(--background-interactive-tertiary-normal))] disabled:text-content-interactive-tertiary-disabled hover:[--bg2:rgb(var(--background-interactive-tertiary-hoverPress))] disabled:[--bg:rgb(var(--background-interactive-tertiary-disabled))] h-8 px-3">
+                                    Euro
+                                    <svg className="flex-[0_0_auto] size-4 fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M7.29289 10.3034C7.68342 9.89888 8.31658 9.89888 8.70711 10.3034L12 13.714L15.2929 10.3034C15.6834 9.89888 16.3166 9.89888 16.7071 10.3034C17.0976 10.7079 17.0976 11.3637 16.7071 11.7681L13.0607 15.545C12.4749 16.1517 11.5251 16.1517 10.9393 15.545L7.29289 11.7681C6.90237 11.3637 6.90237 10.7079 7.29289 10.3034Z">
+                                        </path>
+                                    </svg>
                                 </button>
-                                <a
-                                    href={shareUrl}
-                                    className="decoration-none relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none text-content-inverse [--bg:rgb(var(--background-interactive-primary-normal))] hover:[--bg2:rgb(var(--background-interactive-primary-hoverPress))] disabled:text-content-inverse disabled:[--bg:rgb(var(--background-interactive-primary-disabled))] h-12 px-4 w-full text-center"
-                                    style={{ "--xPos": "50%", "--yPos": "50%" } as any}
-                                >
-                                    Open shared link
-                                </a>
                             </div>
-                        </div>
 
-                        <div className="flex flex-col px-[70px] text-body-medium text-content max-tablet:px-4">
-                            <div>
-                                <p className="pb-4 last:pb-0">The calculator excludes any current pension arrangements. Future income available to you may increase if you have a pension, once you reach the age at which you are able to access these investments.</p>
-                                <p className="pb-4 last:pb-0">The calculation assumes you invest savings monthly, that the rate of return remains constant, and that interest compounds monthly. Forecasts are not a reliable indicator of future performance.</p>
+                            <div className="flex gap-4 max-tablet:flex-col">
+                                <div className="flex w-full flex-col gap-4">
+                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
+                                                    Today
+                                                </div>
+                                                <h5 className="text-content text-headline-small max-tablet:text-center">
+                                                    Your situation
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col">
+
+
+                                            <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%]">
+                                                <span className="text-body-medium text-content-secondary [&_strong]:font-medium [&_strong]:text-content">
+                                                    Age
+                                                </span>
+                                                <div className="flex w-full flex-col gap-2">
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
+                                                            <input type="text" value="12" inputMode="decimal"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%]">
+                                                <span className="text-body-medium text-content-secondary [&_strong]:font-medium [&_strong]:text-content">
+                                                    <div className="flex flex-1 items-center gap-1">
+                                                        <span>Current savings</span>
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                             xmlns="http://www.w3.org/2000/svg"
+                                                             className="flex-[0_0_auto] size-3 fill-content-interactive-secondary">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                  d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                </span>
+                                                <div className="flex w-full flex-col gap-2">
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
+                                                            <input inputMode="decimal"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"
+                                                                   type="text" value="€20,000"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">
+                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                    <div className="flex flex-1 items-center gap-1">
+                                                        <span>Saving monthly</span>
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                             xmlns="http://www.w3.org/2000/svg"
+                                                             className="flex-[0_0_auto] size-3 fill-content-interactive-secondary">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                  d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                </span>
+                                                <div className="flex w-full flex-col gap-2">
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
+                                                            <input inputMode="decimal"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"
+                                                                   type="text" value="€30,000"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
+                                                    Later
+                                                </div>
+                                                <h5 className="text-content text-headline-small max-tablet:text-center">
+                                                    Your retirement
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">
+                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                    <div className="flex flex-1 items-center gap-1">
+                                                        <span>Projection mode</span>
+                                                        <svg className="flex-[0_0_auto] size-3 fill-content-interactive-secondary" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                  d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                </span>
+                                                <div className="flex w-full flex-col gap-2" data-state="closed" aria-expanded="false" aria-haspopup="menu" id="«rp»">
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary bg-background-screen focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">
+                                                            <div className="flex items-center">
+                                                                <div className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-body-medium"
+                                                                    id="" >Life Expectancy
+                                                                </div>
+                                                                <div className="mr-3 leading-[0]">
+                                                                    <button type="button" className="group inline-flex cursor-pointer flex-col items-center gap-2 rounded-full -translate-y-1/2 absolute top-1/2 right-3" aria-label="Show options">
+                                                                        <div className="icon-wrapper flex cursor-pointer items-center justify-center rounded-full group-hover:bg-background-interactive-tertiary-hoverPress group-active:bg-background-interactive-tertiary-active size-8">
+                                                                            <svg width="24" height="24"
+                                                                                 viewBox="0 0 24 24" fill="none"
+                                                                                 xmlns="http://www.w3.org/2000/svg"
+                                                                                 className="flex-[0_0_auto] size-5 fill-content-interactive-tertiary">
+                                                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                                      d="M7.29289 10.3034C7.68342 9.89888 8.31658 9.89888 8.70711 10.3034L12 13.714L15.2929 10.3034C15.6834 9.89888 16.3166 9.89888 16.7071 10.3034C17.0976 10.7079 17.0976 11.3637 16.7071 11.7681L13.0607 15.545C12.4749 16.1517 11.5251 16.1517 10.9393 15.545L7.29289 11.7681C6.90237 11.3637 6.90237 10.7079 7.29289 10.3034Z">
+                                                                                </path>
+                                                                            </svg>
+                                                                        </div>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">
+                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                    <div className="flex flex-1 items-center gap-1">
+                                                        <span>Annual spending</span>
+                                                        <svg className="flex-[0_0_auto] size-3 fill-content-interactive-secondary" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                  d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                </span>
+                                                <div className="flex w-full flex-col gap-2">
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
+                                                            <input inputMode="decimal"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"
+                                                                   type="text" value="€40,000"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%] [&amp;&gt;*:nth-child(1)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:text-center [&amp;&gt;*:nth-child(3)]:flex-[0_0_70%]">
+                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                    Life Expectancy
+                                                </span>
+                                                <div className="text-body-medium-bold text-content">
+                                                    58
+                                                </div>
+                                                {/*<span className="relative flex h-14 w-full touch-none select-none items-center" dir="ltr" data-orientation="horizontal" aria-disabled="false"*/}
+                                                {/*      style="--radix-slider-thumb-transform: translateX(-50%);">*/}
+                                                {/*    <span data-orientation="horizontal" className="relative h-1 flex-grow bg-background-neutral">*/}
+                                                {/*        <span data-orientation="horizontal" className="absolute h-full bg-background-interactive-primary"*/}
+                                                {/*              style="left: 0%; right: 57.4074%;"></span>*/}
+                                                {/*    </span>*/}
+                                                {/*    <span style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(42.5926% + 2.37037px);">*/}
+                                                {/*        <span className="relative block rounded-full bg-background-interactive-primary hover:bg-background-interactive-primary-hoverPress focus:outline-none active:bg-background-interactive-primary-active size-8" role="slider" aria-valuemin="12" aria-valuemax="120" aria-orientation="horizontal" data-orientation="horizontal" tabIndex="0" aria-describedby="«ru»" data-radix-collection-item="" aria-valuenow="58" style=""></span>*/}
+                                                {/*    </span>*/}
+                                                {/*</span>*/}
+                                            </div>
+                                            <div className="text-body-small text-content-secondary">Withdrawal rate is
+                                                the percentage of your savings that you plan to spend each year of
+                                                retirement. 4% is a common target for a 30 year retirement.
+                                                Alternatively, you can determine your FIRE target based on how old you
+                                                plan to live until!
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div className="flex w-full flex-col gap-4">
+                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
+                                                    The plan
+                                                </div>
+                                                <h5 className="text-content text-headline-small max-tablet:text-center">
+                                                    Your investing strategy
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <h6 className="pb-2 text-content text-title-small">
+                                                Stocks / ETFs
+                                            </h6>
+                                            <AllocationRow
+                                                label="Allocation"
+                                                value={stocksPct}
+                                                onChange={setStocksPct}
+                                            />
+                                            {/*<div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">*/}
+                                            {/*    <span*/}
+                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
+                                            {/*        className="flex flex-1 items-center gap-1"><span>Growth rate</span><svg*/}
+                                            {/*        width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
+                                            {/*        xmlns="http://www.w3.org/2000/svg"*/}
+                                            {/*        className="flex-[0_0_auto] size-3 fill-content-interactive-secondary"><path*/}
+                                            {/*        fill-rule="evenodd" clip-rule="evenodd"*/}
+                                            {/*        d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z"></path></svg></div></span>*/}
+                                            {/*    <div className="flex w-full gap-1">*/}
+                                            {/*        <div className="flex w-full flex-col gap-2 flex-1"*/}
+                                            {/*             data-state="closed" aria-expanded="false" aria-haspopup="menu"*/}
+                                            {/*             id="«r15»">*/}
+                                            {/*            <div className="flex flex-col gap-2">*/}
+                                            {/*                <div*/}
+                                            {/*                    className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary bg-background-screen focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">*/}
+                                            {/*                    <div className="flex items-center">*/}
+                                            {/*                        <div*/}
+                                            {/*                            className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-body-medium"*/}
+                                            {/*                            id="" tabIndex="0">Custom*/}
+                                            {/*                        </div>*/}
+                                            {/*                        <div className="mr-3 leading-[0]">*/}
+                                            {/*                            <button type="button"*/}
+                                            {/*                                    className="group inline-flex cursor-pointer flex-col items-center gap-2 rounded-full -translate-y-1/2 absolute top-1/2 right-3"*/}
+                                            {/*                                    tabIndex="0" aria-label="Show options">*/}
+                                            {/*                                <div*/}
+                                            {/*                                    className="icon-wrapper flex cursor-pointer items-center justify-center rounded-full group-hover:bg-background-interactive-tertiary-hoverPress group-active:bg-background-interactive-tertiary-active size-8">*/}
+                                            {/*                                    <svg width="24" height="24"*/}
+                                            {/*                                         viewBox="0 0 24 24" fill="none"*/}
+                                            {/*                                         xmlns="http://www.w3.org/2000/svg"*/}
+                                            {/*                                         className="flex-[0_0_auto] size-5 fill-content-interactive-tertiary">*/}
+                                            {/*                                        <path fill-rule="evenodd"*/}
+                                            {/*                                              clip-rule="evenodd"*/}
+                                            {/*                                              d="M7.29289 10.3034C7.68342 9.89888 8.31658 9.89888 8.70711 10.3034L12 13.714L15.2929 10.3034C15.6834 9.89888 16.3166 9.89888 16.7071 10.3034C17.0976 10.7079 17.0976 11.3637 16.7071 11.7681L13.0607 15.545C12.4749 16.1517 11.5251 16.1517 10.9393 15.545L7.29289 11.7681C6.90237 11.3637 6.90237 10.7079 7.29289 10.3034Z"></path>*/}
+                                            {/*                                    </svg>*/}
+                                            {/*                                </div>*/}
+                                            {/*                            </button>*/}
+                                            {/*                        </div>*/}
+                                            {/*                    </div>*/}
+                                            {/*                </div>*/}
+                                            {/*            </div>*/}
+                                            {/*        </div>*/}
+                                            {/*        <div className="flex flex-col gap-2 w-16">*/}
+                                            {/*            <div className="flex flex-col gap-2">*/}
+                                            {/*                <div*/}
+                                            {/*                    className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">*/}
+                                            {/*                    <input inputMode="decimal"*/}
+                                            {/*                           className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"*/}
+                                            {/*                           type="text" value="6%"/></div>*/}
+                                            {/*            </div>*/}
+                                            {/*        </div>*/}
+                                            {/*    </div>*/}
+                                            {/*</div>*/}
+                                            {/*<h6 className="pt-6 pb-2 text-content text-title-small">Savings Account /*/}
+                                            {/*    Bonds</h6>*/}
+                                            {/*<div*/}
+                                            {/*    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%] [&amp;&gt;*:nth-child(1)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:text-center [&amp;&gt;*:nth-child(3)]:flex-[0_0_70%]">*/}
+                                            {/*    <span*/}
+                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">Allocation:</span>*/}
+                                            {/*    <div className="text-body-medium-bold text-content">0%</div>*/}
+                                            {/*    <span dir="ltr" data-orientation="horizontal" aria-disabled="false"*/}
+                                            {/*          className="relative flex h-14 w-full touch-none select-none items-center"*/}
+                                            {/*          style="--radix-slider-thumb-transform: translateX(-50%);"><span*/}
+                                            {/*        data-orientation="horizontal"*/}
+                                            {/*        className="relative h-1 flex-grow bg-background-neutral"><span*/}
+                                            {/*        data-orientation="horizontal"*/}
+                                            {/*        className="absolute h-full bg-background-interactive-primary"*/}
+                                            {/*        style="left: 0%; right: 100%;"></span></span><span*/}
+                                            {/*        style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(0% + 16px);"><span*/}
+                                            {/*        role="slider" aria-valuemin="0" aria-valuemax="100"*/}
+                                            {/*        aria-orientation="horizontal" data-orientation="horizontal"*/}
+                                            {/*        tabIndex="0"*/}
+                                            {/*        className="relative block rounded-full bg-background-interactive-primary hover:bg-background-interactive-primary-hoverPress focus:outline-none active:bg-background-interactive-primary-active size-8"*/}
+                                            {/*        aria-describedby="«r18»" data-radix-collection-item=""*/}
+                                            {/*        aria-valuenow="0" style=""></span></span></span></div>*/}
+                                            {/*<div*/}
+                                            {/*    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">*/}
+                                            {/*    <span*/}
+                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
+                                            {/*        className="flex flex-1 items-center gap-1"><span>Growth rate</span><svg*/}
+                                            {/*        width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
+                                            {/*        xmlns="http://www.w3.org/2000/svg"*/}
+                                            {/*        className="flex-[0_0_auto] size-3 fill-content-interactive-secondary"><path*/}
+                                            {/*        fill-rule="evenodd" clip-rule="evenodd"*/}
+                                            {/*        d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z"></path></svg></div></span>*/}
+                                            {/*    <div className="flex w-full gap-1">*/}
+                                            {/*        <div className="flex w-full flex-col gap-2 flex-1"*/}
+                                            {/*             data-state="closed" aria-expanded="false" aria-haspopup="menu"*/}
+                                            {/*             id="«r1d»">*/}
+                                            {/*            <div className="flex flex-col gap-2">*/}
+                                            {/*                <div*/}
+                                            {/*                    className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary bg-background-screen focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">*/}
+                                            {/*                    <div className="flex items-center">*/}
+                                            {/*                        <div*/}
+                                            {/*                            className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-body-medium"*/}
+                                            {/*                            id="" tabIndex="0">Lightyear Savings (2.01%)*/}
+                                            {/*                        </div>*/}
+                                            {/*                        <div className="mr-3 leading-[0]">*/}
+                                            {/*                            <button type="button"*/}
+                                            {/*                                    className="group inline-flex cursor-pointer flex-col items-center gap-2 rounded-full -translate-y-1/2 absolute top-1/2 right-3"*/}
+                                            {/*                                    tabIndex="0" aria-label="Show options">*/}
+                                            {/*                                <div*/}
+                                            {/*                                    className="icon-wrapper flex cursor-pointer items-center justify-center rounded-full group-hover:bg-background-interactive-tertiary-hoverPress group-active:bg-background-interactive-tertiary-active size-8">*/}
+                                            {/*                                    <svg width="24" height="24"*/}
+                                            {/*                                         viewBox="0 0 24 24" fill="none"*/}
+                                            {/*                                         xmlns="http://www.w3.org/2000/svg"*/}
+                                            {/*                                         className="flex-[0_0_auto] size-5 fill-content-interactive-tertiary">*/}
+                                            {/*                                        <path fill-rule="evenodd"*/}
+                                            {/*                                              clip-rule="evenodd"*/}
+                                            {/*                                              d="M7.29289 10.3034C7.68342 9.89888 8.31658 9.89888 8.70711 10.3034L12 13.714L15.2929 10.3034C15.6834 9.89888 16.3166 9.89888 16.7071 10.3034C17.0976 10.7079 17.0976 11.3637 16.7071 11.7681L13.0607 15.545C12.4749 16.1517 11.5251 16.1517 10.9393 15.545L7.29289 11.7681C6.90237 11.3637 6.90237 10.7079 7.29289 10.3034Z"></path>*/}
+                                            {/*                                    </svg>*/}
+                                            {/*                                </div>*/}
+                                            {/*                            </button>*/}
+                                            {/*                        </div>*/}
+                                            {/*                    </div>*/}
+                                            {/*                </div>*/}
+                                            {/*            </div>*/}
+                                            {/*        </div>*/}
+                                            {/*        <div className="flex flex-col gap-2 w-16">*/}
+                                            {/*            <div className="flex flex-col gap-2">*/}
+                                            {/*                <div*/}
+                                            {/*                    className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">*/}
+                                            {/*                    <input inputMode="decimal"*/}
+                                            {/*                           className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"*/}
+                                            {/*                           type="text" value="2.01%"/></div>*/}
+                                            {/*            </div>*/}
+                                            {/*        </div>*/}
+                                            {/*    </div>*/}
+                                            {/*</div>*/}
+                                            {/*<h6 className="pt-6 pb-2 text-content text-title-small">Cash</h6>*/}
+                                            {/*<div*/}
+                                            {/*    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%] [&amp;&gt;*:nth-child(1)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:text-center [&amp;&gt;*:nth-child(3)]:flex-[0_0_70%]">*/}
+                                            {/*    <span*/}
+                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
+                                            {/*        className="flex flex-1 items-center gap-1"><span>Allocation</span><svg*/}
+                                            {/*        width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
+                                            {/*        xmlns="http://www.w3.org/2000/svg"*/}
+                                            {/*        className="flex-[0_0_auto] size-3 fill-content-interactive-secondary"><path*/}
+                                            {/*        fill-rule="evenodd" clip-rule="evenodd"*/}
+                                            {/*        d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z"></path></svg></div></span>*/}
+                                            {/*    <div className="text-body-medium-bold text-content">32%</div>*/}
+                                            {/*    <span dir="ltr" data-orientation="horizontal" aria-disabled="false"*/}
+                                            {/*          className="relative flex h-14 w-full touch-none select-none items-center"*/}
+                                            {/*          style="--radix-slider-thumb-transform: translateX(-50%);"><span*/}
+                                            {/*        data-orientation="horizontal"*/}
+                                            {/*        className="relative h-1 flex-grow bg-background-neutral"><span*/}
+                                            {/*        data-orientation="horizontal"*/}
+                                            {/*        className="absolute h-full bg-background-interactive-primary"*/}
+                                            {/*        style="left: 0%; right: 68%;"></span></span><span*/}
+                                            {/*        style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(32% + 5.76px);"><span*/}
+                                            {/*        role="slider" aria-valuemin="0" aria-valuemax="100"*/}
+                                            {/*        aria-orientation="horizontal" data-orientation="horizontal"*/}
+
+                                            {/*        className="relative block rounded-full bg-background-interactive-primary hover:bg-background-interactive-primary-hoverPress focus:outline-none active:bg-background-interactive-primary-active size-8"*/}
+                                            {/*        aria-describedby="«r1i»" data-radix-collection-item=""*/}
+                                            {/*        aria-valuenow="32" style=""></span></span></span></div>*/}
+                                            {/*<h6 className="pt-6 pb-2 text-content text-title-small">*/}
+                                            {/*    <div className="flex flex-1 items-center gap-1"><span>Effective overall rate of return: 4.08%</span>*/}
+                                            {/*        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
+                                            {/*             xmlns="http://www.w3.org/2000/svg"*/}
+                                            {/*             className="flex-[0_0_auto] size-3 fill-content-interactive-secondary">*/}
+                                            {/*            <path fill-rule="evenodd" clip-rule="evenodd"*/}
+                                            {/*                  d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z"></path>*/}
+                                            {/*        </svg>*/}
+                                            {/*    </div>*/}
+                                            {/*</h6>*/}
+                                            {/*<div className="text-body-small text-content-secondary">Returns may vary.*/}
+                                            {/*    You are responsible for the rate you enter - we make no assessment on*/}
+                                            {/*    how likely you are to secure your chosen rate. Calculations do not take*/}
+                                            {/*    into account the effect of costs, inflation or tax. For simplicity, this*/}
+                                            {/*    calculator assumes your chosen rates remain stable throughout the*/}
+                                            {/*    selected duration, and that all present and future savings follow your*/}
+                                            {/*    chosen allocation.*/}
+                                            {/*</div>*/}
+                                        </div>
+                                    </div>
+                                </div>
+
+
                             </div>
-                        </div>
-
-                        <div className="text-body-large text-content-secondary">
-                            <div className="pb-2">Based on this information, the FIRE calculator will give you:</div>
-                            <ul className="list-disc pl-6">
-                                <li><strong>your FIRE target</strong> using either a real-return or safe withdrawal approach</li>
-                                <li><strong>projected annual savings</strong> and expected retirement age</li>
-                                <li><strong>dividends vs inflation</strong> comparison over time</li>
-                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

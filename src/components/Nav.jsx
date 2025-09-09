@@ -11,18 +11,18 @@ export default function Nav() {
 
                 <div className="hidden md:flex flex-1 items-center gap-3">
                     <Link href="/" className={navLinkBase}>Personal</Link>
-                    <Link href="/en-eu/business" className={navLinkBase}>Business</Link>
-                    <Link href="/en-eu/pricing" className={navLinkBase}>Pricing</Link>
-                    <Link href="/en-eu/about" className={navLinkBase}>About</Link>
+                    <Link href="/" className={navLinkBase}>Business</Link>
+                    <Link href="/" className={navLinkBase}>Pricing</Link>
+                    <Link href="/" className={navLinkBase}>About</Link>
                 </div>
 
-                {/* кнопки справа */}
+
                 <div className="flex gap-2">
-                    <Link href="/en-eu/login"
+                    <Link href="/"
                           className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-50 text-indigo-900 text-sm font-semibold">
                         Log in
                     </Link>
-                    <Link href="/signup"
+                    <Link href="/"
                           className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-700 text-white text-sm font-semibold">
                         Sign up
                     </Link>
