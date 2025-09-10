@@ -228,10 +228,10 @@ export default function FireCalculator() {
                                     <div className="flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 bg-white p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
+                                                <div className="text-sm font-semibold uppercase text-violet-800 max-tablet:text-center">
                                                     Today
                                                 </div>
-                                                <h5 className="text-content text-headline-small max-tablet:text-center">
+                                                <h5 className="font-mono text-2xl max-tablet:text-center">
                                                     Your situation
                                                 </h5>
                                             </div>
@@ -240,21 +240,21 @@ export default function FireCalculator() {
 
 
                                             <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%]">
-                                                <span className="text-body-medium text-content-secondary [&_strong]:font-medium [&_strong]:text-content">
+                                                <span className="text-sm text-shadow-2xs">
                                                     Age
                                                 </span>
                                                 <div className="flex w-full flex-col gap-2">
                                                     <div className="flex flex-col gap-2">
                                                         <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
                                                             <input type="text" value="12" inputMode="decimal"
-                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"/>
+                                                                   className="flex h-full w-full items-center rounded-lg border-0  px-3 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary focus:outline-none"/>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%]">
-                                                <span className="text-body-medium text-content-secondary [&_strong]:font-medium [&_strong]:text-content">
+                                                <span className="text-sm text-shadow-2xs  ">
                                                     <div className="flex flex-1 items-center gap-1">
                                                         <span>Current savings</span>
                                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -270,14 +270,14 @@ export default function FireCalculator() {
                                                     <div className="flex flex-col gap-2">
                                                         <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
                                                             <input inputMode="decimal"
-                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0  px-3 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary focus:outline-none"
                                                                    type="text" value="€20,000"/>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">
-                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                <span className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content">
                                                     <div className="flex flex-1 items-center gap-1">
                                                         <span>Saving monthly</span>
                                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -293,7 +293,7 @@ export default function FireCalculator() {
                                                     <div className="flex flex-col gap-2">
                                                         <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
                                                             <input inputMode="decimal"
-                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0  px-3 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary focus:outline-none"
                                                                    type="text" value="€30,000"/>
                                                         </div>
                                                     </div>
@@ -305,7 +305,7 @@ export default function FireCalculator() {
                                     <div className="flex flex-1 flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)] ring-1 ring-gray-100/60">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
+                                                <div className="text-sm font-semibold uppercase text-violet-800 max-tablet:text-center">
                                                     Later
                                                 </div>
                                                 <h5 className="text-content text-headline-small max-tablet:text-center">
@@ -315,7 +315,7 @@ export default function FireCalculator() {
                                         </div>
                                         <div className="flex flex-col">
                                             <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">
-                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                <span className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content">
                                                     <div className="flex flex-1 items-center gap-1">
                                                         <span>Projection mode</span>
                                                         <svg className="flex-[0_0_auto] size-3 fill-content-interactive-secondary" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -327,9 +327,9 @@ export default function FireCalculator() {
                                                 </span>
                                                 <div className="flex w-full flex-col gap-2" data-state="closed" aria-expanded="false" aria-haspopup="menu" id="«rp»">
                                                     <div className="flex flex-col gap-2">
-                                                        <div className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary bg-background-screen focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">
+                                                        <div className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary  focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">
                                                             <div className="flex items-center">
-                                                                <div className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-body-medium"
+                                                                <div className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-sm text-shadow-2xs"
                                                                     id="" >Life Expectancy
                                                                 </div>
                                                                 <div className="mr-3 leading-[0]">
@@ -352,7 +352,7 @@ export default function FireCalculator() {
                                                 </div>
                                             </div>
                                             <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">
-                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                <span className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content">
                                                     <div className="flex flex-1 items-center gap-1">
                                                         <span>Annual spending</span>
                                                         <svg className="flex-[0_0_auto] size-3 fill-content-interactive-secondary" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -366,17 +366,17 @@ export default function FireCalculator() {
                                                     <div className="flex flex-col gap-2">
                                                         <div className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">
                                                             <input inputMode="decimal"
-                                                                   className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"
+                                                                   className="flex h-full w-full items-center rounded-lg border-0  px-3 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary focus:outline-none"
                                                                    type="text" value="€40,000"/>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%] [&amp;&gt;*:nth-child(1)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:text-center [&amp;&gt;*:nth-child(3)]:flex-[0_0_70%]">
-                                                <span className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">
+                                                <span className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content">
                                                     Life Expectancy
                                                 </span>
-                                                <div className="text-body-medium-bold text-content">
+                                                <div className="text-sm text-shadow-2xs-bold text-content">
                                                     58
                                                 </div>
                                                 {/*<span className="relative flex h-14 w-full touch-none select-none items-center" dir="ltr" data-orientation="horizontal" aria-disabled="false"*/}
@@ -390,7 +390,7 @@ export default function FireCalculator() {
                                                 {/*    </span>*/}
                                                 {/*</span>*/}
                                             </div>
-                                            <div className="text-body-small text-content-secondary">Withdrawal rate is
+                                            <div className="text-body-small ">Withdrawal rate is
                                                 the percentage of your savings that you plan to spend each year of
                                                 retirement. 4% is a common target for a 30 year retirement.
                                                 Alternatively, you can determine your FIRE target based on how old you
@@ -402,10 +402,10 @@ export default function FireCalculator() {
 
 
                                 <div className="flex w-full flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
-                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
+                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl  px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
+                                                <div className="text-sm font-semibold uppercase text-violet-800 max-tablet:text-center">
                                                     The plan
                                                 </div>
                                                 <h5 className="text-content text-headline-small max-tablet:text-center">
@@ -424,7 +424,7 @@ export default function FireCalculator() {
                                             />
                                             {/*<div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">*/}
                                             {/*    <span*/}
-                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
+                                            {/*        className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
                                             {/*        className="flex flex-1 items-center gap-1"><span>Growth rate</span><svg*/}
                                             {/*        width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
                                             {/*        xmlns="http://www.w3.org/2000/svg"*/}
@@ -437,10 +437,10 @@ export default function FireCalculator() {
                                             {/*             id="«r15»">*/}
                                             {/*            <div className="flex flex-col gap-2">*/}
                                             {/*                <div*/}
-                                            {/*                    className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary bg-background-screen focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">*/}
+                                            {/*                    className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary  focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">*/}
                                             {/*                    <div className="flex items-center">*/}
                                             {/*                        <div*/}
-                                            {/*                            className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-body-medium"*/}
+                                            {/*                            className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-sm text-shadow-2xs"*/}
                                             {/*                            id="" tabIndex="0">Custom*/}
                                             {/*                        </div>*/}
                                             {/*                        <div className="mr-3 leading-[0]">*/}
@@ -469,7 +469,7 @@ export default function FireCalculator() {
                                             {/*                <div*/}
                                             {/*                    className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">*/}
                                             {/*                    <input inputMode="decimal"*/}
-                                            {/*                           className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"*/}
+                                            {/*                           className="flex h-full w-full items-center rounded-lg border-0  px-3 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary focus:outline-none"*/}
                                             {/*                           type="text" value="6%"/></div>*/}
                                             {/*            </div>*/}
                                             {/*        </div>*/}
@@ -480,8 +480,8 @@ export default function FireCalculator() {
                                             {/*<div*/}
                                             {/*    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%] [&amp;&gt;*:nth-child(1)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:text-center [&amp;&gt;*:nth-child(3)]:flex-[0_0_70%]">*/}
                                             {/*    <span*/}
-                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content">Allocation:</span>*/}
-                                            {/*    <div className="text-body-medium-bold text-content">0%</div>*/}
+                                            {/*        className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content">Allocation:</span>*/}
+                                            {/*    <div className="text-sm text-shadow-2xs-bold text-content">0%</div>*/}
                                             {/*    <span dir="ltr" data-orientation="horizontal" aria-disabled="false"*/}
                                             {/*          className="relative flex h-14 w-full touch-none select-none items-center"*/}
                                             {/*          style="--radix-slider-thumb-transform: translateX(-50%);"><span*/}
@@ -500,7 +500,7 @@ export default function FireCalculator() {
                                             {/*<div*/}
                                             {/*    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%]">*/}
                                             {/*    <span*/}
-                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
+                                            {/*        className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
                                             {/*        className="flex flex-1 items-center gap-1"><span>Growth rate</span><svg*/}
                                             {/*        width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
                                             {/*        xmlns="http://www.w3.org/2000/svg"*/}
@@ -513,10 +513,10 @@ export default function FireCalculator() {
                                             {/*             id="«r1d»">*/}
                                             {/*            <div className="flex flex-col gap-2">*/}
                                             {/*                <div*/}
-                                            {/*                    className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary bg-background-screen focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">*/}
+                                            {/*                    className="group focus-within:-m-[1px] active:-m-[1px] data-[focus]:-m-[1px] relative min-h-12 rounded-lg border border-border-secondary  focus-within:border-2 focus-within:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] active:border-2 active:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] data-[focus]:border-2 data-[focus]:shadow-[0_0_0px_4px_rgb(var(--content-interactive-tertiary)/0.15)] hover:border-border-primary">*/}
                                             {/*                    <div className="flex items-center">*/}
                                             {/*                        <div*/}
-                                            {/*                            className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-body-medium"*/}
+                                            {/*                            className="flex w-full items-center rounded border-0 px-3 text-content outline-none h-[46px] cursor-pointer text-sm text-shadow-2xs"*/}
                                             {/*                            id="" tabIndex="0">Lightyear Savings (2.01%)*/}
                                             {/*                        </div>*/}
                                             {/*                        <div className="mr-3 leading-[0]">*/}
@@ -545,7 +545,7 @@ export default function FireCalculator() {
                                             {/*                <div*/}
                                             {/*                    className="focus-within:-m-px relative min-h-12 rounded-lg border focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)] focus:outline-none border-border-secondary">*/}
                                             {/*                    <input inputMode="decimal"*/}
-                                            {/*                           className="flex h-full w-full items-center rounded-lg border-0 bg-background-screen px-3 py-[14px] text-body-medium text-content outline-none placeholder:text-content-tertiary focus:outline-none"*/}
+                                            {/*                           className="flex h-full w-full items-center rounded-lg border-0  px-3 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary focus:outline-none"*/}
                                             {/*                           type="text" value="2.01%"/></div>*/}
                                             {/*            </div>*/}
                                             {/*        </div>*/}
@@ -555,14 +555,14 @@ export default function FireCalculator() {
                                             {/*<div*/}
                                             {/*    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&amp;_&gt;_*:first-child]:flex-[1_1_30%] [&amp;_&gt;_*:nth-child(2)]:flex-[1_1_70%] [&amp;&gt;*:nth-child(1)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:flex-[0_0_15%] [&amp;&gt;*:nth-child(2)]:text-center [&amp;&gt;*:nth-child(3)]:flex-[0_0_70%]">*/}
                                             {/*    <span*/}
-                                            {/*        className="text-body-medium text-content-secondary [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
+                                            {/*        className="text-sm text-shadow-2xs  [&amp;_strong]:font-medium [&amp;_strong]:text-content"><div*/}
                                             {/*        className="flex flex-1 items-center gap-1"><span>Allocation</span><svg*/}
                                             {/*        width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
                                             {/*        xmlns="http://www.w3.org/2000/svg"*/}
                                             {/*        className="flex-[0_0_auto] size-3 fill-content-interactive-secondary"><path*/}
                                             {/*        fill-rule="evenodd" clip-rule="evenodd"*/}
                                             {/*        d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM14.5 6.5C14.5 7.88071 13.3807 9 12 9C10.6193 9 9.5 7.88071 9.5 6.5C9.5 5.11929 10.6193 4 12 4C13.3807 4 14.5 5.11929 14.5 6.5ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12V18C14 19.1046 13.1046 20 12 20C10.8954 20 10 19.1046 10 18V12Z"></path></svg></div></span>*/}
-                                            {/*    <div className="text-body-medium-bold text-content">32%</div>*/}
+                                            {/*    <div className="text-sm text-shadow-2xs-bold text-content">32%</div>*/}
                                             {/*    <span dir="ltr" data-orientation="horizontal" aria-disabled="false"*/}
                                             {/*          className="relative flex h-14 w-full touch-none select-none items-center"*/}
                                             {/*          style="--radix-slider-thumb-transform: translateX(-50%);"><span*/}
@@ -588,7 +588,7 @@ export default function FireCalculator() {
                                             {/*        </svg>*/}
                                             {/*    </div>*/}
                                             {/*</h6>*/}
-                                            {/*<div className="text-body-small text-content-secondary">Returns may vary.*/}
+                                            {/*<div className="text-body-small ">Returns may vary.*/}
                                             {/*    You are responsible for the rate you enter - we make no assessment on*/}
                                             {/*    how likely you are to secure your chosen rate. Calculations do not take*/}
                                             {/*    into account the effect of costs, inflation or tax. For simplicity, this*/}
