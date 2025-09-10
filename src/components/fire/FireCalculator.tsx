@@ -225,7 +225,7 @@ export default function FireCalculator() {
 
                             <div className="flex gap-4 max-tablet:flex-col">
                                 <div className="flex w-full flex-col gap-4">
-                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
+                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 bg-white p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
                                                 <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
@@ -302,7 +302,7 @@ export default function FireCalculator() {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
+                                    <div className="flex flex-1 flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)] ring-1 ring-gray-100/60">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
                                                 <div className="text-caption-small text-content-interactive-secondary max-tablet:text-center">
@@ -401,7 +401,7 @@ export default function FireCalculator() {
                                 </div>
 
 
-                                <div className="flex w-full flex-col gap-4">
+                                <div className="flex w-full flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                     <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-background-screen px-8 py-12 shadow-prominent-card max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
@@ -418,7 +418,7 @@ export default function FireCalculator() {
                                                 Stocks / ETFs
                                             </h6>
                                             <AllocationRow
-                                                label="Allocation"
+                                                label=""
                                                 value={stocksPct}
                                                 onChange={setStocksPct}
                                             />
