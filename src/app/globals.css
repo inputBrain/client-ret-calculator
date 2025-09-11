@@ -17,3 +17,12 @@
 html, body {
     font-family: 'Mulish', sans-serif;
 }
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
