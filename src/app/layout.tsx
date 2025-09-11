@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
+        <body className="antialiased min-h-screen flex flex-col">
         <VwVhProvider />
         <Nav />
         <div className="w-full pt-20">
