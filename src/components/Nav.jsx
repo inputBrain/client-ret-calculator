@@ -11,8 +11,8 @@ export default function Nav() {
 
                 <div className="hidden md:flex flex-1 items-center gap-3">
                     <Link href="/" className={navLinkBase}>Personal</Link>
-                    <Link href="/" className={navLinkBase}>Business</Link>
-                    <Link href="/" className={navLinkBase}>Pricing</Link>
+                    <Link href="/donation" className={navLinkBase}>Donation</Link>
+                    <Link href="/donation-v1" className={navLinkBase}>Donation-v1</Link>
                     <Link href="/" className={navLinkBase}>About</Link>
                 </div>
 
@@ -20,11 +20,11 @@ export default function Nav() {
                 <div className="flex gap-2">
                     <Link href="/"
                           className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-50 text-indigo-900 text-sm font-semibold">
-                        Log in
+                        Donation
                     </Link>
-                    <Link href="/"
+                    <Link href="/donation"
                           className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-700 text-white text-sm font-semibold">
-                        Sign up
+                        Donation
                     </Link>
                 </div>
             </div>

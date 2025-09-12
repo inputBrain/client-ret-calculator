@@ -134,7 +134,7 @@ export function AllocationTriple({
         // (52 * 11 + 19 * 55) / 100 = 16.17
         return (stocksPct * sr + fixedPct * fr) / 100;
     }, [stocksPct, fixedPct, sr, fr]);
-    const formulaText = `${Math.round(stocksPct)}% × ${sr.toFixed(2)} + ${Math.round(fixedPct)}% × ${fr.toFixed(2)} = ${effectiveRate.toFixed(2)}`;
+    const formulaText = `( ${Math.round(stocksPct)}% × ${sr.toFixed(2)} ) + ( ${Math.round(fixedPct)}% × ${fr.toFixed(2)} ) = ${effectiveRate.toFixed(2)}`;
 
 
 
@@ -235,7 +235,7 @@ export function AllocationTriple({
                     <Info tooltip={formulaText} />
                 </div>
                 <p className="text-xs text-slate-600">
-                    Cash не учитывается (0%). Значение обновляется при изменении ползунков и ставок.
+                    Returns may vary. You are responsible for the rate you enter - we make no assessment on how likely you are to secure your chosen rate. Calculations do not take into account the effect of costs, inflation or tax. For simplicity, this calculator assumes your chosen rates remain stable throughout the selected duration, and that all present and future savings follow your chosen allocation.
                 </p>
             </div>
         </div>
