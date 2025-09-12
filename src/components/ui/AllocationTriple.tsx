@@ -15,7 +15,7 @@ function clamp(n: number, min: number, max: number) {
 
 function Track() {
     return (
-        <Slider.Track className="relative h-1 w-full flex-grow rounded-full bg-gray-200">
+        <Slider.Track className="relative h-1.5 w-full flex-grow rounded-full bg-gray-200">
             <Slider.Range className="absolute h-full rounded-full bg-indigo-500"/>
         </Slider.Track>
     );
@@ -25,8 +25,9 @@ function Thumb({label}: { label: string }) {
     return (
         <Slider.Thumb
             aria-label={label}
-            className="relative h-2 w-2 rounded-full bg-indigo-600 shadow-lg ring-6 ring-indigo-500 hover:bg-indigo-700 active:scale-95 focus-visible:ring-6 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-            style={{transform: "translateX(-50%)"}}
+            className="block h-5 w-5 rounded-full bg-indigo-600 shadow outline-none
+               focus-visible:ring-4 focus-visible:ring-indigo-300
+               data-[state=active]:scale-95"
         />
     );
 }
