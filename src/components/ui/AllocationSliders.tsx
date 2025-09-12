@@ -26,17 +26,15 @@ export default function AllocationSliders({
         [stocksPct, fixedPct]
     );
 
-    // когда двигаем stocks — следим, чтобы сумма не ушла > 100
     const handleStocks = (next: number) => {
         next = clamp(next, 0, 100);
         const remain = 100 - next;
         if (fixedPct > remain) {
-            setFixedPct(remain); // подрезаем fixed
+            setFixedPct(remain);
         }
         setStocksPct(next);
     };
 
-    // когда двигаем fixed — аналогично
     const handleFixed = (next: number) => {
         next = clamp(next, 0, 100);
         const remain = 100 - stocksPct;

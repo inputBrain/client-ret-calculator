@@ -280,7 +280,7 @@ function SelectBox({
         <Select.Root value={value} onValueChange={onValueChange}>
             <Select.Trigger
                 className="inline-flex h-11 min-w-[220px] items-center justify-between gap-3 rounded-xl
-                   border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm
+                   border border-slate-200 bg-white px-4 text-sm now text-slate-800 shadow-sm text-nowrap font-semibold
                    focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
                 aria-label="Select option"
             >
@@ -302,7 +302,7 @@ function SelectBox({
                                 key={o.value}
                                 value={o.value}
                                 className="relative flex cursor-pointer select-none items-center justify-between
-                                           rounded-xl px-4 py-3 text-[15px] text-slate-800
+                                           rounded-xl px-4 py-3 text-sm text-nowrap font-semibold text-slate-800
                                            outline-none data-[highlighted]:bg-indigo-50"
                             >
                                 <Select.ItemText>{o.label}</Select.ItemText>
