@@ -131,7 +131,7 @@ export function AllocationTriple({
         <div className="flex flex-col gap-8">
             {/* Stocks / ETFs */}
             <div className="flex flex-col gap-3">
-                <h6 className="text-sm font-bold text-gray-800 text-shadow-2xs">Stocks / ETFs</h6>
+                <h6 className="text-sm font-semibold text-gray-800 text-shadow-2xs">Stocks / ETFs</h6>
                 <Row label="Allocation:" value={stocksPct} onChange={onStocks}/>
 
                 <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
@@ -166,7 +166,7 @@ export function AllocationTriple({
 
             {/* Savings / Bonds */}
             <div className="flex flex-col gap-3">
-                <h6 className="text-sm font-bold text-gray-800 text-shadow-2xs">Savings Account / Bonds</h6>
+                <h6 className="text-sm font-semibold text-gray-800 text-shadow-2xs">Savings Account / Bonds</h6>
                 <Row label="Allocation:" value={fixedPct} onChange={onFixed}/>
 
                 <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
@@ -212,15 +212,16 @@ export function AllocationTriple({
 
             {/* Cash */}
             <div className="flex flex-col gap-3">
-                <h6 className="text-sm text-shadow-2xs font-bold text-gray-800">Cash</h6>
+                <h6 className="text-sm text-shadow-2xs font-semibold text-gray-800">Cash</h6>
                 <Row label="Allocation:" value={cashPct} onChange={onCash} />
+            </div>
 
-                <div className="mt-2 grid grid-cols-[auto_1fr] items-center gap-3">
-                    <div className="flex items-center text-sm text-slate-600">
-                        Allocation
-                        <Info tooltip="How much of your savings you'll keep as cash (i.e. at 0% growth)" />
-                    </div>
+            <div className="flex flex-col gap-3">
+                <div className="text-sm text-shadow-2xs font-semibold text-gray-800">
+                    Effective overall rate of return:
+                    <Info tooltip="(52% x 11) + (19% x 55) = 16.17" />
                 </div>
+
             </div>
         </div>
     );
