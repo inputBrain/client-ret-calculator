@@ -127,6 +127,17 @@ export function AllocationTriple({
         }
     };
 
+    const sr = stocksRateKind === "none" ? 0 : stocksRate;     // % для акций
+    const fr = fixedRateKind === "none" ? 0 : fixedRate;       // % для депозита/облигаций
+    const effectiveRate = React.useMemo(() => {
+        // (52 * 11 + 19 * 55) / 100 = 16.17
+        return (stocksPct * sr + fixedPct * fr) / 100;
+    }, [stocksPct, fixedPct, sr, fr]);
+    const formulaText = `${Math.round(stocksPct)}% × ${sr.toFixed(2)} + ${Math.round(fixedPct)}% × ${fr.toFixed(2)} = ${effectiveRate.toFixed(2)}`;
+
+
+
+
     return (
         <div className="flex flex-col gap-8">
             {/* Stocks / ETFs */}
@@ -216,12 +227,15 @@ export function AllocationTriple({
                 <Row label="Allocation:" value={cashPct} onChange={onCash} />
             </div>
 
-            <div className="flex flex-col gap-3">
-                <div className="text-sm text-shadow-2xs font-semibold text-gray-800">
-                    Effective overall rate of return:
-                    <Info tooltip="(52% x 11) + (19% x 55) = 16.17" />
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 text-shadow-2xs">
+                    <span>Effective overall rate of return:</span>
+                    <span className="tabular-nums">{effectiveRate.toFixed(2)}%</span>
+                    <Info tooltip={formulaText} />
                 </div>
-
+                <p className="text-xs text-slate-600">
+                    Cash не учитывается (0%). Значение обновляется при изменении ползунков и ставок.
+                </p>
             </div>
         </div>
     );
