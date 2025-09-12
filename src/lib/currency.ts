@@ -13,7 +13,7 @@ export const CURRENCY_META: Record<
         label: "Euro",
         symbol: "€",
         flag: "/flags/eu.png",
-        fixedPresets: [{key: "lightyear", label: "Lightyear Savings", rate: 4.16}],
+        fixedPresets: [{key: "lightyear", label: "Lightyear Savings", rate: 2.01}],
     },
     USD: {
         label: "US Dollar",
@@ -24,13 +24,13 @@ export const CURRENCY_META: Record<
     GBP: {
         label: "British Pound",
         symbol: "£",
-        flag: "/flags/gb.png",
-        fixedPresets: [{key: "lightyear", label: "Lightyear Savings", rate: 4.16}],
+        flag: "/flags/uk.png",
+        fixedPresets: [{key: "lightyear", label: "Lightyear Savings", rate: 4.15}],
     },
     HUF: {
         label: "Hungarian Forint",
         symbol: "Ft",
-        flag: "/flags/hu.png",
+        flag: "/flags/hg.png",
         fixedPresets: [],
     },
 };

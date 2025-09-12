@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import ResultsHeader from "./ResultsHeader";
 import NumberField from "./NumberField";
@@ -21,6 +21,8 @@ import {
 } from "@/lib/finance";
 import {AllocationRow} from "@/components/ui/AllocationRow";
 import {AllocationTriple} from "@/components/ui/AllocationTriple";
+import {CURRENCY_META} from "@/lib/currency";
+import CurrencySelect from "@/components/ui/CurrencySelect";
 
 type Currency = "EUR" | "USD" | "GBP";
 
@@ -51,6 +53,8 @@ export default function FireCalculator() {
     const [inflationRate, setInflationRate] = useState<number>(2.8);
     const [dividendYield, setDividendYield] = useState<number>(2);
 
+    const [amount, setAmount] = React.useState<number>(20000);
+    const symbol = CURRENCY_META[currency].symbol;
     useEffect(() => {
         const get = (k: string, d: number) => {
             const v = search.get(k);
@@ -214,14 +218,9 @@ export default function FireCalculator() {
                     <div className="flex flex-col gap-10">
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col items-end">
-                                <button className="relative m-0 flex cursor-pointer select-none items-center justify-center gap-2 overflow-hidden rounded-full border-none bg-[radial-gradient(circle_at_var(--xPos,50%)_var(--yPos,50%),var(--bg2),var(--bg))] text-title-small decoration-none transition duration-fast ease-curve [--bg2:var(--bg)] disabled:pointer-events-none text-content-interactive-tertiary [--bg:rgb(var(--background-interactive-tertiary-normal))] disabled:text-content-interactive-tertiary-disabled hover:[--bg2:rgb(var(--background-interactive-tertiary-hoverPress))] disabled:[--bg:rgb(var(--background-interactive-tertiary-disabled))] h-8 px-3">
-                                    Euro
-                                    <svg className="flex-[0_0_auto] size-4 fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                              d="M7.29289 10.3034C7.68342 9.89888 8.31658 9.89888 8.70711 10.3034L12 13.714L15.2929 10.3034C15.6834 9.89888 16.3166 9.89888 16.7071 10.3034C17.0976 10.7079 17.0976 11.3637 16.7071 11.7681L13.0607 15.545C12.4749 16.1517 11.5251 16.1517 10.9393 15.545L7.29289 11.7681C6.90237 11.3637 6.90237 10.7079 7.29289 10.3034Z">
-                                        </path>
-                                    </svg>
-                                </button>
+                                <div className="flex justify-end">
+                                    <CurrencySelect value={currency} onValueChange={setCurrency} />
+                                </div>
                             </div>
 
                             <div className="flex gap-4 max-tablet:flex-col">
@@ -427,6 +426,7 @@ export default function FireCalculator() {
 
 
                                             <AllocationTriple
+                                                currency={currency}
                                                 stocksPct={stocksPct}
                                                 fixedPct={fixedPct}
                                                 setStocksPct={setStocksPct}
