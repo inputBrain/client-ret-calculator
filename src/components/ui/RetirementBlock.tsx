@@ -27,6 +27,29 @@ export default function RetirementBlock({
     return (
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
+
+                <div className="mt-2 grid grid-cols-3 items-center gap-2">
+                    <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
+                        Projection mode
+                        <Info tooltip="How much you expect to spend every year during retirement"/>
+                    </div>
+
+                    <SelectBox
+                        value={mode}
+                        onValueChange={(v) => setMode(v as "withdrawal" | "life")}
+                        options={[
+                            {value: "withdrawal", label: "Projection mode"},
+                            {value: "life", label: "Life Expectancy"},
+                        ]}
+                        placeholder="Choose..."
+                    />
+                    <div/>
+
+
+
+                </div>
+
+
                 <div className="mt-2 grid grid-cols-3 items-center gap-2">
                     <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
                         Annual spending
@@ -42,55 +65,45 @@ export default function RetirementBlock({
                     />
                 </div>
 
-                <div
-                    className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%] ">
-                    <div className="mb-2 flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-600 text-nowrap">
-              {mode === "withdrawal" ? "Withdrawal Rate" : "Life Expectancy"}
-            </span>
+
+
+
+
+
+
+
+                <div className="mt-2 items-center">
+                    <div className="flex items-center text-sm text-slate-800 font-normal gap-4">
+                        <span className="text-sm font-medium text-gray-600">
+                          {mode === "withdrawal" ? "Withdrawal Rate" : "Life Expectancy"}
+                        </span>
                         {mode === "withdrawal" ? (
                             <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold tabular-nums text-gray-900">
-                  {displayValue.toFixed(2)}%
-                </span>
+                                <span className="text-sm font-semibold tabular-nums text-gray-900">
+                                  {displayValue.toFixed(2)}%
+                                </span>
                                 <Info tooltip="The percentage of your portfolio you plan to withdraw annually."/>
                             </div>
                         ) : (
                             <span className="text-sm font-semibold tabular-nums text-gray-900">
-                {Math.round(displayValue)}
-              </span>
+                                 {Math.round(displayValue)}
+                            </span>
                         )}
+
+                        <Slider.Root
+                            className="relative flex h-10 w-full touch-none select-none items-center"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={[sliderVal]}
+                            onValueChange={(vals) => setSliderVal(vals[0] ?? sliderVal)}
+                            style={{["--radix-slider-thumb-transform" as any]: "translateX(-50%)"}}
+                        >
+                            <Track/>
+                            <Thumb label={mode === "withdrawal" ? "Withdrawal Rate" : "Life Expectancy"}/>
+                        </Slider.Root>
                     </div>
 
-                    <Slider.Root
-                        className="relative flex h-10 w-full touch-none select-none items-center"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={[sliderVal]}
-                        onValueChange={(vals) => setSliderVal(vals[0] ?? sliderVal)}
-                        style={{["--radix-slider-thumb-transform" as any]: "translateX(-50%)"}}
-                    >
-                        <Track/>
-                        <Thumb label={mode === "withdrawal" ? "Withdrawal Rate" : "Life Expectancy"}/>
-                    </Slider.Root>
-                </div>
-
-                <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                    <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
-                        Mode
-                    </div>
-
-                    <SelectBox
-                        value={mode}
-                        onValueChange={(v) => setMode(v as "withdrawal" | "life")}
-                        options={[
-                            {value: "withdrawal", label: "Projection mode"},
-                            {value: "life", label: "Life Expectancy"},
-                        ]}
-                        placeholder="Choose..."
-                    />
-                    <div/>
                 </div>
             </div>
         </div>
@@ -118,8 +131,7 @@ function Thumb({label}: { label: string }) {
 
 function Row({label, value, onChange}: { label: string; value: number; onChange: (v: number) => void }) {
     return (
-        <div
-            className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%] ">
+        <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%] ">
             <div className="mb-2 flex items-center gap-3">
                 <span className="text-sm font-medium text-gray-600 ">{label}</span>
                 <span className="text-sm font-semibold tabular-nums text-gray-900">{Math.round(value)}%</span>
@@ -139,7 +151,6 @@ function Row({label, value, onChange}: { label: string; value: number; onChange:
         </div>
     );
 }
-
 
 
 function Info({tooltip}: { tooltip: string }) {
@@ -166,11 +177,11 @@ function Info({tooltip}: { tooltip: string }) {
 }
 
 function SelectBox({
-                       value,
-                       onValueChange,
-                       options,
-                       placeholder,
-                   }: {
+    value,
+    onValueChange,
+    options,
+    placeholder,
+}: {
     value: string;
     onValueChange: (v: string) => void;
     options: { value: string; label: string }[];
@@ -179,7 +190,7 @@ function SelectBox({
     return (
         <Select.Root value={value} onValueChange={onValueChange}>
             <Select.Trigger
-                className="inline-flex h-11 min-w-[220px] items-center justify-between  rounded-xl border text-nowrap border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
+                className=" inline-flex min-w-[300px]  items-center justify-between h-11 col-span-2 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
                 aria-label="Select option"
             >
                 <Select.Value placeholder={placeholder}/>
@@ -189,7 +200,7 @@ function SelectBox({
             </Select.Trigger>
             <Select.Portal>
                 <Select.Content
-                    className="z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                    className="z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl min-w-[300px]"
                     position="popper"
                     sideOffset={8}
                 >
@@ -202,10 +213,9 @@ function SelectBox({
                             >
                                 <Select.ItemText>{o.label}</Select.ItemText>
                                 <Select.ItemIndicator>
-                  <span
-                      className="ml-4 inline-flex h-5 w-5 items-center justify-center rounded-full border border-indigo-200">
-                    <span className="h-3 w-3 rounded-full bg-indigo-600"/>
-                  </span>
+                                  <span className="ml-4 inline-flex h-5 w-5 items-center justify-center rounded-full border border-indigo-200">
+                                    <span className="h-3 w-3 rounded-full bg-indigo-600"/>
+                                  </span>
                                 </Select.ItemIndicator>
                             </Select.Item>
                         ))}

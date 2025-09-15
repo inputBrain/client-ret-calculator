@@ -57,11 +57,11 @@ function Row({label, value, onChange}: { label: string; value: number; onChange:
 }
 
 export function AllocationTriple({
-     currency,
-     stocksPct,
-     fixedPct,
-     setStocksPct,
-     setFixedPct,
+    currency,
+    stocksPct,
+    fixedPct,
+    setStocksPct,
+    setFixedPct,
 }: {
     currency: Currency;
     stocksPct: number;
@@ -137,8 +137,6 @@ export function AllocationTriple({
     const formulaText = `( ${Math.round(stocksPct)}% × ${sr.toFixed(2)} ) + ( ${Math.round(fixedPct)}% × ${fr.toFixed(2)} ) = ${effectiveRate.toFixed(2)}`;
 
 
-
-
     return (
         <div className="flex flex-col gap-8">
             {/* Stocks / ETFs */}
@@ -148,7 +146,7 @@ export function AllocationTriple({
 
                 <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
-                        Growth rate <Info tooltip="Your expected annual growth rate (market gains), expressed as AER/APY." />
+                        Growth rate <Info tooltip="Your expected annual growth rate (market gains), expressed as AER/APY."/>
                     </div>
 
 
@@ -225,17 +223,19 @@ export function AllocationTriple({
             {/* Cash */}
             <div className="flex flex-col gap-3">
                 <h6 className="text-sm text-shadow-2xs font-semibold text-gray-800">Cash</h6>
-                <Row label="Allocation:" value={cashPct} onChange={onCash} />
+                <Row label="Allocation:" value={cashPct} onChange={onCash}/>
             </div>
 
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 text-shadow-2xs">
                     <span>Effective overall rate of return:</span>
                     <span className="tabular-nums">{effectiveRate.toFixed(2)}%</span>
-                    <Info tooltip={formulaText} />
+                    <Info tooltip={formulaText}/>
                 </div>
                 <p className="text-xs text-slate-600">
-                    Returns may vary. You are responsible for the rate you enter - we make no assessment on how likely you are to secure your chosen rate. Calculations do not take into account the effect of costs, inflation or tax. For simplicity, this calculator assumes your chosen rates remain stable throughout the selected duration, and that all present and future savings follow your chosen allocation.
+                    Returns may vary. You are responsible for the rate you enter - we make no assessment on how likely you are to secure your chosen rate. Calculations do not take into account the
+                    effect of costs, inflation or tax. For simplicity, this calculator assumes your chosen rates remain stable throughout the selected duration, and that all present and future savings
+                    follow your chosen allocation.
                 </p>
             </div>
         </div>
@@ -268,11 +268,11 @@ function Info({tooltip}: { tooltip: string }) {
 }
 
 function SelectBox({
-                       value,
-                       onValueChange,
-                       options,
-                       placeholder,
-                   }: {
+    value,
+    onValueChange,
+    options,
+    placeholder,
+}: {
     value: string;
     onValueChange: (v: string) => void;
     options: { value: string; label: string }[];
