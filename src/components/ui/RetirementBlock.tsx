@@ -67,11 +67,6 @@ export default function RetirementBlock({
 
 
 
-
-
-
-
-
                 <div className="mt-2 items-center">
                     <div className="flex items-center text-sm text-slate-800 font-normal gap-4">
                         <span className="text-sm font-medium text-gray-600">
@@ -82,7 +77,6 @@ export default function RetirementBlock({
                                 <span className="text-sm font-semibold tabular-nums text-gray-900">
                                   {displayValue.toFixed(2)}%
                                 </span>
-                                <Info tooltip="The percentage of your portfolio you plan to withdraw annually."/>
                             </div>
                         ) : (
                             <span className="text-sm font-semibold tabular-nums text-gray-900">
@@ -105,6 +99,9 @@ export default function RetirementBlock({
                     </div>
 
                 </div>
+                <p className="text-xs text-slate-600">
+                    Withdrawal rate is the percentage of your savings that you plan to spend each year of retirement. 4% is a common target for a 30 year retirement. Alternatively, you can determine your FIRE target based on how old you plan to live until!
+                </p>
             </div>
         </div>
     );
