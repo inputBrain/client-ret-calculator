@@ -85,6 +85,7 @@ export default function SituationBlock({
                             value={currentSavings}
                             onChange={setCurrentSavings}
                             placeholder="0"
+                            className="col-span-2"
                         />
 
 

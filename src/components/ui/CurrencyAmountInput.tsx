@@ -8,7 +8,6 @@ function formatNumber(n: number) {
 }
 
 function toNumber(raw: string) {
-    // выкидываем всё кроме цифр/., заменяем запятую на точку
     const s = raw.replace(/[^\d.,]/g, "").replace(",", ".");
     const n = parseFloat(s);
     return Number.isFinite(n) ? n : 0;
@@ -19,11 +18,13 @@ export default function CurrencyAmountInput({
                                                 value,
                                                 onChange,
                                                 placeholder,
+                                                className = "",
                                             }: {
     symbol: string;
     value: number;
     onChange: (n: number) => void;
     placeholder?: string;
+    className?: string;
 }) {
     const [text, setText] = React.useState<string>(formatNumber(value));
 
@@ -32,16 +33,16 @@ export default function CurrencyAmountInput({
     }, [value]);
 
     return (
-        <div className="focus-within:-m-px relative min-h-12 rounded-lg border border-border-secondary focus-within:border-2 focus-within:border-content-interactive-tertiary focus-within:shadow-[0_0_0_4px_rgb(var(--content-interactive-tertiary)/0.15)]">
-            {/* префикс-символ */}
-            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-sm text-slate-500">
+        <div
+            className={`relative h-11 rounded-xl border border-slate-200 bg-white shadow-sm focus-within:outline-none focus-within:ring-4 focus-within:ring-indigo-200 ${className}`}
+        >
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-[15px] text-slate-500">
                 {symbol}
             </div>
 
             <input
-                inputMode="decimal"
-                className="flex h-full w-full items-center rounded-lg border-0 px-3 pl-7 py-[14px] text-sm text-shadow-2xs text-content outline-none placeholder:text-content-tertiary"
                 type="text"
+                inputMode="decimal"
                 value={text}
                 placeholder={placeholder}
                 onChange={(e) => {
@@ -49,6 +50,7 @@ export default function CurrencyAmountInput({
                     onChange(toNumber(e.target.value));
                 }}
                 onBlur={() => setText(formatNumber(value))}
+                className="h-11 w-full rounded-xl border-0 outline-none px-4 pl-8 text-[15px] text-slate-800 placeholder:text-slate-400 bg-transparent"
             />
         </div>
     );
