@@ -1,48 +1,107 @@
 ﻿"use client";
 
-import React, {useEffect, useState} from "react";
-import {useSearchParams} from "next/navigation";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {AllocationTriple} from "@/components/ui/AllocationTriple";
 import CurrencySelect from "@/components/ui/CurrencySelect";
 import SituationBlock from "@/components/ui/SituationBlock";
+import {RetirementBlock} from "@/components/ui/RetirementBlock";
 import {CURRENCY_META} from "@/lib/currency";
-import RetirementBlock from "@/components/ui/RetirementBlock";
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
 
 type Currency = "EUR" | "USD" | "GBP";
+// Значения по умолчанию — будем ими руководствоваться и при запись/очистке
+const DEFAULTS = {
+    ccy: "EUR" as Currency,
+    sp: 70,     // stocksPct
+    fp: 20,     // fixedPct
+    age: 30,
+    cs: 20000,  // currentSavings
+    sm: 3000,   // savingMonthly
+    as: 0,      // annualSpend
+    mode: "withdrawal" as "withdrawal" | "life",
+    wr: 10,     // пример: значение слайдера из RetirementBlock (поднимите наверх)
+};
+
 
 export default function FireCalculator() {
+    const router = useRouter();
+    const pathname = usePathname();
     const search = useSearchParams();
 
-    const [currency, setCurrency] = useState<Currency>("EUR");
+    const [currency, setCurrency] = useState<Currency>(DEFAULTS.ccy);
+    const [stocksPct, setStocksPct] = useState(DEFAULTS.sp);
+    const [fixedPct, setFixedPct] = useState(DEFAULTS.fp);
+    const [age, setAge] = useState(DEFAULTS.age);
+    const [currentSavings, setCurrentSavings] = useState(DEFAULTS.cs);
+    const [savingMonthly, setSavingMonthly] = useState(DEFAULTS.sm);
 
-    const [stocksPct, setStocksPct] = useState<number>(70);
-    const [fixedPct, setFixedPct] = useState<number>(20);
+    const [annualSpend, setAnnualSpend] = useState(DEFAULTS.as);
+
+    // Поднимите из RetirementBlock, если нужно тоже писать в URL:
+    const [retMode, setRetMode] = useState<"withdrawal" | "life">(DEFAULTS.mode);
+    const [withdrawalSlider, setWithdrawalSlider] = useState(DEFAULTS.wr);
+
     const symbol = CURRENCY_META[currency].symbol;
-    const [age, setAge] = useState<number>(30);
-    const [currentSavings, setCurrentSavings] = useState<number>(20000);
-    const [savingMonthly, setSavingMonthly] = useState<number>(3000);
-
-    const [annualSpend, setAnnualSpend] = useState<number>(0);
-
 
     useEffect(() => {
-        const get = (k: string, d: number) => {
+        const num = (k: string, d: number) => {
             const v = search.get(k);
             if (v == null) return d;
             const n = Number(v);
             return Number.isFinite(n) ? n : d;
         };
-        const getStr = (k: string, d: string) => {
-            const v = search.get(k);
-            return v ?? d;
-        };
-        setCurrency((getStr("ccy", "EUR") as Currency) || "EUR");
-        setStocksPct(get("sp", 70));
-        setFixedPct(get("fp", 20));
+        const str = <T extends string>(k: string, d: T) => (search.get(k) as T) ?? d;
+
+        setCurrency(str("ccy", DEFAULTS.ccy));
+        setStocksPct(num("sp", DEFAULTS.sp));
+        setFixedPct(num("fp", DEFAULTS.fp));
+        setAge(num("age", DEFAULTS.age));
+        setCurrentSavings(num("cs", DEFAULTS.cs));
+        setSavingMonthly(num("sm", DEFAULTS.sm));
+        setAnnualSpend(num("as", DEFAULTS.as));
+        setRetMode(str("mode", DEFAULTS.mode));
+        setWithdrawalSlider(num("wr", DEFAULTS.wr));
     }, [search]);
+
+
+    // Будем собирать URLSearchParams на основе текущих и чистить дефолты
+    const paramsString = useMemo(() => {
+        const p = new URLSearchParams(search.toString());
+        const set = (k: string, v: any, def: any) => {
+            if (v === def || v === "" || v == null) p.delete(k);
+            else p.set(k, String(v));
+        };
+        set("ccy", currency, DEFAULTS.ccy);
+        set("sp", stocksPct, DEFAULTS.sp);
+        set("fp", fixedPct, DEFAULTS.fp);
+        set("age", age, DEFAULTS.age);
+        set("cs", currentSavings, DEFAULTS.cs);
+        set("sm", savingMonthly, DEFAULTS.sm);
+        set("as", annualSpend, DEFAULTS.as);
+        set("mode", retMode, DEFAULTS.mode);
+        set("wr", withdrawalSlider, DEFAULTS.wr);
+        return p.toString();
+    }, [
+        search,
+        currency, stocksPct, fixedPct,
+        age, currentSavings, savingMonthly,
+        annualSpend, retMode, withdrawalSlider
+    ]);
+
+
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        const id = window.setTimeout(() => {
+            const url = paramsString ? `${pathname}?${paramsString}` : pathname;
+            router.replace(url, { scroll: false });
+        }, 300);
+
+        return () => window.clearTimeout(id);
+    }, [paramsString, pathname, router]);
 
     return (
         <>
@@ -112,6 +171,10 @@ export default function FireCalculator() {
                                                 currencySymbol={symbol}
                                                 annualSpend={annualSpend}
                                                 setAnnualSpend={setAnnualSpend}
+                                                mode={retMode}
+                                                setMode={setRetMode}
+                                                sliderVal={withdrawalSlider}
+                                                setSliderVal={setWithdrawalSlider}
                                             />
                                         </div>
                                     </div>

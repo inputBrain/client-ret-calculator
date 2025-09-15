@@ -7,17 +7,24 @@ import * as Slider from "@radix-ui/react-slider";
 import * as Select from "@radix-ui/react-select";
 import {ChevronDownIcon} from "@radix-ui/react-icons";
 
-export default function RetirementBlock({
+export function RetirementBlock({
     currencySymbol,
     annualSpend,
     setAnnualSpend,
+    mode,
+    setMode,
+    sliderVal, setSliderVal,
 }: {
     currencySymbol: string;
     annualSpend: number;
     setAnnualSpend: (n: number) => void;
+    mode: "withdrawal" | "life";
+    setMode: (m: "withdrawal" | "life") => void;
+    sliderVal: number;
+    setSliderVal: (n: number) => void;
 }) {
-    const [mode, setMode] = React.useState<"withdrawal" | "life">("withdrawal");
-    const [sliderVal, setSliderVal] = React.useState<number>(10);
+    // const [mode, setMode] = React.useState<"withdrawal" | "life">("withdrawal");
+    // const [sliderVal, setSliderVal] = React.useState<number>(10);
 
     const displayValue =
         mode === "withdrawal"
@@ -38,7 +45,7 @@ export default function RetirementBlock({
                         value={mode}
                         onValueChange={(v) => setMode(v as "withdrawal" | "life")}
                         options={[
-                            {value: "withdrawal", label: "Projection mode"},
+                            {value: "withdrawal", label: "Withdrawal Rate"},
                             {value: "life", label: "Life Expectancy"},
                         ]}
                         placeholder="Choose..."
@@ -101,6 +108,7 @@ export default function RetirementBlock({
     );
 }
 
+
 function Track() {
     return (
         <Slider.Track className="relative h-1.5 w-full flex-grow rounded-full bg-gray-200">
@@ -157,7 +165,7 @@ function SelectBox({
     return (
         <Select.Root value={value} onValueChange={onValueChange}>
             <Select.Trigger
-                className=" inline-flex min-w-[300px]  items-center justify-between h-11 col-span-2 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
+                className=" inline-flex items-center justify-between h-11 col-span-2 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
                 aria-label="Select option"
             >
                 <Select.Value placeholder={placeholder}/>
@@ -167,7 +175,7 @@ function SelectBox({
             </Select.Trigger>
             <Select.Portal>
                 <Select.Content
-                    className="z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl min-w-[300px]"
+                    className="z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl min-w-[290px]"
                     position="popper"
                     sideOffset={8}
                 >
