@@ -7,11 +7,11 @@ import Image from "next/image";
 import {CURRENCY_META, type Currency} from "@/lib/currency";
 
 export default function CurrencySelect({
-                                           value,
-                                           onValueChangeAction,
-                                           side = "bottom",
-                                           align = "end",
-                                       }: {
+    value,
+    onValueChangeAction,
+    side = "bottom",
+    align = "end",
+}: {
     value: Currency;
     onValueChangeAction: (v: Currency) => void;
     side?: "top" | "right" | "bottom" | "left";
@@ -19,8 +19,7 @@ export default function CurrencySelect({
 }) {
     return (
         <Select.Root value={value} onValueChange={(v) => onValueChangeAction(v as Currency)}>
-            <Select.Trigger
-                className="inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm text-indigo-700 hover:text-indigo-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200"
+            <Select.Trigger className="inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm text-indigo-700 hover:text-indigo-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200"
                 aria-label="Currency"
             >
                 {/* кастомное Value: флаг + лейбл */}

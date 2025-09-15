@@ -44,11 +44,7 @@ export default function RetirementBlock({
                         placeholder="Choose..."
                     />
                     <div/>
-
-
-
                 </div>
-
 
                 <div className="mt-2 grid grid-cols-3 items-center gap-2">
                     <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
@@ -64,8 +60,6 @@ export default function RetirementBlock({
                         className="col-span-2"
                     />
                 </div>
-
-
 
                 <div className="mt-2 items-center">
                     <div className="flex items-center text-sm text-slate-800 font-normal gap-4">
@@ -125,30 +119,6 @@ function Thumb({label}: { label: string }) {
         />
     );
 }
-
-function Row({label, value, onChange}: { label: string; value: number; onChange: (v: number) => void }) {
-    return (
-        <div className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%] ">
-            <div className="mb-2 flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-600 ">{label}</span>
-                <span className="text-sm font-semibold tabular-nums text-gray-900">{Math.round(value)}%</span>
-            </div>
-            <Slider.Root
-                className="relative flex h-10 w-full touch-none select-none items-center"
-                min={0}
-                max={100}
-                step={1}
-                value={[value]}
-                onValueChange={(vals) => onChange(vals[0] ?? value)}
-                style={{["--radix-slider-thumb-transform" as any]: "translateX(-50%)"}}
-            >
-                <Track/>
-                <Thumb label={label}/>
-            </Slider.Root>
-        </div>
-    );
-}
-
 
 function Info({tooltip}: { tooltip: string }) {
     return (

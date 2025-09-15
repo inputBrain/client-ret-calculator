@@ -16,11 +16,11 @@ type Props = {
 };
 
 export default function AllocationSliders({
-                                              stocksPct,
-                                              fixedPct,
-                                              setStocksPct,
-                                              setFixedPct,
-                                          }: Props) {
+    stocksPct,
+    fixedPct,
+    setStocksPct,
+    setFixedPct,
+}: Props) {
     const cashPct = React.useMemo(
         () => Math.max(0, 100 - stocksPct - fixedPct),
         [stocksPct, fixedPct]
@@ -47,8 +47,8 @@ export default function AllocationSliders({
     return (
         <div className="grid gap-4 rounded-2xl border p-4 shadow-sm">
             <div className="text-sm font-medium">Allocation</div>
-            <SliderField label="Stocks" value={stocksPct} onChange={handleStocks} />
-            <SliderField label="Fixed income" value={fixedPct} onChange={handleFixed} />
+            <SliderField label="Stocks" value={stocksPct} onChange={handleStocks}/>
+            <SliderField label="Fixed income" value={fixedPct} onChange={handleFixed}/>
             <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Cash</span>
                 <span className="text-sm font-medium tabular-nums">{Math.round(cashPct)}%</span>

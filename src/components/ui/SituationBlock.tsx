@@ -9,14 +9,14 @@ function Info({tooltip}: { tooltip: string }) {
         <Tooltip.Provider delayDuration={200}>
             <Tooltip.Root>
                 <Tooltip.Trigger className="ml-2 inline-flex size-4 items-center justify-center rounded-full bg-indigo-600 text-white text-lg"
-                    aria-label="Info"
+                                 aria-label="Info"
                 >
                     i
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
                     <Tooltip.Content className="max-w-xs rounded-xl bg-slate-800 px-3 py-2 text-sm text-white shadow-xl"
-                        side="top"
-                        sideOffset={8}
+                                     side="top"
+                                     sideOffset={8}
                     >
                         {tooltip}
                         <Tooltip.Arrow className="fill-slate-900"/>
@@ -28,14 +28,14 @@ function Info({tooltip}: { tooltip: string }) {
 }
 
 export default function SituationBlock({
-                                           currencySymbol,
-                                           age,
-                                           setAge,
-                                           currentSavings,
-                                           setCurrentSavings,
-                                           savingMonthly,
-                                           setSavingMonthly,
-                                       }: {
+    currencySymbol,
+    age,
+    setAge,
+    currentSavings,
+    setCurrentSavings,
+    savingMonthly,
+    setSavingMonthly,
+}: {
     currencySymbol: string;
     age: number;
     setAge: (n: number) => void;
@@ -45,13 +45,9 @@ export default function SituationBlock({
     setSavingMonthly: (n: number) => void;
 }) {
     return (
-
         <>
-
             {/* Rows */}
             <div className="flex flex-col gap-8">
-
-
                 <div className="flex flex-col gap-4">
                     <div className="mt-2 grid grid-cols-3 items-center gap-2">
                         <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
@@ -114,5 +110,4 @@ export default function SituationBlock({
             </div>
         </>
     );
-
 }
