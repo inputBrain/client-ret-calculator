@@ -4,7 +4,8 @@ import React, {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import {AllocationTriple} from "@/components/ui/AllocationTriple";
 import CurrencySelect from "@/components/ui/CurrencySelect";
-import {SituationBlock} from "@/components/ui/SituationBlock";
+import SituationBlock from "@/components/ui/SituationBlock";
+import {CURRENCY_META} from "@/lib/currency";
 
 type Currency = "EUR" | "USD" | "GBP";
 
@@ -15,7 +16,10 @@ export default function FireCalculator() {
 
     const [stocksPct, setStocksPct] = useState<number>(70);
     const [fixedPct, setFixedPct] = useState<number>(20);
-
+    const symbol = CURRENCY_META[currency].symbol;
+    const [age, setAge] = useState<number>(30);
+    const [currentSavings, setCurrentSavings] = useState<number>(20000);
+    const [savingMonthly, setSavingMonthly] = useState<number>(3000);
     useEffect(() => {
         const get = (k: string, d: number) => {
             const v = search.get(k);
@@ -79,11 +83,13 @@ export default function FireCalculator() {
                                         <div className="flex flex-col">
 
                                             <SituationBlock
-                                                currency={currency}
-                                                stocksPct={stocksPct}
-                                                fixedPct={fixedPct}
-                                                setStocksPct={setStocksPct}
-                                                setFixedPct={setFixedPct}
+                                                currencySymbol={symbol}
+                                                age={age}
+                                                setAge={setAge}
+                                                currentSavings={currentSavings}
+                                                setCurrentSavings={setCurrentSavings}
+                                                savingMonthly={savingMonthly}
+                                                setSavingMonthly={setSavingMonthly}
                                             />
 
 
