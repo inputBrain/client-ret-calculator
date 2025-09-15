@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import {AllocationTriple} from "@/components/ui/AllocationTriple";
 import CurrencySelect from "@/components/ui/CurrencySelect";
+import {SituationBlock} from "@/components/ui/SituationBlock";
 
 type Currency = "EUR" | "USD" | "GBP";
 
@@ -77,6 +78,18 @@ export default function FireCalculator() {
                                         </div>
                                         <div className="flex flex-col">
 
+                                            <SituationBlock
+                                                currency={currency}
+                                                stocksPct={stocksPct}
+                                                fixedPct={fixedPct}
+                                                setStocksPct={setStocksPct}
+                                                setFixedPct={setFixedPct}
+                                            />
+
+
+
+
+
 
                                             <div
                                                 className="-mx-3 flex min-h-12 items-center justify-between gap-1 rounded bg-background-interactive-tertiary px-3 py-2 [&_>_*:first-child]:flex-[1_1_30%] [&_>_*:nth-child(2)]:flex-[1_1_70%]">
@@ -146,6 +159,16 @@ export default function FireCalculator() {
                                                 </div>
                                             </div>
                                         </div>
+
+
+
+
+
+
+
+
+
+
                                     </div>
 
                                     <div
