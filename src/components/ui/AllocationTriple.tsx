@@ -62,21 +62,34 @@ export function AllocationTriple({
     fixedPct,
     setStocksPct,
     setFixedPct,
+
+    stocksRateKind,
+    setStocksRateKind,
+    stocksRate,
+    setStocksRate,
+    fixedRateKind,
+    setFixedRateKind,
+    fixedRate,
+    setFixedRate,
 }: {
     currency: Currency;
     stocksPct: number;
     fixedPct: number;
     setStocksPct: (n: number) => void;
     setFixedPct: (n: number) => void;
+
+    stocksRateKind: "none" | "custom";
+    setStocksRateKind: (v: "none" | "custom") => void;
+    stocksRate: number;
+    setStocksRate: (n: number) => void;
+
+    fixedRateKind: "none" | "custom" | "preset";
+    setFixedRateKind: (v: "none" | "custom" | "preset") => void;
+    fixedRate: number;
+    setFixedRate: (n: number) => void;
 }) {
-    const [stocksRateKind, setStocksRateKind] = React.useState<"none" | "custom">("none");
-    const [stocksRate, setStocksRate] = React.useState(0);
-
-
     const fixedPresets = CURRENCY_META[currency].fixedPresets;
     type FixedKind = "none" | "custom" | "preset";
-    const [fixedRateKind, setFixedRateKind] = React.useState<FixedKind>(fixedPresets.length ? "preset" : "custom");
-    const [fixedRate, setFixedRate] = React.useState<number>(fixedPresets.length ? fixedPresets[0].rate : 0);
 
     React.useEffect(() => {
         if (fixedPresets.length) {
@@ -185,9 +198,8 @@ export function AllocationTriple({
                     </div>
 
                     {fixedPresets.length === 0 ? (
-                        <div
-                            className="h-11 min-w-[220px] rounded-xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-slate-400 flex items-center">
-                            No presets for this currency
+                        <div className="h-11 min-w-[220px] text-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-slate-400 flex items-center">
+                            Custom
                         </div>
                     ) : (
                         <SelectBox

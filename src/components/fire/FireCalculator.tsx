@@ -11,18 +11,29 @@ import {CURRENCY_META} from "@/lib/currency";
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
 
-type Currency = "EUR" | "USD" | "GBP";
-// Значения по умолчанию — будем ими руководствоваться и при запись/очистке
+type Currency = "EUR" | "USD" | "GBP" | "HUF";
 const DEFAULTS = {
     ccy: "EUR" as Currency,
-    sp: 70,     // stocksPct
-    fp: 20,     // fixedPct
+
+    // SituationBlock
     age: 30,
     cs: 20000,  // currentSavings
-    sm: 3000,   // savingMonthly
+    sm: 3000, // savingMonthly
+
+    // RetirementBlock
     as: 0,      // annualSpend
     mode: "withdrawal" as "withdrawal" | "life",
-    wr: 10,     // пример: значение слайдера из RetirementBlock (поднимите наверх)
+    wr: 10,
+
+    //AllocationTriple block
+    sp: 70,     // stocksPct
+    fp: 20,     // fixedPct
+    csh: 10,
+
+    srk: "none" as "none" | "custom",   // stocksRateKind
+    sr: 0,                              // stocksRate
+    frk: "custom" as "none" | "custom" | "preset", // fixedRateKind
+    fr: 0,
 };
 
 
@@ -40,9 +51,17 @@ export default function FireCalculator() {
 
     const [annualSpend, setAnnualSpend] = useState(DEFAULTS.as);
 
-    // Поднимите из RetirementBlock, если нужно тоже писать в URL:
     const [retMode, setRetMode] = useState<"withdrawal" | "life">(DEFAULTS.mode);
     const [withdrawalSlider, setWithdrawalSlider] = useState(DEFAULTS.wr);
+
+
+
+    const [stocksRateKind, setStocksRateKind] = useState<"none" | "custom">(DEFAULTS.srk);
+    const [stocksRate, setStocksRate] = useState<number>(DEFAULTS.sr);
+
+    type FixedKind = "none" | "custom" | "preset";
+    const [fixedRateKind, setFixedRateKind] = useState<FixedKind>(DEFAULTS.frk);
+    const [fixedRate, setFixedRate] = useState<number>(DEFAULTS.fr);
 
     const symbol = CURRENCY_META[currency].symbol;
 
@@ -64,10 +83,31 @@ export default function FireCalculator() {
         setAnnualSpend(num("as", DEFAULTS.as));
         setRetMode(str("mode", DEFAULTS.mode));
         setWithdrawalSlider(num("wr", DEFAULTS.wr));
+
+        setStocksRateKind(str("srk", DEFAULTS.srk));
+        setStocksRate(num("sr", DEFAULTS.sr));
+        setFixedRateKind(str("frk", DEFAULTS.frk) as "none" | "custom" | "preset");
+        setFixedRate(num("fr", DEFAULTS.fr));
     }, [search]);
 
+    useEffect(() => {
+        const fixedPresets = CURRENCY_META[currency].fixedPresets ?? [];
+        if (fixedPresets.length === 0) {
+            if (fixedRateKind === "preset") {
+                setFixedRateKind("custom");
+                setFixedRate(0);
+            }
+        } else {
+            if (fixedRateKind === "preset") {
+                setFixedRate(fixedPresets[0].rate);
+            }
+        }
+    }, [currency, fixedRateKind]);
 
-    // Будем собирать URLSearchParams на основе текущих и чистить дефолты
+
+    const cashPct = useMemo(() => Math.max(0, Math.min(100, 100 - stocksPct - fixedPct)), [stocksPct, fixedPct]);
+
+
     const paramsString = useMemo(() => {
         const p = new URLSearchParams(search.toString());
         const set = (k: string, v: any, def: any) => {
@@ -83,12 +123,31 @@ export default function FireCalculator() {
         set("as", annualSpend, DEFAULTS.as);
         set("mode", retMode, DEFAULTS.mode);
         set("wr", withdrawalSlider, DEFAULTS.wr);
+
+        set("srk", stocksRateKind, DEFAULTS.srk);
+        set("sr", stocksRate, DEFAULTS.sr);
+        set("frk", fixedRateKind, DEFAULTS.frk);
+        set("fr", fixedRate, DEFAULTS.fr);
+
+        set("csh", cashPct, DEFAULTS.csh);
+
         return p.toString();
     }, [
         search,
-        currency, stocksPct, fixedPct,
-        age, currentSavings, savingMonthly,
-        annualSpend, retMode, withdrawalSlider
+        currency,
+        stocksPct,
+        fixedPct,
+        age,
+        currentSavings,
+        savingMonthly,
+        annualSpend,
+        retMode,
+        withdrawalSlider,
+        stocksRateKind,
+        stocksRate,
+        fixedRateKind,
+        fixedRate,
+        cashPct,
     ]);
 
 
@@ -98,7 +157,7 @@ export default function FireCalculator() {
         const id = window.setTimeout(() => {
             const url = paramsString ? `${pathname}?${paramsString}` : pathname;
             router.replace(url, { scroll: false });
-        }, 300);
+        }, 500);
 
         return () => window.clearTimeout(id);
     }, [paramsString, pathname, router]);
@@ -126,7 +185,7 @@ export default function FireCalculator() {
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col items-end">
                                 <div className="flex justify-end">
-                                    <CurrencySelect value={currency} onValueChangeAction={setCurrency}/>
+                                    <CurrencySelect value={currency} onValueChangeAction={(v) => setCurrency(v)}/>
                                 </div>
                             </div>
 
@@ -198,6 +257,14 @@ export default function FireCalculator() {
                                                 fixedPct={fixedPct}
                                                 setStocksPct={setStocksPct}
                                                 setFixedPct={setFixedPct}
+                                                stocksRateKind={stocksRateKind}
+                                                setStocksRateKind={setStocksRateKind}
+                                                stocksRate={stocksRate}
+                                                setStocksRate={setStocksRate}
+                                                fixedRateKind={fixedRateKind}
+                                                setFixedRateKind={setFixedRateKind}
+                                                fixedRate={fixedRate}
+                                                setFixedRate={setFixedRate}
                                             />
                                         </div>
                                     </div>

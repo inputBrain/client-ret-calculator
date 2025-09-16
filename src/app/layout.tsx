@@ -11,6 +11,8 @@ export const metadata: Metadata = {
     description: "...",
 };
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
