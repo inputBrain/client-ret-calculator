@@ -7,6 +7,9 @@ import CurrencySelect from "@/components/ui/CurrencySelect";
 import SituationBlock from "@/components/ui/SituationBlock";
 import {RetirementBlock} from "@/components/ui/RetirementBlock";
 import {CURRENCY_META} from "@/lib/currency";
+import JourneyProjection from "@/components/ui/JourneyProjection";
+import { projectWithInflation, effectiveAnnualRate, realReturnFromNominal, type ProjectionRow } from '@/lib/finance';
+
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
@@ -34,6 +37,9 @@ const DEFAULTS = {
     sr: 0,                              // stocksRate
     frk: "custom" as "none" | "custom" | "preset", // fixedRateKind
     fr: 0,
+
+    //Inflation
+    infl: 0
 };
 
 
@@ -64,6 +70,8 @@ export default function FireCalculator() {
     const [fixedRate, setFixedRate] = useState<number>(DEFAULTS.fr);
 
     const symbol = CURRENCY_META[currency].symbol;
+
+    const [inflationPct, setInflationPct] = useState(DEFAULTS.infl);
 
     useEffect(() => {
         const num = (k: string, d: number) => {
@@ -131,6 +139,8 @@ export default function FireCalculator() {
 
         set("csh", cashPct, DEFAULTS.csh);
 
+        set("infl", cashPct, DEFAULTS.csh);
+
         return p.toString();
     }, [
         search,
@@ -161,6 +171,50 @@ export default function FireCalculator() {
 
         return () => window.clearTimeout(id);
     }, [paramsString, pathname, router]);
+
+
+
+
+
+
+
+    const R_stocks = (stocksRateKind === "custom" ? stocksRate : 0) / 100;
+    const R_fixed  = (fixedRateKind  === "custom" ? fixedRate  : 0) / 100;
+    const wS = stocksPct / 100;
+    const wF = fixedPct / 100;
+    const R_nominal = R_stocks * wS + R_fixed * wF;
+
+
+    const horizonYears = Math.max(6, 65 - age);
+    const contribYear = savingMonthly * 12;
+
+
+    const rows = projectWithInflation({
+        startAge: age,
+        years: horizonYears,
+        principal: currentSavings,
+        contribYear,
+        nominalReturn: R_nominal,
+        inflation: Math.max(0, inflationPct) / 100,
+    });
+
+    const kpi = {
+        target: rows.at(-1)!.totalEndReal,
+        retireAge: rows.at(-1)!.age,
+        annualSavings: contribYear,
+    };
+
+
+    const rowsForChart = rows.map(r => ({
+        yearIdx: r.yearIdx,
+        age: r.age,
+        depositStart: r.depositStart,
+        contribYear: r.contribYear,
+        interestYear: r.interestYear,
+        totalEnd: r.totalEndReal,
+    }));
+
+
 
     return (
         <>
@@ -270,6 +324,23 @@ export default function FireCalculator() {
                                     </div>
                                 </div>
                             </div>
+
+
+                            <div className="p-6 sm:p-8 rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
+                                <h2 className="mb-4 text-lg font-semibold text-slate-900 text-center">Inflation</h2>
+                                <div className="flex flex-wrap gap-2 justify-center">
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={`${baseBlockStyle} bg-gradient-to-b from-violet-50 `}>
+                            <JourneyProjection
+                                currencySymbol={symbol}
+                                kpi={kpi}
+                                rows={rowsForChart}
+                            />
                         </div>
                     </div>
                 </div>

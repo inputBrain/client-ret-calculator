@@ -11,8 +11,71 @@
     return ns.s * rates.stocks + ns.f * rates.fixed + ns.c * rates.cash;
 }
 
-export function realReturnFromNominalAndInflation(R: number, i: number) {
-    return (1 + R) / (1 + i) - 1;
+export function realReturnFromNominal(R_nominal: number, i_infl: number) {
+    return (1 + R_nominal) / (1 + i_infl) - 1;
+}
+
+
+export type ProjectionRow = {
+    yearIdx: number;      // Y0..Yn
+    age: number;          // возраст в конце года
+    depositStart: number; // сумма на начало года (номинал)
+    contribYear: number;  // взносы за год (номинал)
+    interestYear: number; // начисленные проценты за год (номинал)
+    totalEnd: number;     // итог на конец года (номинал)
+    totalEndReal: number; // итог в реальных ценах (дисконт по инфляции)
+};
+
+export function projectWithInflation(params: {
+    startAge: number;
+    years: number;
+    principal: number;        // стартовый капитал (номинал)
+    contribYear: number;      // ежегодные взносы (номинал, без индексации)
+    nominalReturn: number;    // номинальная годовая доходность (0..1)
+    inflation: number;        // годовая инфляция (0..1)
+}): ProjectionRow[] {
+    const { startAge, years, principal, contribYear, nominalReturn, inflation } = params;
+
+    // реальная доходность, чтобы понимать реальную покупательную способность
+    const rReal = realReturnFromNominal(nominalReturn, inflation);
+
+    const rows: ProjectionRow[] = [];
+    // Y0 — точка «сейчас»
+    rows.push({
+        yearIdx: 0,
+        age: startAge,
+        depositStart: principal,
+        contribYear: 0,
+        interestYear: 0,
+        totalEnd: principal,
+        totalEndReal: principal, // на Y0 дисконт = 1
+    });
+
+    let acc = principal;
+    for (let y = 1; y <= years; y++) {
+        const age = startAge + y;
+
+        const start = acc;
+        const interest = (start + contribYear) * nominalReturn; // годовой процент на сумму после взносов
+        const endNominal = start + contribYear + interest;
+
+        // дисконт по инфляции: делим на (1+i)^y
+        const discount = Math.pow(1 + inflation, y);
+        const endReal = endNominal / discount;
+
+        acc = endNominal;
+
+        rows.push({
+            yearIdx: y,
+            age,
+            depositStart: start,
+            contribYear,
+            interestYear: interest,
+            totalEnd: endNominal,
+            totalEndReal: endReal,
+        });
+    }
+    return rows;
 }
 
 export function pvAtRetirementPerpetualReal(W_today: number, r_real: number) {
