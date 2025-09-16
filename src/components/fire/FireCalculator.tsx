@@ -7,8 +7,9 @@ import CurrencySelect from "@/components/ui/CurrencySelect";
 import SituationBlock from "@/components/ui/SituationBlock";
 import {RetirementBlock} from "@/components/ui/RetirementBlock";
 import {CURRENCY_META} from "@/lib/currency";
+import PercentInputLikeInInflation from "@/lib/input-helper";
 import JourneyProjection from "@/components/ui/JourneyProjection";
-import { projectWithInflation, effectiveAnnualRate, realReturnFromNominal, type ProjectionRow } from '@/lib/finance';
+import { projectWithInflation} from '@/lib/finance';
 
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
@@ -96,6 +97,7 @@ export default function FireCalculator() {
         setStocksRate(num("sr", DEFAULTS.sr));
         setFixedRateKind(str("frk", DEFAULTS.frk) as "none" | "custom" | "preset");
         setFixedRate(num("fr", DEFAULTS.fr));
+        setInflationPct(num("infl", DEFAULTS.infl));
     }, [search]);
 
     useEffect(() => {
@@ -139,7 +141,7 @@ export default function FireCalculator() {
 
         set("csh", cashPct, DEFAULTS.csh);
 
-        set("infl", cashPct, DEFAULTS.csh);
+        set("infl", inflationPct, DEFAULTS.infl);
 
         return p.toString();
     }, [
@@ -158,6 +160,7 @@ export default function FireCalculator() {
         fixedRateKind,
         fixedRate,
         cashPct,
+        inflationPct,
     ]);
 
 
@@ -329,8 +332,14 @@ export default function FireCalculator() {
                             <div className="p-6 sm:p-8 rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                 <h2 className="mb-4 text-lg font-semibold text-slate-900 text-center">Inflation</h2>
                                 <div className="flex flex-wrap gap-2 justify-center">
-
-
+                                    <PercentInputLikeInInflation
+                                        value={inflationPct}
+                                        onChange={(n) => setInflationPct(n)}
+                                        min={0}
+                                        max={20000}
+                                        step={0.01}
+                                        className="w-36 sm:w-40"
+                                    />
                                 </div>
                             </div>
                         </div>

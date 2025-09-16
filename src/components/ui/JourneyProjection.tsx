@@ -1,9 +1,8 @@
 ﻿"use client";
 
 import React, { useMemo, useState } from "react";
-import {
-    AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Dot
-} from "recharts";
+import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Dot} from "recharts";
+import Image from "next/image";
 
 type Row = {
     yearIdx: number;
@@ -278,10 +277,13 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                                     onClick={() => setShareOpen(false)}
                                 >
                                     {/* Telegram */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" className="h-5 w-5">
-                                        <path d="M120 0c66.3 0 120 53.7 120 120s-53.7 120-120 120S0 186.3 0 120 53.7 0 120 0z" fill="#2ca5e0"/>
-                                        <path d="M178.7 70.7 161 164.3c-1.2 6.2-4.7 7.7-9.5 4.8l-26.3-19.4-12.7 12.2c-1.4 1.4-2.6 2.6-5.3 2.6l1.9-27.3 49.7-44.8c2.2-1.9-.5-3-3.4-1.1l-61.4 38.7-26.5-8.3c-5.8-1.8-5.9-5.8 1.2-8.6l103.6-40.1c4.8-1.8 9 1.1 7.5 8.6z" fill="#fff"/>
-                                    </svg>
+                                    <Image
+                                        src="/social-icons/tg-icon.png"
+                                        alt="li"
+                                        width={20}
+                                        height={20}
+                                        className="h-5 w-5 object-contain"
+                                    />
                                     Telegram
                                 </a>
 
@@ -293,10 +295,13 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                                     onClick={() => setShareOpen(false)}
                                 >
                                     {/* WhatsApp */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="h-5 w-5">
-                                        <path d="M128 0C57.3 0 0 57.3 0 128c0 22.5 6 43.6 16.4 61.7L0 256l68.3-16.4C86.4 250 107.5 256 130 256c70.7 0 128-57.3 128-128S198.7 0 128 0z" fill="#25D366"/>
-                                        <path d="M206.1 183.9c-3.4 9.6-16.8 17.6-27.5 19-7.4 1-16.9 1.8-49-10.4-41.1-16.3-67.7-58.7-69.7-61.4-2-2.7-16.6-22.1-16.6-42.2s10.2-29.9 14.3-34.1c3.4-3.4 9-5 14.3-5 1.7 0 3.2 0.1 4.6 0.1 4 0.2 6 0.4 8.6 6.6 3.4 8.2 11.6 28.3 12.6 30.3 1 2 1.7 4.5 0.3 7.2-1.2 2.4-1.9 3.9-3.7 6-1.9 2.2-3.9 4-5.9 6.5-1.8 2.3-3.7 4.7-1.6 8.9 2.2 4.4 9.6 15.8 20.7 25.6 14.2 12.3 25.9 16.1 30.4 18 4.5 1.9 7.1 1.6 9.7-0.9 3.1-3 7.2-8.3 9.1-11.2 2-2.9 4-2.5 6.7-1.6 2.8 1 17.8 8.4 20.9 9.9 3.1 1.5 5.1 2.3 5.9 3.6 0.8 1.4 0.8 8.2-2.6 17.8z" fill="#fff"/>
-                                    </svg>
+                                    <Image
+                                        src="/social-icons/whatsup-icon.png"
+                                        alt="li"
+                                        width={20}
+                                        height={20}
+                                        className="h-5 w-5 object-contain"
+                                    />
                                     WhatsApp
                                 </a>
 
@@ -308,10 +313,13 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                                     onClick={() => setShareOpen(false)}
                                 >
                                     {/* X / Twitter */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" className="h-5 w-5">
-                                        <path d="M0 0h300v300H0z" fill="#000"/>
-                                        <path d="M180.1 130.5 271 20h-21.6l-78.7 95.3L112.4 20H40l95.8 140.9L40 280h21.6l82.7-100.2L187.6 280H260l-79.9-118.9zM154.5 166.7l-9.6-13.7-76.2-108.1h32.8l61.5 87.3 9.6 13.7 80.3 114.1h-32.8l-65.6-93.3z" fill="#fff"/>
-                                    </svg>
+                                    <Image
+                                        src="/social-icons/twitter-icon.png"
+                                        alt="li"
+                                        width={20}
+                                        height={20}
+                                        className="h-5 w-5 object-contain"
+                                    />
                                     X (Twitter)
                                 </a>
 
@@ -323,10 +331,13 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                                     onClick={() => setShareOpen(false)}
                                 >
                                     {/* LinkedIn */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="h-5 w-5">
-                                        <path d="M0 0h256v256H0z" fill="#0A66C2"/>
-                                        <path d="M54 96h36v116H54zM72 44a22 22 0 1 1 0 44 22 22 0 0 1 0-44zm56 52h34v16c6-11 21-20 40-20 43 0 52 26 52 60v64h-36v-56c0-17-1-38-24-38-23 0-28 18-28 37v57h-38V96z" fill="#fff"/>
-                                    </svg>
+                                    <Image
+                                        src="/social-icons/linkedin-icon.png"
+                                        alt="li"
+                                        width={20}
+                                        height={20}
+                                        className="h-5 w-5 object-contain"
+                                    />
                                     LinkedIn
                                 </a>
 

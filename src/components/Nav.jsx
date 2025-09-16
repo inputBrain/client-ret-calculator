@@ -10,10 +10,9 @@ export default function Nav() {
                 <Logo />
 
                 <div className="hidden md:flex flex-1 items-center gap-3">
-                    <Link href="/" className={navLinkBase}>Personal</Link>
+                    <Link href="/" className={navLinkBase}>Home</Link>
                     <Link href="/donation" className={navLinkBase}>Donation</Link>
                     <Link href="/donation-v1" className={navLinkBase}>Donation-v1</Link>
-                    <Link href="/" className={navLinkBase}>About</Link>
                 </div>
 
 
