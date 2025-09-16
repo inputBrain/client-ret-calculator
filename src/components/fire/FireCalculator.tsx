@@ -9,8 +9,13 @@ import {RetirementBlock} from "@/components/ui/RetirementBlock";
 import {CURRENCY_META} from "@/lib/currency";
 import PercentInputLikeInInflation from "@/lib/input-helper";
 import JourneyProjection from "@/components/ui/JourneyProjection";
-import { projectWithInflation} from '@/lib/finance';
 
+import {
+    projectWithInflation,
+    monthsToTargetStandard,
+    monthsToTargetLifeExpGrowing,
+    pvAtRetirementFiniteGrowing,
+} from "@/lib/finance";
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
@@ -186,27 +191,79 @@ export default function FireCalculator() {
     const wS = stocksPct / 100;
     const wF = fixedPct / 100;
     const R_nominal = R_stocks * wS + R_fixed * wF;
+    const infl = Math.max(0, inflationPct) / 100;
 
+    // параметры режима
+    const withdrawalRate = withdrawalSlider / 100; // 2 => 0.02
+    const lifeExpectancy = 10 + Math.round((withdrawalSlider / 100) * 110);
 
-    const horizonYears = Math.max(6, 65 - age);
+    // целевая "цена" FI в сегодняшних деньгах
+    let goalReal = 0;
+    let monthsToFi = 0;
+
+    if (retMode === "withdrawal") {
+        // классическая цель: годовые траты / выбранная ставка из слайдера
+        const wr = Math.max(1e-6, withdrawalRate);
+        goalReal = annualSpend / wr;
+
+        monthsToFi = monthsToTargetStandard(
+            currentSavings,
+            savingMonthly,
+            R_nominal,
+            goalReal // цель в «сегодняшних» — ок
+        );
+    } else {
+        // Life Expectancy: считаем итеративно с учётом роста трат (inflation)
+        monthsToFi = monthsToTargetLifeExpGrowing(
+            currentSavings,
+            savingMonthly,
+            R_nominal,
+            infl,
+            annualSpend, // W_today
+            age,
+            lifeExpectancy
+        );
+
+        // чтобы показать Goal для легенды/линии, восстановим её из найденного горизонта:
+        const yearsToFi = Math.max(0, monthsToFi / 12);
+        const retirementAge = age + yearsToFi;
+        const yearsInRetirement = Math.max(0, lifeExpectancy - retirementAge);
+        const spendingAtRet = annualSpend * Math.pow(1 + infl, yearsToFi);
+        const targetNominalAtRet = pvAtRetirementFiniteGrowing(
+            spendingAtRet,
+            R_nominal,
+            infl,
+            yearsInRetirement
+        );
+        // вернём в реальные сегодняшние:
+        goalReal = targetNominalAtRet / Math.pow(1 + infl, yearsToFi);
+    }
+
+    if (!Number.isFinite(monthsToFi) || monthsToFi < 0) monthsToFi = 0;
+
+    const yearsToFiRounded = Math.max(1, Math.ceil(monthsToFi / 12));
+    const retireAge = age + yearsToFiRounded;
+    const retireSpanYears =
+        retMode === "life" ? (lifeExpectancy - retireAge) : undefined;
+
     const contribYear = savingMonthly * 12;
 
-
+    // строим ряд ПРОЕКЦИИ до выхода на пенсию
     const rows = projectWithInflation({
         startAge: age,
-        years: horizonYears,
+        years: yearsToFiRounded,
         principal: currentSavings,
         contribYear,
         nominalReturn: R_nominal,
-        inflation: Math.max(0, inflationPct) / 100,
+        inflation: infl,
     });
 
     const kpi = {
-        target: rows.at(-1)!.totalEndReal,
-        retireAge: rows.at(-1)!.age,
+        target: goalReal,
+        retireAge: Math.round(retireAge),
         annualSavings: contribYear,
+        retireSpanYears: retireSpanYears != null ? Math.round(retireSpanYears) : undefined,
     };
-
 
     const rowsForChart = rows.map(r => ({
         yearIdx: r.yearIdx,
@@ -214,8 +271,14 @@ export default function FireCalculator() {
         depositStart: r.depositStart,
         contribYear: r.contribYear,
         interestYear: r.interestYear,
-        totalEnd: r.totalEndReal,
+        totalEnd: r.totalEndReal, // график и таблица в «реальных» деньгах
     }));
+
+    const legend = {
+        initial: currentSavings,
+        contribMonthly: savingMonthly,
+        growthPct: R_nominal * 100,
+    };
 
 
 
@@ -349,6 +412,9 @@ export default function FireCalculator() {
                                 currencySymbol={symbol}
                                 kpi={kpi}
                                 rows={rowsForChart}
+                                goal={goalReal}
+                                legend={legend}
+                                mode={retMode}
                             />
                         </div>
                     </div>

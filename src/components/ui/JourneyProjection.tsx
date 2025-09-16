@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useMemo, useState } from "react";
-import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Dot} from "recharts";
+import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Dot, ReferenceLine} from "recharts";
 import Image from "next/image";
 
 type Row = {
@@ -15,9 +15,12 @@ type Row = {
 
 export type JourneyProjectionProps = {
     currencySymbol: string;
-    kpi: { target: number; retireAge: number; annualSavings: number };
+    kpi: { target: number; retireAge: number; annualSavings: number; retireSpanYears?: number | null };
     rows: Row[];
-};
+    goal: number;
+    legend: { initial: number; contribMonthly: number; growthPct: number };
+    mode?: "withdrawal" | "life";
+}
 
 const card =
     "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
@@ -25,9 +28,23 @@ const card =
 const fmt = (v: number, sym: string) =>
     `${sym}${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function JourneyProjection({ currencySymbol, kpi, rows }: JourneyProjectionProps) {
+export default function JourneyProjection({
+    currencySymbol, kpi, rows, goal, legend, mode
+}: JourneyProjectionProps) {
     const [tab, setTab] = useState<"chart" | "table">("chart");
 
+    const data = useMemo(
+        () =>
+            rows.map((r) => ({
+                x: `Y${r.yearIdx}`,
+                y: Number(r.totalEnd.toFixed(2)),
+                age: r.age,
+                contrib: r.contribYear,
+                growth: r.interestYear,
+                start: r.depositStart,
+            })),
+        [rows]
+    );
     // share ui state
     const [shareOpen, setShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -70,19 +87,6 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
     const twHref = `https://twitter.com/intent/tweet?url=${urlEnc}&text=${textEnc}`;
     const liHref = `https://www.linkedin.com/sharing/share-offsite/?url=${urlEnc}`;
 
-    const data = useMemo(
-        () =>
-            rows.map((r) => ({
-                x: `Y${r.yearIdx}`,
-                y: Number(r.totalEnd.toFixed(2)),
-                age: r.age,
-                contrib: r.contribYear,
-                growth: r.interestYear,
-                start: r.depositStart,
-            })),
-        [rows]
-    );
-
     return (
         <>
             {/* KPI trio */}
@@ -97,7 +101,9 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                 </div>
                 <div>
                     <div className="text-5xl leading-none font-semibold text-slate-900">{kpi.retireAge}</div>
-                    <div className="text-sm text-slate-600">Retirement age</div>
+                    <div className="text-sm text-slate-600">
+                        Retirement age{mode === "life" && kpi.retireSpanYears != null ? ` (${kpi.retireSpanYears} year retirement)` : ""}
+                    </div>
                 </div>
                 <div>
                     <div className="text-2xl font-semibold text-slate-900">
@@ -147,13 +153,7 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
 
                                 <CartesianGrid stroke="#eef2ff" vertical={false} />
                                 <XAxis dataKey="x" tick={{ fontSize: 12, fill: "#64748b" }} tickLine={false} axisLine={{ stroke: "#e5e7eb" }} />
-                                <YAxis
-                                    tickFormatter={(v) => fmt(v, currencySymbol)}
-                                    width={90}
-                                    tick={{ fontSize: 12, fill: "#64748b" }}
-                                    tickLine={false}
-                                    axisLine={{ stroke: "#e5e7eb" }}
-                                />
+                                <YAxis tickFormatter={(v) => fmt(v, currencySymbol)} width={90} tick={{ fontSize: 12, fill: "#64748b" }} tickLine={false} axisLine={{ stroke: "#e5e7eb" }} />
 
                                 <Tooltip
                                     cursor={{ stroke: "#c7d2fe", strokeDasharray: 4 }}
@@ -182,6 +182,20 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                                     }}
                                 />
 
+                                {/* линия цели */}
+                                <ReferenceLine
+                                    y={goal}
+                                    stroke="#10b981"
+                                    strokeDasharray="6 6"
+                                    label={{
+                                        value: `Goal: ${fmt(goal, currencySymbol)}`,
+                                        position: "left",
+                                        fill: "#047857",
+                                        fontSize: 12,
+                                        offset: 8,
+                                    }}
+                                />
+
                                 <Area
                                     type="monotone"
                                     dataKey="y"
@@ -192,8 +206,6 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
-
-
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -232,15 +244,15 @@ export default function JourneyProjection({ currencySymbol, kpi, rows }: Journey
                     <div className="flex flex-wrap items-center gap-6 text-slate-700">
                         <div className="inline-flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-indigo-600" />
-                            Initial {currencySymbol} 105
+                            Initial {fmt(legend.initial, currencySymbol)}
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-violet-600" />
-                            Contributions {currencySymbol} 105 p/m
+                            Contributions {fmt(legend.contribMonthly, currencySymbol)} p/m
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-emerald-600" />
-                            Growth 0.00% p/a
+                            Growth {legend.growthPct.toFixed(2)}% p/a
                         </div>
                     </div>
 
