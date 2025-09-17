@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-// import "./123.css";
 // import { Mulish } from "next/font/google";
 import Nav from "@/components/Nav";
 import VwVhProvider from "@/components/VwVhProvider";
