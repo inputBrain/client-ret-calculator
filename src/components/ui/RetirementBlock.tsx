@@ -112,7 +112,7 @@ export function RetirementBlock({
 function Track() {
     return (
         <Slider.Track className="relative h-1.5 w-full flex-grow rounded-full bg-gray-200">
-            <Slider.Range className="absolute h-full rounded-full bg-indigo-500"/>
+            <Slider.Range className="absolute h-full rounded-full bg-indigo-600"/>
         </Slider.Track>
     );
 }

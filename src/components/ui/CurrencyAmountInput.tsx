@@ -4,7 +4,7 @@ import React from "react";
 
 function formatNumber(n: number) {
     if (!Number.isFinite(n)) return "";
-    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(n);
+    return new Intl.NumberFormat("en-US", {maximumFractionDigits: 2}).format(n);
 }
 
 function toNumber(raw: string) {
@@ -23,12 +23,12 @@ function toNumber(raw: string) {
 }
 
 export default function CurrencyAmountInput({
-                                                symbol,
-                                                value,
-                                                onChange,
-                                                placeholder,
-                                                className = "",
-                                            }: {
+    symbol,
+    value,
+    onChange,
+    placeholder,
+    className = "",
+}: {
     symbol: string;
     value: number;
     onChange: (n: number) => void;
@@ -44,9 +44,7 @@ export default function CurrencyAmountInput({
 
 
     return (
-        <div
-            className={`relative h-11 rounded-xl border border-slate-200 bg-white shadow-sm focus-within:outline-none focus-within:ring-4 focus-within:ring-indigo-200 ${className}`}
-        >
+        <div className={`relative h-11 rounded-xl border border-slate-200 bg-white shadow-sm focus-within:outline-none focus-within:ring-4 focus-within:ring-indigo-400 ${className}`}>
             <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-[15px] text-slate-500 font-bold">
                 {symbol}
             </div>
@@ -57,7 +55,10 @@ export default function CurrencyAmountInput({
                 value={text}
                 placeholder={placeholder}
                 onFocus={() => setIsFocused(true)}
-                onBlur={() => { setIsFocused(false); setText(formatNumber(value)); }}
+                onBlur={() => {
+                    setIsFocused(false);
+                    setText(formatNumber(value));
+                }}
                 onChange={(e) => {
                     const v = e.target.value;
                     setText(v);

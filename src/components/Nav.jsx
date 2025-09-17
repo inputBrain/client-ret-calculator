@@ -16,7 +16,7 @@ export default function Nav() {
                 </div>
 
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 ">
                     <Link href="/"
                           className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-50 text-indigo-900 text-sm font-semibold">
                         Donation

@@ -50,7 +50,7 @@ export default function SituationBlock({
                                 else setAge(v);
                             }}
                             placeholder="Enter age"
-                            className="h-11 col-span-2 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
+                            className="h-11 col-span-2 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400"
                         />
                     </div>
 

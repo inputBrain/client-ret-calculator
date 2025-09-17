@@ -54,7 +54,7 @@ export function Thumb({label}: { label: string }) {
 export function PercentInput({value, onChange}: { value: number; onChange: (n: number) => void }) {
     return (
         <div
-            className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus-within:ring-4 focus-within:ring-indigo-200">
+            className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus-within:ring-4 focus-within:ring-indigo-400">
             <input
                 type="number"
                 step="0.01"
