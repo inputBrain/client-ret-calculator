@@ -169,7 +169,7 @@ export default function DonatePage() {
             k: "uah",
             l: (
                 <span className="inline-flex items-center gap-2">
-          <Banknote className={iconCls}/> UAH (банка)
+          <Banknote className={iconCls}/> Monobank
         </span>
             ),
         },
