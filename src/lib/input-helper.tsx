@@ -54,10 +54,10 @@ export function Thumb({label}: { label: string }) {
 export function PercentInput({value, onChange}: { value: number; onChange: (n: number) => void }) {
     return (
         <div
-            className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus-within:ring-4 focus-within:ring-indigo-400">
+            className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus-within:ring-2 focus-within:ring-indigo-400">
             <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={Number.isFinite(value) ? value : 0}
                 onChange={(e) => onChange(parseFloat(e.target.value || "0"))}
                 className="w-full bg-transparent text-center outline-none"
@@ -155,7 +155,7 @@ export default function PercentInputLikeInInflation({
     onChange,
     min = 0,
     max = 20000,
-    step = 0.01,
+    step = 1,
     placeholder = "0.00",
     className = "",
 }: {
@@ -171,7 +171,7 @@ export default function PercentInputLikeInInflation({
         <div
             className={clsx(
                 "relative h-11 w-32 rounded-xl border border-slate-200 bg-white shadow-sm",
-                "focus-within:ring-4 focus-within:ring-indigo-200",
+                "focus-within:ring-2 focus-within:ring-indigo-400",
                 className
             )}
         >

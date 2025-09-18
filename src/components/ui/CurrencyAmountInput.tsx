@@ -44,7 +44,7 @@ export default function CurrencyAmountInput({
 
 
     return (
-        <div className={`relative h-11 rounded-xl border border-slate-200 bg-white shadow-sm focus-within:outline-none focus-within:ring-4 focus-within:ring-indigo-400 ${className}`}>
+        <div className={`relative h-11 rounded-xl border border-slate-200 bg-white shadow-sm focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-400 ${className}`}>
             <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-[15px] text-slate-500 font-bold">
                 {symbol}
             </div>

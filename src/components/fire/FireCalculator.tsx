@@ -2,13 +2,13 @@
 
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import {AllocationTriple} from "@/components/ui/AllocationTriple";
+import {AllocationTriple} from "@/components/blocks/AllocationTriple";
 import CurrencySelect from "@/components/ui/CurrencySelect";
-import SituationBlock from "@/components/ui/SituationBlock";
-import {RetirementBlock} from "@/components/ui/RetirementBlock";
+import SituationBlock from "@/components/blocks/SituationBlock";
+import {RetirementBlock} from "@/components/blocks/RetirementBlock";
 import {CURRENCY_META} from "@/lib/currency";
 import PercentInputLikeInInflation from "@/lib/input-helper";
-import JourneyProjection from "@/components/ui/JourneyProjection";
+import JourneyProjection from "@/components/charts/JourneyProjection";
 
 import {
     projectWithInflation,
@@ -30,9 +30,9 @@ const DEFAULTS = {
     sm: 3000, // savingMonthly
 
     // RetirementBlock
-    as: 0,      // annualSpend
+    as: 40000,      // annualSpend
     mode: "withdrawal" as "withdrawal" | "life",
-    wr: 10,
+    wr: 4,
 
     //AllocationTriple block
     sp: 70,     // stocksPct
@@ -400,7 +400,7 @@ export default function FireCalculator() {
                                         onChange={(n) => setInflationPct(n)}
                                         min={0}
                                         max={20000}
-                                        step={0.01}
+                                        step={1}
                                         className="w-36 sm:w-40"
                                     />
                                 </div>
