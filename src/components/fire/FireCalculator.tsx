@@ -314,10 +314,10 @@ export default function FireCalculator() {
                                     <div className={baseBlockStyle}>
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="text-sm font-bold uppercase text-indigo-800 max-tablet:text-center">
+                                                <div className="text-sm font-bold uppercase text-rose-600 max-tablet:text-center">
                                                     Today
                                                 </div>
-                                                <h5 className="text-2xl font-semibold max-tablet:text-center">
+                                                <h5 className="text-2xl font-semibold  max-tablet:text-center text-slate-900">
                                                     Your situation
                                                 </h5>
                                             </div>
@@ -337,10 +337,10 @@ export default function FireCalculator() {
                                     <div className={baseBlockStyle}>
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2 ">
-                                                <div className="text-sm font-bold uppercase text-indigo-800 max-tablet:text-center">
+                                                <div className="text-sm font-bold uppercase text-rose-600 max-tablet:text-center">
                                                     Later
                                                 </div>
-                                                <h5 className="text-2xl font-semibold max-tablet:text-center">
+                                                <h5 className="text-2xl font-semibold max-tablet:text-center text-slate-900">
                                                     Your retirement
                                                 </h5>
                                             </div>
@@ -362,10 +362,10 @@ export default function FireCalculator() {
                                     <div className={baseBlockStyle}>
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="text-sm font-bold uppercase text-indigo-800 max-tablet:text-center">
+                                                <div className="text-sm font-bold uppercase text-rose-600 max-tablet:text-center">
                                                     The plan
                                                 </div>
-                                                <h5 className="text-2xl font-semibold max-tablet:text-center">
+                                                <h5 className="text-2xl font-semibold max-tablet:text-center text-slate-900">
                                                     Your investing strategy
                                                 </h5>
                                             </div>
@@ -393,7 +393,7 @@ export default function FireCalculator() {
 
 
                             <div className="p-6 sm:p-8 rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
-                                <h2 className="mb-4 text-lg font-semibold text-slate-900 text-center">Inflation</h2>
+                                <h2 className="mb-4 text-lg font-semibold text-rose-600 text-center">Inflation</h2>
                                 <div className="flex flex-wrap gap-2 justify-center">
                                     <PercentInputLikeInInflation
                                         value={inflationPct}

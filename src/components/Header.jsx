@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import HeaderLogo from "./HeaderLogo";
+import { DollarSign } from "lucide-react";
 
 const navLinkBase = "m-1 h-10 px-4 inline-flex items-center justify-center rounded-full py-1.5 text-title-small text-sm font-semibold transition-all duration-500 hover:bg-indigo-50";
 
@@ -10,21 +11,28 @@ export default function Header() {
                 <HeaderLogo />
 
                 <div className="hidden md:flex flex-1 items-center gap-3">
-                    <Link href="/" className={navLinkBase}>Home</Link>
-                    <Link href="/donation" className={navLinkBase}>Donation</Link>
-                    <Link href="/donation-v1" className={navLinkBase}>Donation-v1</Link>
+                    {/*<Link href="/" className={navLinkBase}>Home</Link>*/}
+                    {/*<Link href="/donation" className={navLinkBase}>Donation</Link>*/}
+                    {/*<Link href="/donation-v1" className={navLinkBase}>Donation-v1</Link>*/}
                 </div>
 
 
-                <div className="flex gap-2 ">
-                    <Link href="/"
-                          className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-50 text-indigo-900 text-sm font-semibold">
-                        Donation
+                <div className="flex">
+                    {/*<Link href="/"*/}
+                    {/*      className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-50 text-indigo-900 text-sm font-semibold">*/}
+                    {/*    Donation*/}
+                    {/*</Link>*/}
+                    <Link
+                        href="/donation"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-medium border border-indigo-200 shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-100 hover:shadow-md hover:scale-[1.03] active:scale-[0.97]"
+                    >
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full ring-1 ring-white/30">
+                            <DollarSign className="h-3.5 w-3.5" />
+                        </span>
+                        <span>Donate</span>
                     </Link>
-                    <Link href="/donation"
-                          className="h-10 px-4 inline-flex items-center rounded-full bg-indigo-700 text-white text-sm font-semibold">
-                        Donation
-                    </Link>
+
+
                 </div>
             </div>
         </nav>

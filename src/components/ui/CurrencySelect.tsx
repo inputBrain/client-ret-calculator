@@ -64,11 +64,11 @@ export default function CurrencySelect({
                                     <Select.ItemText>{m.label}</Select.ItemText>
                                     {/* справа — кружок с «пулей» у выбранного */}
                                     <span
-                                        className="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 group-data-[state=checked]:border-violet-600"
+                                        className="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 group-data-[state=checked]:border-indigo-600"
                                         aria-hidden
                                     >
                     <Select.ItemIndicator>
-                      <span className="h-3 w-3 rounded-full bg-violet-600"/>
+                      <span className="h-3 w-3 rounded-full bg-indigo-600"/>
                     </Select.ItemIndicator>
                   </span>
                                 </Select.Item>

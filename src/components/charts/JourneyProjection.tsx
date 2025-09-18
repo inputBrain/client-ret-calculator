@@ -117,7 +117,7 @@ export default function JourneyProjection({
             <div className={`${card}  p-4 sm:p-6`}>
 
                 <div className="gap-2 flex flex-col">
-                    <div className="text-sm font-semibold uppercase text-indigo-700 text-center">
+                    <div className="text-sm font-semibold uppercase text-rose-900 text-center">
                         The journey ahead
                     </div>
                     <h5 className="text-2xl font-semibold text-center">
