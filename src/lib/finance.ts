@@ -60,7 +60,8 @@ export function projectWithInflation(params: {
         const endNominal = start + contribYear + interest;
 
         // дисконт по инфляции: делим на (1+i)^y
-        const discount = Math.pow(1 + inflation, y);
+        // const discount = Math.pow(1 + inflation, y);
+        const discount = inflation === 0 ? 1 : Math.pow(1 + inflation, y);
         const endReal = endNominal / discount;
 
         acc = endNominal;

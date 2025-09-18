@@ -15,25 +15,38 @@ type Row = {
 
 export type JourneyProjectionProps = {
     currencySymbol: string;
-    kpi: { target: number; retireAge: number; annualSavings: number; retireSpanYears?: number | null };
+    kpi: {
+        target: number;
+        retireAge: number;
+        annualSavings: number;
+        retireSpanYears?:
+            number | null
+    };
     rows: Row[];
     goal: number;
-    legend: { initial: number; contribMonthly: number; growthPct: number };
+    legend: { initial: number;
+        contribMonthly: number;
+        growthPct: number
+    };
     mode?: "withdrawal" | "life";
 }
 
-const card =
-    "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
+const card = "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
-const fmt = (v: number, sym: string) =>
-    `${sym}${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = (v: number, sym: string) => `${sym}${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function JourneyProjection({
-    currencySymbol, kpi, rows, goal, legend, mode
-}: JourneyProjectionProps) {
+    currencySymbol,
+    kpi,
+    rows,
+    goal,
+    legend,
+    mode
+}: JourneyProjectionProps)
+{
     const [tab, setTab] = useState<"chart" | "table">("chart");
 
-    const data = useMemo(
+    const fullData = useMemo(
         () =>
             rows.map((r) => ({
                 x: r.yearIdx,
@@ -45,6 +58,15 @@ export default function JourneyProjection({
             })),
         [rows]
     );
+    function downsampleToMax<T>(arr: T[], max: number): T[] {
+        if (arr.length <= max) return arr;
+        const step = (arr.length - 1) / (max - 1);
+        return Array.from({ length: max }, (_, i) => arr[Math.round(i * step)]);
+    }
+
+    const data = useMemo(() => downsampleToMax(fullData, 120), [fullData]);
+
+
     // share ui state
     const [shareOpen, setShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -87,6 +109,23 @@ export default function JourneyProjection({
     const twHref = `https://twitter.com/intent/tweet?url=${urlEnc}&text=${textEnc}`;
     const liHref = `https://www.linkedin.com/sharing/share-offsite/?url=${urlEnc}`;
 
+
+    // внутри JourneyProjection, до return
+    const retireAgeMeta = useMemo(() => {
+        const over = kpi.retireAge > 120;
+        if (over && mode !== "life") {
+            return { number: "Over 120", subtitle: "Retirement age... R.I.P." };
+        }
+        if (over && mode === "life") {
+            return { number: 120, subtitle: "Retirement age (0 year retirement)" };
+        }
+        const baseSub =
+            mode === "life" && kpi.retireSpanYears != null
+                ? `(${kpi.retireSpanYears} year retirement)`
+                : "";
+        return { number: kpi.retireAge, subtitle: baseSub };
+    }, [kpi.retireAge, kpi.retireSpanYears, mode]);
+
     return (
         <>
             {/* KPI trio */}
@@ -100,9 +139,11 @@ export default function JourneyProjection({
                     </div>
                 </div>
                 <div>
-                    <div className="text-5xl leading-none font-semibold text-slate-900">{kpi.retireAge}</div>
+                    <div className="text-5xl leading-none font-semibold text-slate-900">
+                        {retireAgeMeta.number}
+                    </div>
                     <div className="text-sm text-slate-600">
-                        Retirement age{mode === "life" && kpi.retireSpanYears != null ? ` (${kpi.retireSpanYears} year retirement)` : ""}
+                        {retireAgeMeta.subtitle || "Retirement age"}
                     </div>
                 </div>
                 <div>
@@ -152,12 +193,15 @@ export default function JourneyProjection({
                                 </defs>
 
                                 <CartesianGrid stroke="#eef2ff" vertical={false} />
-                                <XAxis dataKey="x"
-                                       tickFormatter={(v: number) => `year ${v}`}
-                                       tick={{ fontSize: 12, fill: "#64748b" }}
-                                       tickLine={false}
-                                       axisLine={{ stroke: "#e5e7eb" }}
-                                       label={{ value: " ", position: "insideBottomRight", offset: -6 }}
+                                <XAxis
+                                    dataKey="x"
+                                    ticks={data.map(d => d.x)}     // ← все значения по X
+                                    interval={0}                   // ← не пропускаем подписи
+                                    domain={['dataMin','dataMax']}
+                                    tickFormatter={(v: number) => `y${v}`}
+                                    tick={{ fontSize: 12, fill: "#64748b" }}
+                                    tickLine={false}
+                                    axisLine={{ stroke: "#e5e7eb" }}
                                 />
                                 <YAxis tickFormatter={(v) => fmt(v, currencySymbol)}
                                        width={90}
@@ -213,7 +257,8 @@ export default function JourneyProjection({
                                     stroke="#4f46e5"
                                     strokeWidth={2}
                                     fill="url(#fillTotal)"
-                                    activeDot={<Dot r={4} stroke="#4f46e5" />}
+                                    dot={{ r: 2 }}                 // ← точки на каждом значении
+                                    activeDot={{ r: 4 }}           // ← побольше при ховере
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -225,7 +270,6 @@ export default function JourneyProjection({
                             <tr className="text-left text-slate-600">
                                 <th className="py-3 px-4 font-medium">End of Year</th>
                                 <th className="py-3 px-4 font-medium">Initial deposit</th>
-                                <th className="py-3 px-4 font-medium">Interest earned</th>
                                 <th className="py-3 px-4 font-medium">Total value</th>
                             </tr>
                             </thead>
@@ -236,7 +280,6 @@ export default function JourneyProjection({
                                         {r.yearIdx} (age {r.age})
                                     </td>
                                     <td className="py-3 px-4">{fmt(r.depositStart, currencySymbol)}</td>
-                                    <td className="py-3 px-4">{fmt(r.interestYear, currencySymbol)}</td>
                                     <td className="py-3 px-4 font-medium text-slate-900">
                                         {fmt(r.totalEnd, currencySymbol)}
                                     </td>

@@ -191,8 +191,10 @@ export default function FireCalculator() {
     const wS = stocksPct / 100;
     const wF = fixedPct / 100;
     const R_nominal = R_stocks * wS + R_fixed * wF;
-    const infl = Math.max(0, inflationPct) / 100;
+    // const infl = Math.max(0, inflationPct) / 100;
 
+    const inflRaw = Math.max(0, inflationPct) / 100;
+    const infl = inflRaw <= 0 ? 0 : inflRaw; // ← чистый ноль
     // параметры режима
     const withdrawalRate = withdrawalSlider / 100; // 2 => 0.02
     const lifeExpectancy = 10 + Math.round((withdrawalSlider / 100) * 110);
@@ -279,6 +281,8 @@ export default function FireCalculator() {
         contribMonthly: savingMonthly,
         growthPct: R_nominal * 100,
     };
+
+
 
 
 
