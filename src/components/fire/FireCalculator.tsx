@@ -15,6 +15,7 @@ import {
     monthsToTargetStandard,
     monthsToTargetLifeExpGrowing,
     pvAtRetirementFiniteGrowing,
+    monthsToTargetLifeExp_LY,
 } from "@/lib/finance";
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
@@ -194,59 +195,39 @@ export default function FireCalculator() {
     // const infl = Math.max(0, inflationPct) / 100;
 
     const inflRaw = Math.max(0, inflationPct) / 100;
-    const infl = inflRaw <= 0 ? 0 : inflRaw; // ← чистый ноль
+    const infl = inflRaw <= 0 ? 0 : inflRaw;
     // параметры режима
     const withdrawalRate = withdrawalSlider / 100; // 2 => 0.02
     const lifeExpectancy = 10 + Math.round((withdrawalSlider / 100) * 110);
 
     // целевая "цена" FI в сегодняшних деньгах
-    let goalReal = 0;
+    let goalNominalAtRet = 0;
     let monthsToFi = 0;
 
     if (retMode === "withdrawal") {
-        // классическая цель: годовые траты / выбранная ставка из слайдера
         const wr = Math.max(1e-6, withdrawalRate);
-        goalReal = annualSpend / wr;
-
-        monthsToFi = monthsToTargetStandard(
-            currentSavings,
-            savingMonthly,
-            R_nominal,
-            goalReal // цель в «сегодняшних» — ок
-        );
+        goalNominalAtRet = annualSpend / wr; // номинальная цель
+        monthsToFi = monthsToTargetStandard(currentSavings, savingMonthly, R_nominal, goalNominalAtRet);
     } else {
-        // Life Expectancy: считаем итеративно с учётом роста трат (inflation)
-        monthsToFi = monthsToTargetLifeExpGrowing(
+        // Life Expectancy — LIGHTYEAR-стиль
+        monthsToFi = monthsToTargetLifeExp_LY(
             currentSavings,
-            savingMonthly,
+            savingMonthly,       // важно: месячный!
             R_nominal,
-            infl,
-            annualSpend, // W_today
+            annualSpend,
             age,
             lifeExpectancy
         );
-
-        // чтобы показать Goal для легенды/линии, восстановим её из найденного горизонта:
         const yearsToFi = Math.max(0, monthsToFi / 12);
-        const retirementAge = age + yearsToFi;
-        const yearsInRetirement = Math.max(0, lifeExpectancy - retirementAge);
-        const spendingAtRet = annualSpend * Math.pow(1 + infl, yearsToFi);
-        const targetNominalAtRet = pvAtRetirementFiniteGrowing(
-            spendingAtRet,
-            R_nominal,
-            infl,
-            yearsInRetirement
-        );
-        // вернём в реальные сегодняшние:
-        goalReal = targetNominalAtRet / Math.pow(1 + infl, yearsToFi);
+        const yearsInRet = Math.max(0, lifeExpectancy - (age + yearsToFi));
+        goalNominalAtRet = annualSpend * yearsInRet; // Плашка Goal и KPI.target берём именно это
     }
 
     if (!Number.isFinite(monthsToFi) || monthsToFi < 0) monthsToFi = 0;
 
     const yearsToFiRounded = Math.max(1, Math.ceil(monthsToFi / 12));
     const retireAge = age + yearsToFiRounded;
-    const retireSpanYears =
-        retMode === "life" ? (lifeExpectancy - retireAge) : undefined;
+    const retireSpanYears = retMode === "life" ? Math.max(0, Math.round(lifeExpectancy - retireAge)) : undefined;
 
     const contribYear = savingMonthly * 12;
 
@@ -257,15 +238,16 @@ export default function FireCalculator() {
         principal: currentSavings,
         contribYear,
         nominalReturn: R_nominal,
-        inflation: infl,
+        inflation: infl, // не влияет на номинальные totalEnd, но пригодится если захочешь реальную таблицу
     });
 
     const kpi = {
-        target: goalReal,
+        target: goalNominalAtRet,   // <-- справа в KPI показывается 200 000
         retireAge: Math.round(retireAge),
         annualSavings: contribYear,
-        retireSpanYears: retireSpanYears != null ? Math.round(retireSpanYears) : undefined,
+        retireSpanYears,
     };
+
 
     const rowsForChart = rows.map(r => ({
         yearIdx: r.yearIdx,
@@ -273,7 +255,7 @@ export default function FireCalculator() {
         depositStart: r.depositStart,
         contribYear: r.contribYear,
         interestYear: r.interestYear,
-        totalEnd: r.totalEndReal, // график и таблица в «реальных» деньгах
+        totalEnd: r.totalEnd,       // <-- НОМИНАЛ
     }));
 
     const legend = {
@@ -416,7 +398,7 @@ export default function FireCalculator() {
                                 currencySymbol={symbol}
                                 kpi={kpi}
                                 rows={rowsForChart}
-                                goal={goalReal}
+                                goal={goalNominalAtRet}
                                 legend={legend}
                                 mode={retMode}
                             />

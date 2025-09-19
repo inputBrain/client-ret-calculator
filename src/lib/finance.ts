@@ -78,7 +78,27 @@ export function projectWithInflation(params: {
     }
     return rows;
 }
+export function monthsToTargetLifeExp_LY(
+    P0: number, C_year: number, R_nominal: number,
+    W_today: number, currentAge: number, lifeExpectancyAge: number
+) {
+    // переводим к "в месяц" для формулы monthsToTargetStandard
+    const C = C_year; // у нас monthsToTargetStandard уже ждёт С в год? — см. ниже.
+    // В твоей monthsToTargetStandard: C трактуется как МЕСЯЧНЫЙ взнос.
+    // У тебя выше ты передавал savingMonthly, так что сюда передай savingMonthly, а не C_year.
 
+    let n = monthsToTargetStandard(P0, C, R_nominal, W_today / 0.04); // стартовая оценка
+    for (let i = 0; i < 120; i++) {
+        const yearsToFi = n / 12;
+        const yearsInRet = Math.max(0, lifeExpectancyAge - (currentAge + yearsToFi));
+        const target = W_today * yearsInRet; // простая модель: 0% real return на пенсии
+        const n2 = monthsToTargetStandard(P0, C, R_nominal, target);
+        if (!isFinite(n2)) return Infinity;
+        if (Math.abs(n2 - n) < 0.5) return n2;
+        n = n2;
+    }
+    return n;
+}
 export function pvAtRetirementPerpetualReal(W_today: number, r_real: number) {
     if (r_real <= 0) return Infinity;
     return W_today / r_real;
