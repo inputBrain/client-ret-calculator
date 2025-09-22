@@ -17,6 +17,7 @@ import {
     pvAtRetirementFiniteGrowing,
     monthsToTargetLifeExp_LY, realReturnFromNominal,
 } from "@/lib/finance";
+import InflationBlockSimple from "@/components/blocks/InflationBlockSimple";
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
@@ -395,15 +396,13 @@ export default function FireCalculator() {
                             <div className="p-6 sm:p-8 rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                 <h2 className="mb-4 text-lg font-semibold text-rose-600 text-center">Inflation</h2>
                                 <div className="flex flex-wrap gap-2 justify-center">
-                                    <PercentInputLikeInInflation
-                                        value={inflationPct}
-                                        onChange={(n) => setInflationPct(n)}
-                                        min={0}
-                                        max={20000}
-                                        step={1}
-                                        className="w-36 sm:w-40"
+                                    <InflationBlockSimple
+                                        inflationPct={inflationPct}
+                                        setInflationPct={setInflationPct}
                                     />
                                 </div>
+
+
                             </div>
                         </div>
 
