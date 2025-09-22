@@ -15,7 +15,7 @@ import {
     monthsToTargetStandard,
     monthsToTargetLifeExpGrowing,
     pvAtRetirementFiniteGrowing,
-    monthsToTargetLifeExp_LY,
+    monthsToTargetLifeExp_LY, realReturnFromNominal,
 } from "@/lib/finance";
 
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
@@ -196,6 +196,9 @@ export default function FireCalculator() {
 
     const inflRaw = Math.max(0, inflationPct) / 100;
     const infl = inflRaw <= 0 ? 0 : inflRaw;
+
+    const R_real = realReturnFromNominal(R_nominal, infl); // доходность в "деньгах сегодня"
+
     // параметры режима
     const withdrawalRate = withdrawalSlider / 100; // 2 => 0.02
     const lifeExpectancy = 10 + Math.round((withdrawalSlider / 100) * 110);
@@ -206,21 +209,25 @@ export default function FireCalculator() {
 
     if (retMode === "withdrawal") {
         const wr = Math.max(1e-6, withdrawalRate);
-        goalNominalAtRet = annualSpend / wr; // номинальная цель
-        monthsToFi = monthsToTargetStandard(currentSavings, savingMonthly, R_nominal, goalNominalAtRet);
+        // Цель в "деньгах сегодня"
+        goalNominalAtRet = annualSpend / wr;
+        // Срок до цели — считаем в "реальных" деньгах
+        monthsToFi = monthsToTargetStandard(currentSavings, savingMonthly, R_real, goalNominalAtRet);
     } else {
-        // Life Expectancy — LIGHTYEAR-стиль
+        // Режим Life — используем "реальную" доходность тоже,
+        // чтобы инфляция влияла на срок до цели.
         monthsToFi = monthsToTargetLifeExp_LY(
             currentSavings,
-            savingMonthly,       // важно: месячный!
-            R_nominal,
+            savingMonthly,
+            R_real,          // ← было R_nominal
             annualSpend,
             age,
             lifeExpectancy
         );
         const yearsToFi = Math.max(0, monthsToFi / 12);
         const yearsInRet = Math.max(0, lifeExpectancy - (age + yearsToFi));
-        goalNominalAtRet = annualSpend * yearsInRet; // Плашка Goal и KPI.target берём именно это
+        // Цель (KPI.target) у тебя уже в "деньгах сегодня"
+        goalNominalAtRet = annualSpend * yearsInRet;
     }
 
     if (!Number.isFinite(monthsToFi) || monthsToFi < 0) monthsToFi = 0;
@@ -249,19 +256,26 @@ export default function FireCalculator() {
     };
 
 
-    const rowsForChart = rows.map(r => ({
-        yearIdx: r.yearIdx,
-        age: r.age,
-        depositStart: r.depositStart,
-        contribYear: r.contribYear,
-        interestYear: r.interestYear,
-        totalEnd: r.totalEnd,       // <-- НОМИНАЛ
-    }));
+    const rowsForChart = rows.map(r => {
+        // для "Initial deposit" в таблице тоже приведём к "деньгам сегодня"
+        const discountPowForStart = Math.max(0, r.yearIdx - 1);
+        const depositStartReal =
+            r.yearIdx === 0 ? r.depositStart : r.depositStart / Math.pow(1 + infl, discountPowForStart);
+
+        return {
+            yearIdx: r.yearIdx,
+            age: r.age,
+            depositStart: depositStartReal, // real
+            contribYear: r.contribYear,     // можно оставить номинал, он в таблице сейчас не выводится
+            interestYear: r.interestYear,   // "за год", номинал — в тултипе не используется
+            totalEnd: r.totalEndReal,       // ← real: именно это рисуем и показываем
+        };
+    });
 
     const legend = {
         initial: currentSavings,
         contribMonthly: savingMonthly,
-        growthPct: R_nominal * 100,
+        growthPct: R_real * 100, // реальная p/a
     };
 
 
