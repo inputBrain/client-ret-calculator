@@ -98,8 +98,8 @@ export function RetirementBlock({
                             <Thumb label={mode === "withdrawal" ? "Withdrawal Rate" : "Life Expectancy"}/>
                         </Slider.Root>
                     </div>
-
                 </div>
+
                 <p className="text-xs text-slate-600">
                     Withdrawal rate is the percentage of your savings that you plan to spend each year of retirement. 4% is a common target for a 30 year retirement. Alternatively, you can determine your FIRE target based on how old you plan to live until!
                 </p>

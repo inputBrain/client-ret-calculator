@@ -2,7 +2,7 @@
 import HeaderLogo from "./HeaderLogo";
 import { DollarSign } from "lucide-react";
 
-const navLinkBase = "m-1 h-10 px-4 inline-flex items-center justify-center rounded-full py-1.5 text-title-small text-sm font-semibold transition-all duration-500 hover:bg-indigo-50";
+const navLinkBase = "inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-indigo-700 font-medium  shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-100 hover:shadow-md hover:scale-[1.03] active:scale-[0.97]";
 
 export default function Header() {
     return (
@@ -11,7 +11,8 @@ export default function Header() {
                 <HeaderLogo />
 
                 <div className="hidden md:flex flex-1 items-center gap-3">
-                    <Link href="/" className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-indigo-700 font-medium  shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-100 hover:shadow-md hover:scale-[1.03] active:scale-[0.97]">Home</Link>
+                    <Link href="/" className={navLinkBase}>Home</Link>
+                    <Link href="/inflation" className={navLinkBase}>Inflation</Link>
                     {/*<Link href="/donation" className={navLinkBase}>Donation</Link>*/}
                     {/*<Link href="/donation-v1" className={navLinkBase}>Donation-v1</Link>*/}
                 </div>
