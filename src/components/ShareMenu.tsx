@@ -38,7 +38,8 @@ export default function ShareMenu({
     const [copied, setCopied] = useState(false);
 
     const href = useSafeUrl(url);
-    const urlEnc = useMemo(() => encodeURIComponent(href || ""), [href]);
+    // const urlEnc = useMemo(() => encodeURIComponent(href || ""), [href]);
+    const urlEnc = typeof window !== "undefined" ? encodeURIComponent(window.location.href) : "";
     const textEnc = useMemo(() => encodeURIComponent(text), [text]);
 
     // соц-ссылки
