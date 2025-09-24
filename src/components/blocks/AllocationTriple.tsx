@@ -167,7 +167,7 @@ export function AllocationTriple({
                                 {value: "none", label: "None (0%)"},
                                 ...fixedPresets.map((p) => ({
                                     value: "preset",
-                                    label: `${p.label} (${p.rate.toFixed(2)}%)`,
+                                    label: `${p.label}`,
                                 })),
                                 {value: "custom", label: "Custom"},
                             ]}

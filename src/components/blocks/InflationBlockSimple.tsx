@@ -51,8 +51,8 @@ export default function InflationBlockSimple({ inflationPct, setInflationPct, cl
                     onValueChange={onKindChange}
                     options={[
                         { value: "none", label: "None (0%)" },
-                        { value: "ecb_target_2", label: "European Central Bank target (2%)" },
-                        { value: "eurozone_aug2024_22", label: "Aug 2024 Eurozone inflation (2.2%)" },
+                        { value: "ecb_target_2", label: "European Central Bank target" },
+                        { value: "eurozone_aug2024_22", label: "Aug 2024 Eurozone inflation" },
                         { value: "custom", label: "Custom" },
                     ]}
                     placeholder="Choose..."
