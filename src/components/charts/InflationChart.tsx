@@ -176,7 +176,7 @@ export default function InflationChart({
 
                                 {/* линии/площади */}
                                 <Area type="monotone" dataKey="balance" stroke={COLOR_BALANCE} strokeWidth={2} fill="url(#fillBalance)" dot={{ r: 2 }} activeDot={{ r: 4 }} />
-                                <Line type="monotone" dataKey="buying"  stroke={COLOR_BUYING}  strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                                <Area type="monotone" dataKey="buying"  stroke={COLOR_BUYING}  strokeWidth={2} fill="url(#fillBuying)" dot={{ r: 2 }} activeDot={{ r: 4 }} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
