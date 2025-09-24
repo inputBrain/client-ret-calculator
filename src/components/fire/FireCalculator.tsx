@@ -22,7 +22,7 @@ import InflationBlockSimple from "@/components/blocks/InflationBlockSimple";
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
 
-type Currency = "EUR" | "USD" | "GBP" | "HUF";
+type Currency = "EUR" | "USD" | "GBP";
 const DEFAULTS = {
     ccy: "EUR" as Currency,
 

@@ -1,4 +1,4 @@
-﻿export type Currency = "EUR" | "USD" | "GBP" | "HUF";
+﻿export type Currency = "EUR" | "USD" | "GBP";
 
 export const CURRENCY_META: Record<
     Currency,
@@ -26,11 +26,5 @@ export const CURRENCY_META: Record<
         symbol: "£",
         flag: "/flags/uk.png",
         fixedPresets: [{key: "lightyear", label: "Lightyear Savings", rate: 4.15}],
-    },
-    HUF: {
-        label: "Hungarian Forint",
-        symbol: "Ft",
-        flag: "/flags/hg.png",
-        fixedPresets: [],
-    },
+    }
 };
