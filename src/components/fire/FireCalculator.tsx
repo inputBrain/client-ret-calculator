@@ -281,7 +281,7 @@ export default function FireCalculator() {
 
 
 
-
+    const [considerCutAfter60, setConsiderCutAfter60] = useState(false);
 
     return (
         <>
@@ -291,9 +291,16 @@ export default function FireCalculator() {
 
                         <div className="flex flex-col items-center gap-4 pb-4 pt-20">
                             <h1 className="text-7xl font-[Mulish]">FIRE calculator</h1>
-                            <div className="mb-2 text-center">
-                                <span>FIRE stands for Financial Independence Retire Early. Our calculator will help you work out an investment and savings strategy that could help you join the growing movement of people who aim to retire years earlier than expected.</span>
+                            <div className="mb-2 text-center text-slate-800 leading-relaxed">
+                              <span>
+                                <strong>FIRE</strong> — short for <em>Financial Independence, Retire Early</em> —
+                                is a lifestyle movement focused on achieving financial freedom ahead of the
+                                traditional retirement age. This calculator is designed to help you build a
+                                personalized savings and investment plan, so you can chart a path toward early
+                                retirement and take control of your future.
+                              </span>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -395,6 +402,7 @@ export default function FireCalculator() {
 
                             <div className="p-6 sm:p-8 rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                 <h2 className="mb-4 text-lg font-semibold text-rose-600 text-center">Inflation</h2>
+
                                 <div className="flex flex-wrap gap-2 justify-center">
                                     <InflationBlockSimple
                                         inflationPct={inflationPct}
@@ -402,7 +410,19 @@ export default function FireCalculator() {
                                     />
                                 </div>
 
-
+                                {/* Чекбокс: враховувати зниження витрат після 60 */}
+                                <div className="mt-12 flex items-center justify-center gap-2 text-sm">
+                                    <input
+                                        id="lowerAfter60"
+                                        type="checkbox"
+                                        checked={considerCutAfter60}
+                                        onChange={(e) => setConsiderCutAfter60(e.target.checked)}
+                                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <label htmlFor="lowerAfter60" className="text-slate-700">
+                                        Consider cost reduction after 60
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -414,6 +434,18 @@ export default function FireCalculator() {
                                 goal={goalNominalAtRet}
                                 legend={legend}
                                 mode={retMode}
+
+                                annualSpend={annualSpend}          // твоя існуюча змінна з батька
+                                inflationPct={inflationPct}        // % з блока інфляції
+                                incomeYieldPct={legend.growthPct}  // % p/a (те, що зараз показуєш у легенді)
+                                considerCutAfter60={considerCutAfter60}
+                                spendingDropAfter60Pct={20}        // за замовчуванням 20%. Можемо вивести окремим інпутом
+                                startAgeForSpending={age}
+
+                                // annualSpend={annualSpend}          // базові річні витрати з вашого стану
+                                // inflationPct={inflationPct}        // % інфляції
+                                // lowerExpensesAfter60={lowerAfter60}
+                                // expenseDropFactor={0.8}            // -20% після 60 (можна підкрутити)
                             />
                         </div>
                     </div>

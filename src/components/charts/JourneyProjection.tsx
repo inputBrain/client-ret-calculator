@@ -1,9 +1,17 @@
 ﻿"use client";
 
-import React, { useMemo, useState } from "react";
+import React, {useMemo, useState} from "react";
 import {
-    AreaChart, Area, Line, XAxis, YAxis, Tooltip,
-    CartesianGrid, ResponsiveContainer, ReferenceLine, Label
+    AreaChart,
+    Area,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    CartesianGrid,
+    ResponsiveContainer,
+    ReferenceLine,
+    Label, ReferenceDot, ReferenceArea,
 } from "recharts";
 import ShareMenu from "@/components/ShareMenu";
 
@@ -18,26 +26,59 @@ type Row = {
 
 export type JourneyProjectionProps = {
     currencySymbol: string;
-    kpi: { target: number; retireAge: number; annualSavings: number; retireSpanYears?: number | null };
+    kpi: {
+        target: number;
+        retireAge: number;
+        annualSavings: number;
+        retireSpanYears?: number | null;
+    };
     rows: Row[];
     goal: number;
-    legend: { initial: number; contribMonthly: number; growthPct: number };
+    legend: {
+        initial: number;
+        contribMonthly: number;
+        growthPct: number;
+    };
     mode?: "withdrawal" | "life";
+
+    /** NEW: базові річні витрати на старті (номінал) */
+    annualSpend?: number;
+    /** NEW: інфляція для індексації витрат (% p/a) */
+    inflationPct?: number;
+    /** NEW: ставка «дохідності портфеля» для інвест. доходу (% p/a) */
+    incomeYieldPct?: number;
+    /** NEW: враховувати пониження витрат після 60 */
+    considerCutAfter60?: boolean;
+    /** NEW: на скільки % зменшувати витрати після 60 (за замовчуванням 20%) */
+    spendingDropAfter60Pct?: number;
+    /** NEW: стартовий вік для обчислення віку в рядах (якщо в rows.age уже є — можна не передавати) */
+    startAgeForSpending?: number;
 };
 
 const card = "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
 const fmt = (v: number, sym: string) =>
-    `${sym}${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `${sym}${v.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })}`;
 
-const COLOR_TOTAL   = "#4f46e5"; // indigo (итого)
-const COLOR_INITIAL = "#3b82f6"; // blue   (initial, штрих)
-const COLOR_CONTRIB = "#8b5cf6"; // purple (contribCum)
-const COLOR_GROWTH  = "#10b981"; // emerald (growthCum)
+// === Единые цвета серий ===
+const COLOR_TOTAL = "#4f46e5"; // indigo: Total (итог)
+const COLOR_INITIAL = "#3b82f6"; // blue: Initial (штрих)
+const COLOR_CONTRIB = "#8b5cf6"; // purple: Contributions (cum.)
+const COLOR_GROWTH = "#10b981"; // emerald: Growth (cum.)
+
+// NEW: цвета для главного смысла по ТЗ украинского клиента
+const COLOR_INV_INCOME = "#2563eb"; // синій: Investment income
+const COLOR_EXPENSES = "#16a34a"; // зелений: Expenses (infl.-adj.)
 
 // маленькая цветная точка
-const DotSwatch = ({ color }: { color: string }) => (
-    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+const DotSwatch = ({color}: { color: string }) => (
+    <span
+        className="inline-block h-2.5 w-2.5 rounded-full"
+        style={{background: color}}
+    />
 );
 
 export default function JourneyProjection({
@@ -46,10 +87,19 @@ export default function JourneyProjection({
     rows,
     goal,
     legend,
-    mode
+    mode,
+
+    // NEW props
+    annualSpend,
+    inflationPct,
+    incomeYieldPct,
+    considerCutAfter60 = false,
+    spendingDropAfter60Pct = 20,
+    startAgeForSpending,
 }: JourneyProjectionProps) {
     const [tab, setTab] = useState<"chart" | "table">("chart");
 
+    // Подготавливаем исходные данные как раньше
     const fullData = useMemo(() => {
         let contribCum = 0;
         return rows.map((r) => {
@@ -58,50 +108,57 @@ export default function JourneyProjection({
             const growthCum = Math.max(0, total - legend.initial - contribCum);
             return {
                 x: r.yearIdx,
-                y: total,             // Total (nominal)
+                y: total, // Total (nominal)
                 age: r.age,
                 contribYear: r.contribYear,
                 growthYear: r.interestYear,
-                contribCum,           // линия Contributions (cum)
-                growthCum,            // линия Growth (cum)
+
+                contribCum, // Contributions (cum.)
+                growthCum, // Growth (cum.)
                 initial: legend.initial, // горизонтальная Initial
             };
         });
     }, [rows, legend.initial]);
 
+    // Даунсэмплинг на длинных периодах
     function downsampleToMax<T>(arr: T[], max: number): T[] {
         if (arr.length <= max) return arr;
         const step = (arr.length - 1) / (max - 1);
-        return Array.from({ length: max }, (_, i) => arr[Math.round(i * step)]);
+        return Array.from({length: max}, (_, i) => arr[Math.round(i * step)]);
     }
 
     const data = useMemo(() => downsampleToMax(fullData, 120), [fullData]);
 
-    // тики каждые 5 лет + первая/последняя
+    // Тики по X каждые 5 лет + крайние
     const ticksEvery5 = useMemo(() => {
         const xs = data.map((d) => d.x);
-        const first = xs[0], last = xs[xs.length - 1];
+        const first = xs[0],
+            last = xs[xs.length - 1];
         const t: number[] = [];
-        for (const x of xs) if (x === first || x === last || x % 5 === 0) t.push(x);
+        for (const x of xs) {
+            if (x === first || x === last || x % 5 === 0) t.push(x);
+        }
         return Array.from(new Set(t));
     }, [data]);
 
-    // аккуратная плашка Goal
-    function GoalPill({ value }: { value: string }) {
+    // Аккуратная плашка Goal
+    function GoalPill({value}: { value: string }) {
         return (
             <Label
                 position="insideLeft"
                 content={(props) => {
-                    const { viewBox } = props as any;
+                    const {viewBox} = props as any;
                     const y = viewBox.y;
-                    const x = viewBox.x + 8;
+                    const x = viewBox.x + 8; // небольшой отступ слева
                     const text = `Goal: ${value}`;
-                    const w = 10 + text.length * 7;
+                    const w = 10 + text.length * 7; // грубая ширина
                     const h = 22;
                     return (
                         <g transform={`translate(${x},${y - h - 6})`}>
-                            <rect width={w} height={h} rx={11} ry={11} fill="#065f46" />
-                            <text x={10} y={14} fontSize={12} fill="#ecfdf5">{text}</text>
+                            <rect width={w} height={h} rx={11} ry={11} fill="#065f46"/>
+                            <text x={10} y={14} fontSize={12} fill="#ecfdf5">
+                                {text}
+                            </text>
                         </g>
                     );
                 }}
@@ -112,14 +169,68 @@ export default function JourneyProjection({
     const retireAgeMeta = useMemo(() => {
         const over = kpi.retireAge > 120;
         if (over && mode !== "life") {
-            return { number: "Over 120", subtitle: "Retirement age... R.I.P." };
+            return {number: "Over 120", subtitle: "Retirement age... R.I.P."};
         }
         if (over && mode === "life") {
-            return { number: 120, subtitle: "Retirement age (0 year retirement)" };
+            return {number: 120, subtitle: "Retirement age (0 year retirement)"};
         }
-        const baseSub = mode === "life" && kpi.retireSpanYears != null ? `(${kpi.retireSpanYears} year retirement)` : "";
-        return { number: kpi.retireAge, subtitle: baseSub };
+        const baseSub =
+            mode === "life" && kpi.retireSpanYears != null
+                ? `(${kpi.retireSpanYears} year retirement)`
+                : "";
+        return {number: kpi.retireAge, subtitle: baseSub};
     }, [kpi.retireAge, kpi.retireSpanYears, mode]);
+
+
+    const enriched = useMemo(() => {
+        const infl = Math.max(0, inflationPct ?? 0) / 100;
+        const yieldPct = Math.max(0, incomeYieldPct ?? 0) / 100;
+
+        const baseAge =
+            typeof startAgeForSpending === "number"
+                ? startAgeForSpending
+                : (data[0]?.age ?? 0);
+
+        return data.map((d, idx) => {
+            const age = (data[idx]?.age ?? baseAge) as number;
+
+            // Expenses(t): индексируем базовые расходы инфляцией
+            let exp = (annualSpend ?? 0) * Math.pow(1 + infl, d.x);
+            if (considerCutAfter60 && age >= 60) {
+                exp = exp * (1 - spendingDropAfter60Pct / 100);
+            }
+
+            // Investment income(t): y(t) * доходная ставка
+            const invIncome = (d.y ?? 0) * yieldPct;
+
+            return {...d, exp, invIncome, age};
+        });
+    }, [
+        data,
+        annualSpend,
+        inflationPct,
+        incomeYieldPct,
+        considerCutAfter60,
+        spendingDropAfter60Pct,
+        startAgeForSpending,
+    ]);
+
+
+    const crossIdx = useMemo(() => {
+        for (let i = 0; i < enriched.length; i++) {
+            const p = enriched[i];
+            if ((p.invIncome ?? 0) >= (p.exp ?? 0)) return i;
+        }
+        return -1;
+    }, [enriched]);
+
+    const crossPoint = crossIdx >= 0 ? enriched[crossIdx] : null;
+    const crossLabel = crossPoint ? `Crossover @ Y${crossPoint.x}` : undefined;
+    const idx60 = useMemo(
+        () => enriched.findIndex(p => (p.age ?? 0) >= 60),
+        [enriched]
+    );
+    const xAt60 = idx60 >= 0 ? enriched[idx60].x : null;
 
     return (
         <>
@@ -142,18 +253,30 @@ export default function JourneyProjection({
             {/* Inner card with tabs */}
             <div className={`${card}  p-4 sm:p-6`}>
                 <div className="gap-2 flex flex-col">
-                    <div className="text-sm font-semibold uppercase text-rose-900 text-center">The journey ahead</div>
-                    <h5 className="text-2xl font-semibold text-center">Your FIRE projection</h5>
+                    <div className="text-sm font-semibold uppercase text-rose-900 text-center">
+                        The journey ahead
+                    </div>
+                    <h5 className="text-2xl font-semibold text-center">
+                        Your FIRE projection
+                    </h5>
                     <div className="flex items-center justify-center gap-3 text-xs mb-4">
                         <button
                             onClick={() => setTab("chart")}
-                            className={`rounded-full px-3 py-1 font-medium ${tab === "chart" ? "bg-indigo-50 text-indigo-800" : "text-slate-600 hover:bg-slate-50"}`}
+                            className={`rounded-full px-3 py-1 font-medium ${
+                                tab === "chart"
+                                    ? "bg-indigo-50 text-indigo-800"
+                                    : "text-slate-600 hover:bg-slate-50"
+                            }`}
                         >
                             Chart
                         </button>
                         <button
                             onClick={() => setTab("table")}
-                            className={`rounded-full px-3 py-1 font-medium ${tab === "table" ? "bg-indigo-50 text-indigo-800" : "text-slate-600 hover:bg-slate-50"}`}
+                            className={`rounded-full px-3 py-1 font-medium ${
+                                tab === "table"
+                                    ? "bg-indigo-50 text-indigo-800"
+                                    : "text-slate-600 hover:bg-slate-50"
+                            }`}
                         >
                             Table
                         </button>
@@ -163,7 +286,10 @@ export default function JourneyProjection({
                 {tab === "chart" ? (
                     <div className="h-[360px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                            <AreaChart
+                                data={enriched}
+                                margin={{top: 10, right: 20, left: 0, bottom: 0}}
+                            >
                                 <defs>
                                     {/* Total */}
                                     <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
@@ -171,59 +297,143 @@ export default function JourneyProjection({
                                         <stop offset="100%" stopColor={COLOR_TOTAL}   stopOpacity={0.05} />
                                     </linearGradient>
                                     {/* Contributions cum */}
-                                    <linearGradient id="fillContrib" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"  stopColor={COLOR_CONTRIB} stopOpacity={0.20} />
-                                        <stop offset="100%" stopColor={COLOR_CONTRIB} stopOpacity={0.04} />
+                                    <linearGradient
+                                        id="fillContrib"
+                                        x1="0"
+                                        y1="0"
+                                        x2="0"
+                                        y2="1"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor={COLOR_CONTRIB}
+                                            stopOpacity={0.2}
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor={COLOR_CONTRIB}
+                                            stopOpacity={0.04}
+                                        />
                                     </linearGradient>
                                     {/* Growth cum */}
                                     <linearGradient id="fillGrowth" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"  stopColor={COLOR_GROWTH} stopOpacity={0.20} />
-                                        <stop offset="100%" stopColor={COLOR_GROWTH} stopOpacity={0.04} />
+                                        <stop
+                                            offset="0%"
+                                            stopColor={COLOR_GROWTH}
+                                            stopOpacity={0.2}
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor={COLOR_GROWTH}
+                                            stopOpacity={0.04}
+                                        />
+                                    </linearGradient>
+                                    {/* NEW: Investment income (blue area) */}
+                                    <linearGradient
+                                        id="fillInvIncome"
+                                        x1="0"
+                                        y1="0"
+                                        x2="0"
+                                        y2="1"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor={COLOR_INV_INCOME}
+                                            stopOpacity={0.2}
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor={COLOR_INV_INCOME}
+                                            stopOpacity={0.04}
+                                        />
+                                    </linearGradient>
+                                    {/* NEW: Expenses (green area) */}
+                                    <linearGradient
+                                        id="fillExpenses"
+                                        x1="0"
+                                        y1="0"
+                                        x2="0"
+                                        y2="1"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor={COLOR_EXPENSES}
+                                            stopOpacity={0.2}
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor={COLOR_EXPENSES}
+                                            stopOpacity={0.04}
+                                        />
                                     </linearGradient>
                                 </defs>
 
-                                <CartesianGrid stroke="#eef2ff" vertical={false} />
+                                <CartesianGrid stroke="#eef2ff" vertical={false}/>
                                 <XAxis
                                     dataKey="x"
                                     ticks={ticksEvery5}
                                     interval={0}
                                     tickFormatter={(v: number) => (v === 0 ? "Y0" : `Y${v}`)}
-                                    tick={{ fontSize: 12, fill: "#64748b" }}
+                                    tick={{fontSize: 12, fill: "#64748b"}}
                                     tickLine={false}
-                                    axisLine={{ stroke: "#e5e7eb" }}
+                                    axisLine={{stroke: "#e5e7eb"}}
                                 />
                                 <YAxis
                                     tickFormatter={(v) => fmt(v, currencySymbol)}
                                     width={90}
-                                    tick={{ fontSize: 12, fill: "#64748b" }}
+                                    tick={{fontSize: 12, fill: "#64748b"}}
                                     tickLine={false}
-                                    axisLine={{ stroke: "#e5e7eb" }}
+                                    axisLine={{stroke: "#e5e7eb"}}
                                 />
 
                                 <Tooltip
-                                    cursor={{ stroke: "#c7d2fe", strokeDasharray: 4 }}
-                                    content={({ active, payload }) => {
+                                    cursor={{stroke: "#c7d2fe", strokeDasharray: 4}}
+                                    content={({active, payload}) => {
                                         if (!active || !payload?.length) return null;
                                         const p: any = payload[0].payload;
                                         return (
                                             <div className="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                                                 <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
-                                                    <div className="text-slate-600 flex items-center gap-2"><DotSwatch color={COLOR_GROWTH} /> Growth</div>
-                                                    <div className="font-medium">{fmt(p.growthCum, currencySymbol)}</div>
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_INV_INCOME}/> Investment income
+                                                    </div>
+                                                    <div className="font-medium">{fmt(p.invIncome ?? 0, currencySymbol)}</div>
 
-                                                    <div className="text-slate-600 flex items-center gap-2"><DotSwatch color={COLOR_CONTRIB} /> Contributions</div>
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_EXPENSES}/> Expenses (infl.-adj.)
+                                                    </div>
+                                                    <div className="font-medium">{fmt(p.exp ?? 0, currencySymbol)}</div>
+
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_CONTRIB}/> Contributions (total)
+                                                    </div>
                                                     <div className="font-medium">{fmt(p.contribCum, currencySymbol)}</div>
 
-                                                    <div className="text-slate-600 flex items-center gap-2"><DotSwatch color={COLOR_INITIAL} /> Initial lump sum</div>
-                                                    <div className="font-medium">{fmt(p.initial, currencySymbol)}</div>
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_GROWTH}/> Growth (total)
+                                                    </div>
+                                                    <div className="font-medium">{fmt(p.growthCum, currencySymbol)}</div>
+
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_INITIAL}/> Initial lump sum
+                                                    </div>
+                                                    <div className="font-medium">
+                                                        {fmt(p.initial, currencySymbol)}
+                                                    </div>
                                                 </div>
-                                                <div className="my-3 h-px bg-gray-100" />
+
+                                                <div className="my-3 h-px bg-gray-100"/>
+
                                                 <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
                                                     <div className="text-slate-600">Age</div>
                                                     <div className="font-semibold">{p.age}</div>
 
-                                                    <div className="text-slate-600 flex items-center gap-2"><DotSwatch color={COLOR_TOTAL} /> Total saved</div>
-                                                    <div className="font-semibold">{fmt(p.y, currencySymbol)}</div>
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_TOTAL}/> Total saved
+                                                    </div>
+                                                    <div className="font-semibold">
+                                                        {fmt(p.y, currencySymbol)}
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
@@ -235,8 +445,27 @@ export default function JourneyProjection({
                                     y={goal}
                                     stroke={COLOR_GROWTH}
                                     strokeDasharray="6 6"
-                                    label={<GoalPill value={fmt(goal, currencySymbol)} />}
+                                    label={<GoalPill value={fmt(goal, currencySymbol)}/>}
                                 />
+
+                                {/* NEW: вертикальная линия в месте перетина доход/витрати */}
+                                {crossPoint && (
+                                    <ReferenceLine
+                                        x={crossPoint.x}
+                                        stroke="#94a3b8"
+                                        strokeDasharray="6 6"
+                                        label={
+                                            <Label
+                                                position="top"
+                                                value={`Crossover @ Y${crossPoint.x}`}
+                                                offset={10}
+                                                fill="#475569"
+                                                fontSize={12}
+                                            />
+                                        }
+                                    />
+                                )}
+
 
                                 {/* Total (заливка) */}
                                 <Area
@@ -245,12 +474,18 @@ export default function JourneyProjection({
                                     stroke={COLOR_TOTAL}
                                     strokeWidth={2}
                                     fill="url(#fillTotal)"
-                                    dot={{ r: 2 }}
-                                    activeDot={{ r: 4 }}
+                                    dot={{r: 2}}
+                                    activeDot={{r: 4}}
                                 />
 
                                 {/* Initial — штриховая линия без заливки */}
-                                <Line type="monotone" dataKey="initial" stroke={COLOR_INITIAL} strokeDasharray="4 4" dot={false} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="initial"
+                                    stroke={COLOR_INITIAL}
+                                    strokeDasharray="4 4"
+                                    dot={false}
+                                />
 
                                 {/* Contributions (cum) — полупрозрачная area + тонкий контур */}
                                 <Area
@@ -259,8 +494,8 @@ export default function JourneyProjection({
                                     stroke={COLOR_CONTRIB}
                                     strokeWidth={1.5}
                                     fill="url(#fillContrib)"
-                                    dot={{ r: 1.5 }}
-                                    activeDot={{ r: 3 }}
+                                    dot={{r: 1.5}}
+                                    activeDot={{r: 3}}
                                 />
 
                                 {/* Growth (cum) — полупрозрачная area + тонкий контур */}
@@ -270,10 +505,50 @@ export default function JourneyProjection({
                                     stroke={COLOR_GROWTH}
                                     strokeWidth={1.5}
                                     fill="url(#fillGrowth)"
-                                    dot={{ r: 1.5 }}
-                                    activeDot={{ r: 3 }}
+                                    dot={{r: 1.5}}
+                                    activeDot={{r: 3}}
                                 />
+
+                                {/* NEW: Investment income (blue) */}
+                                <Area
+                                    type="monotone"
+                                    dataKey="invIncome"
+                                    stroke={COLOR_INV_INCOME}
+                                    strokeWidth={2}
+                                    fill="url(#fillInvIncome)"
+                                    dot={{r: 2}}
+                                    activeDot={{r: 4}}
+                                />
+
+                                {/* NEW: Expenses (green) */}
+                                <Area
+                                    type="monotone"
+                                    dataKey="exp"
+                                    stroke={COLOR_EXPENSES}
+                                    strokeWidth={2}
+                                    fill="url(#fillExpenses)"
+                                    dot={{r: 2}}
+                                    activeDot={{r: 4}}
+                                />
+
+                                {considerCutAfter60 && xAt60 != null && (
+                                    <ReferenceLine
+                                        x={xAt60}
+                                        stroke="#0ea5e9"
+                                        strokeDasharray="4 3"
+                                        label={
+                                            <Label
+                                                position="insideLeft"
+                                                value="Age 60 (spending adjusted)"
+                                                offset={10}
+                                                fill="#0369a1"
+                                                fontSize={12}
+                                            />
+                                        }
+                                    />
+                                )}
                             </AreaChart>
+
                         </ResponsiveContainer>
                     </div>
                 ) : (
@@ -289,9 +564,13 @@ export default function JourneyProjection({
                             <tbody>
                             {rows.map((r, i) => (
                                 <tr key={i} className={i % 2 ? "bg-slate-50/60" : ""}>
-                                    <td className="py-3 px-4 text-slate-700">{r.yearIdx} (age {r.age})</td>
+                                    <td className="py-3 px-4 text-slate-700">
+                                        {r.yearIdx} (age {r.age})
+                                    </td>
                                     <td className="py-3 px-4">{fmt(r.depositStart, currencySymbol)}</td>
-                                    <td className="py-3 px-4 font-medium text-slate-900">{fmt(r.totalEnd, currencySymbol)}</td>
+                                    <td className="py-3 px-4 font-medium text-slate-900">
+                                        {fmt(r.totalEnd, currencySymbol)}
+                                    </td>
                                 </tr>
                             ))}
                             </tbody>
@@ -303,18 +582,30 @@ export default function JourneyProjection({
                 <div className="mt-8 mb-10 flex items-start justify-between text-sm font-semibold relative">
                     {/* Легенда (цвета совпадают с графиком) */}
                     <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
-                        <div className="flex items-center gap-2"><DotSwatch color={COLOR_TOTAL} /> <span>Total</span></div>
-                        <div className="flex items-center gap-2"><DotSwatch color={COLOR_INITIAL} /> <span>Initial</span></div>
-                        <div className="flex items-center gap-2"><DotSwatch color={COLOR_CONTRIB} /> <span>Contributions (cum.)</span></div>
-                        <div className="flex items-center gap-2"><DotSwatch color={COLOR_GROWTH} /> <span>Growth (cum.)</span></div>
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_INV_INCOME}/> <span>Investment income</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_EXPENSES}/> <span>Expenses (infl.-adj.)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_TOTAL}/> <span>Total</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_CONTRIB}/> <span>Contributions</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_GROWTH}/> <span>Growth</span>
+                        </div>
                     </div>
 
                     {/* Share button */}
                     <ShareMenu
                         title="My FIRE projection"
                         text="Check out my FIRE projection"
-                        onCopied={() => {}}
-                        trigger={({ onClick, "aria-expanded": expanded }) => (
+                        onCopied={() => {
+                        }}
+                        trigger={({onClick, "aria-expanded": expanded}) => (
                             <button
                                 onClick={onClick}
                                 aria-expanded={expanded}
