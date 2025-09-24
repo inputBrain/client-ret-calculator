@@ -7,6 +7,7 @@ import {
 } from "recharts";
 
 import Image from "next/image";
+import ShareMenu from "@/components/ShareMenu";
 
 type Row = {
     yearIdx: number;
@@ -50,13 +51,10 @@ export default function JourneyProjection({
 {
     const [tab, setTab] = useState<"chart" | "table">("chart");
 
-// --- ВМЕСТО твоего data = useMemo(...):
     const fullData = useMemo(() => {
-        // rows приходят номинальные totalEnd и номинальные contrib/interest
-        // (ниже покажу где их отдать из FireCalculator)
         let contribCum = 0;
         return rows.map((r) => {
-            contribCum += r.contribYear; // накопленные взносы к концу года r.yearIdx
+            contribCum += r.contribYear;
             const total = Number(r.totalEnd.toFixed(2));
             const growthCum = Math.max(0, total - legend.initial - contribCum);
             return {
@@ -79,7 +77,7 @@ export default function JourneyProjection({
         return Array.from({ length: max }, (_, i) => arr[Math.round(i * step)]);
     }
 
-// ≤120 точек на графике
+
     const data = useMemo(() => downsampleToMax(fullData, 120), [fullData]);
 
 // тики каждые 5 лет + первая/последняя
@@ -116,51 +114,6 @@ export default function JourneyProjection({
         );
     }
 
-
-    // share ui state
-    const [shareOpen, setShareOpen] = useState(false);
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(window.location.href);
-            setCopied(true);
-            setShareOpen(false);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleNativeShare = async () => {
-        try {
-            if (navigator.share) {
-                await navigator.share({
-                    title: "My FIRE projection",
-                    text: "\nWebsite share",
-                    url: window.location.href,
-                });
-            } else {
-                // если нет поддержки — просто копируем
-                await handleCopy();
-            }
-            setShareOpen(false);
-        } catch {
-            // пользователь мог отменить — просто закрываем меню
-            setShareOpen(false);
-        }
-    };
-
-    const urlEnc = typeof window !== "undefined" ? encodeURIComponent(window.location.href) : "";
-    const textEnc = encodeURIComponent("Check out my FIRE projection");
-
-    const tgHref = `https://t.me/share/url?url=${urlEnc}&text=${textEnc}`;
-    const waHref = `https://wa.me/?text=${textEnc}%20${urlEnc}`;
-    const twHref = `https://twitter.com/intent/tweet?url=${urlEnc}&text=${textEnc}`;
-    const liHref = `https://www.linkedin.com/sharing/share-offsite/?url=${urlEnc}`;
-
-
-    // внутри JourneyProjection, до return
     const retireAgeMeta = useMemo(() => {
         const over = kpi.retireAge > 120;
         if (over && mode !== "life") {
@@ -348,124 +301,23 @@ export default function JourneyProjection({
                     </div>
 
                     {/* Share button + dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShareOpen((v) => !v)}
-                            className="rounded-full px-4 py-2 text-sm font-semibold text-indigo-800 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:translate-y-[1px] transition"
-                        >
-                            Share
-                        </button>
+                    <ShareMenu
+                        title="My FIRE projection"
+                        text="Check out my FIRE projection"
+                        onCopied={() => {
 
-                        {shareOpen && (
-                            <div
-                                className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]"
-                                onMouseLeave={() => setShareOpen(false)}
+                        }}
+                        trigger={({ onClick, "aria-expanded": expanded }) => (
+                            <button
+                                onClick={onClick}
+                                aria-expanded={expanded}
+                                className="rounded-full px-4 py-2 text-sm font-semibold text-indigo-800 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:translate-y-[1px] transition"
                             >
-                                <button
-                                    onClick={handleNativeShare}
-                                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50"
-                                >
-                                    {/* system share icon */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-                                        <path d="M7 7h10M12 7v10M7 17h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                                    </svg>
-                                    Native Share
-                                </button>
-
-                                <a
-                                    href={tgHref}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50"
-                                    onClick={() => setShareOpen(false)}
-                                >
-                                    {/* Telegram */}
-                                    <Image
-                                        src="/social-icons/tg-icon.png"
-                                        alt="li"
-                                        width={20}
-                                        height={20}
-                                        className="h-5 w-5 object-contain"
-                                    />
-                                    Telegram
-                                </a>
-
-                                <a
-                                    href={waHref}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50"
-                                    onClick={() => setShareOpen(false)}
-                                >
-                                    {/* WhatsApp */}
-                                    <Image
-                                        src="/social-icons/whatsup-icon.png"
-                                        alt="li"
-                                        width={20}
-                                        height={20}
-                                        className="h-5 w-5 object-contain"
-                                    />
-                                    WhatsApp
-                                </a>
-
-                                <a
-                                    href={twHref}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50"
-                                    onClick={() => setShareOpen(false)}
-                                >
-                                    {/* X / Twitter */}
-                                    <Image
-                                        src="/social-icons/twitter-icon.png"
-                                        alt="li"
-                                        width={20}
-                                        height={20}
-                                        className="h-5 w-5 object-contain"
-                                    />
-                                    X (Twitter)
-                                </a>
-
-                                <a
-                                    href={liHref}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50"
-                                    onClick={() => setShareOpen(false)}
-                                >
-                                    {/* LinkedIn */}
-                                    <Image
-                                        src="/social-icons/linkedin-icon.png"
-                                        alt="li"
-                                        width={20}
-                                        height={20}
-                                        className="h-5 w-5 object-contain"
-                                    />
-                                    LinkedIn
-                                </a>
-
-                                <button
-                                    onClick={handleCopy}
-                                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50"
-                                >
-                                    {/* Copy icon */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                        <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.6"/>
-                                        <rect x="4" y="4" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.6"/>
-                                    </svg>
-                                    Copy link
-                                </button>
-                            </div>
+                                Share
+                            </button>
                         )}
-                    </div>
+                    />
                 </div>
-
-                {/* Toast */}
-                {copied && (
-                    <div className="fixed bottom-6 right-6 rounded-full bg-slate-900 text-white px-4 py-2 text-sm shadow-lg">
-                        Link copied
-                    </div>
-                )}
             </div>
         </>
     );

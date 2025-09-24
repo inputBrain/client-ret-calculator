@@ -4,11 +4,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import CurrencySelect from "@/components/ui/CurrencySelect";
 import { CURRENCY_META } from "@/lib/currency";
-import JourneyProjection from "@/components/charts/JourneyProjection";
-import { projectWithInflation, realReturnFromNominal } from "@/lib/finance";
 
 import SavingsBlock from "@/components/blocks/inflation-page/SavingsBlock";
 import GrowthBlock from "@/components/blocks/inflation-page/GrowthBlock";
+import InflationChart from "@/components/charts/InflationChart";
 
 const baseBlockStyle =
     "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
@@ -16,10 +15,10 @@ const baseBlockStyle =
 type Currency = "EUR" | "USD" | "GBP" | "HUF";
 const DEFAULTS = {
     ccy: "EUR" as Currency,
-    ts: 20000, // totalSavings
-    yrs: 10,   // years horizon
-    infl: 0,   // inflation %
-    gr: 0,     // growth %
+    ts: 10000, // totalSavings
+    yrs: 5,   // years horizon
+    infl: 2,   // inflation %
+    gr: 2.01,     // growth %
 };
 
 export default function Inflation() {
@@ -53,7 +52,6 @@ export default function Inflation() {
         setGrowthPct(num("gr", DEFAULTS.gr));
     }, [search]);
 
-    // state -> URL (только отличия от дефолтов)
     const paramsString = useMemo(() => {
         const p = new URLSearchParams(search.toString());
         const set = (k: string, v: any, def: any) => {
@@ -73,44 +71,6 @@ export default function Inflation() {
         router.replace(url, { scroll: false });
     }, [paramsString, pathname, router]);
 
-    // --- расчёты для графика (минимально) ---
-    const R_nominal = Math.max(0, growthPct) / 100;
-    const infl = Math.max(0, inflationPct) / 100;
-    const R_real = realReturnFromNominal(R_nominal, infl);
-
-    const contribYear = 0; // пока без пополнений, как договорились
-
-    const rows = projectWithInflation({
-        startAge: 0,                // не используется в KPI сейчас
-        years: Math.max(0, Math.round(years)),
-        principal: totalSavings,
-        contribYear,
-        nominalReturn: R_nominal,
-        inflation: infl,
-    });
-
-    const rowsForChart = rows.map((r) => ({
-        yearIdx: r.yearIdx,
-        age: r.age,
-        depositStart: r.depositStart, // номинал тут не важен, график позже подправим
-        contribYear: r.contribYear,
-        interestYear: r.interestYear,
-        totalEnd: r.totalEndReal,
-    }));
-
-    const kpi = {
-        target: 0,             // временно
-        retireAge: 0,          // временно
-        annualSavings: contribYear,
-        retireSpanYears: undefined as number | undefined,
-    };
-
-    const legend = {
-        initial: totalSavings,
-        contribMonthly: 0,
-        growthPct: R_real * 100,
-    };
-
     return (
         <>
             <div className="mx-auto py-6 grid gap-8 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
@@ -121,9 +81,9 @@ export default function Inflation() {
                                 Inflation Calculator for <br /> Investments & Savings
                             </h1>
                             <div className="mb-2 text-center">
-                <span>
-                  Use this tool to forecast how much your investments could be worth in the future, based on the growth rate and inflation rate you expect. Past performance is not a reliable indicator of future returns.
-                </span>
+                                <span>
+                                  Use this tool to forecast how much your investments could be worth in the future, based on the growth rate and inflation rate you expect. Past performance is not a reliable indicator of future returns.
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -191,13 +151,12 @@ export default function Inflation() {
                         </div>
 
                         <div className={`${baseBlockStyle} bg-gradient-to-b from-violet-50 `}>
-                            <JourneyProjection
+                            <InflationChart
                                 currencySymbol={symbol}
-                                kpi={kpi}
-                                rows={rowsForChart}
-                                goal={0}
-                                legend={legend}
-                                mode="life" // временно — график не зависит сейчас
+                                initial={totalSavings}
+                                years={years}
+                                growthPct={growthPct}
+                                inflationPct={inflationPct}
                             />
                         </div>
                     </div>
