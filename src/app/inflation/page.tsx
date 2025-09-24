@@ -1,52 +1,26 @@
 "use client";
 
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import CurrencySelect from "@/components/ui/CurrencySelect";
-import {CURRENCY_META} from "@/lib/currency";
+import { CURRENCY_META } from "@/lib/currency";
 import JourneyProjection from "@/components/charts/JourneyProjection";
-
-import {
-    projectWithInflation,
-    monthsToTargetStandard,
-    monthsToTargetLifeExp_LY, realReturnFromNominal,
-} from "@/lib/finance";
+import { projectWithInflation, realReturnFromNominal } from "@/lib/finance";
 
 import SavingsBlock from "@/components/blocks/inflation-page/SavingsBlock";
-import InflationBlockSimple from "@/components/blocks/InflationBlockSimple";
 import GrowthBlock from "@/components/blocks/inflation-page/GrowthBlock";
 
-const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
-
+const baseBlockStyle =
+    "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
 type Currency = "EUR" | "USD" | "GBP" | "HUF";
 const DEFAULTS = {
     ccy: "EUR" as Currency,
-
-    // SituationBlock
-    age: 30,
-    cs: 20000,  // currentSavings
-    sm: 3000, // savingMonthly
-
-    // RetirementBlock
-    as: 40000,      // annualSpend
-    mode: "withdrawal" as "withdrawal" | "life",
-    wr: 4,
-
-    //AllocationTriple block
-    sp: 70,     // stocksPct
-    fp: 20,     // fixedPct
-    csh: 10,
-
-    srk: "none" as "none" | "custom",   // stocksRateKind
-    sr: 0,                              // stocksRate
-    frk: "custom" as "none" | "custom" | "preset", // fixedRateKind
-    fr: 0,
-
-    //Inflation
-    infl: 0
+    ts: 20000, // totalSavings
+    yrs: 10,   // years horizon
+    infl: 0,   // inflation %
+    gr: 0,     // growth %
 };
-
 
 export default function Inflation() {
     const router = useRouter();
@@ -54,30 +28,15 @@ export default function Inflation() {
     const search = useSearchParams();
 
     const [currency, setCurrency] = useState<Currency>(DEFAULTS.ccy);
-    const [stocksPct, setStocksPct] = useState(DEFAULTS.sp);
-    const [fixedPct, setFixedPct] = useState(DEFAULTS.fp);
-    const [age, setAge] = useState(DEFAULTS.age);
-    const [currentSavings, setCurrentSavings] = useState(DEFAULTS.cs);
-    const [savingMonthly, setSavingMonthly] = useState(DEFAULTS.sm);
+    const [totalSavings, setTotalSavings] = useState<number>(DEFAULTS.ts);
+    const [years, setYears] = useState<number>(DEFAULTS.yrs);
 
-    const [annualSpend, setAnnualSpend] = useState(DEFAULTS.as);
-
-    const [retMode, setRetMode] = useState<"withdrawal" | "life">(DEFAULTS.mode);
-    const [withdrawalSlider, setWithdrawalSlider] = useState(DEFAULTS.wr);
-
-
-
-    const [stocksRateKind, setStocksRateKind] = useState<"none" | "custom">(DEFAULTS.srk);
-    const [stocksRate, setStocksRate] = useState<number>(DEFAULTS.sr);
-
-    type FixedKind = "none" | "custom" | "preset";
-    const [fixedRateKind, setFixedRateKind] = useState<FixedKind>(DEFAULTS.frk);
-    const [fixedRate, setFixedRate] = useState<number>(DEFAULTS.fr);
+    const [inflationPct, setInflationPct] = useState<number>(DEFAULTS.infl);
+    const [growthPct, setGrowthPct] = useState<number>(DEFAULTS.gr);
 
     const symbol = CURRENCY_META[currency].symbol;
 
-    const [inflationPct, setInflationPct] = useState(DEFAULTS.infl);
-
+    // URL -> state
     useEffect(() => {
         const num = (k: string, d: number) => {
             const v = search.get(k);
@@ -88,40 +47,13 @@ export default function Inflation() {
         const str = <T extends string>(k: string, d: T) => (search.get(k) as T) ?? d;
 
         setCurrency(str("ccy", DEFAULTS.ccy));
-        setStocksPct(num("sp", DEFAULTS.sp));
-        setFixedPct(num("fp", DEFAULTS.fp));
-        setAge(num("age", DEFAULTS.age));
-        setCurrentSavings(num("cs", DEFAULTS.cs));
-        setSavingMonthly(num("sm", DEFAULTS.sm));
-        setAnnualSpend(num("as", DEFAULTS.as));
-        setRetMode(str("mode", DEFAULTS.mode));
-        setWithdrawalSlider(num("wr", DEFAULTS.wr));
-
-        setStocksRateKind(str("srk", DEFAULTS.srk));
-        setStocksRate(num("sr", DEFAULTS.sr));
-        setFixedRateKind(str("frk", DEFAULTS.frk) as "none" | "custom" | "preset");
-        setFixedRate(num("fr", DEFAULTS.fr));
+        setTotalSavings(num("ts", DEFAULTS.ts));
+        setYears(num("yrs", DEFAULTS.yrs));
         setInflationPct(num("infl", DEFAULTS.infl));
+        setGrowthPct(num("gr", DEFAULTS.gr));
     }, [search]);
 
-    useEffect(() => {
-        const fixedPresets = CURRENCY_META[currency].fixedPresets ?? [];
-        if (fixedPresets.length === 0) {
-            if (fixedRateKind === "preset") {
-                setFixedRateKind("custom");
-                setFixedRate(0);
-            }
-        } else {
-            if (fixedRateKind === "preset") {
-                setFixedRate(fixedPresets[0].rate);
-            }
-        }
-    }, [currency, fixedRateKind]);
-
-
-    const cashPct = useMemo(() => Math.max(0, Math.min(100, 100 - stocksPct - fixedPct)), [stocksPct, fixedPct]);
-
-
+    // state -> URL (только отличия от дефолтов)
     const paramsString = useMemo(() => {
         const p = new URLSearchParams(search.toString());
         const set = (k: string, v: any, def: any) => {
@@ -129,173 +61,74 @@ export default function Inflation() {
             else p.set(k, String(v));
         };
         set("ccy", currency, DEFAULTS.ccy);
-        set("sp", stocksPct, DEFAULTS.sp);
-        set("fp", fixedPct, DEFAULTS.fp);
-        set("age", age, DEFAULTS.age);
-        set("cs", currentSavings, DEFAULTS.cs);
-        set("sm", savingMonthly, DEFAULTS.sm);
-        set("as", annualSpend, DEFAULTS.as);
-        set("mode", retMode, DEFAULTS.mode);
-        set("wr", withdrawalSlider, DEFAULTS.wr);
-
-        set("srk", stocksRateKind, DEFAULTS.srk);
-        set("sr", stocksRate, DEFAULTS.sr);
-        set("frk", fixedRateKind, DEFAULTS.frk);
-        set("fr", fixedRate, DEFAULTS.fr);
-
-        set("csh", cashPct, DEFAULTS.csh);
-
+        set("ts", totalSavings, DEFAULTS.ts);
+        set("yrs", years, DEFAULTS.yrs);
         set("infl", inflationPct, DEFAULTS.infl);
-
+        set("gr", growthPct, DEFAULTS.gr);
         return p.toString();
-    }, [
-        search,
-        currency,
-        stocksPct,
-        fixedPct,
-        age,
-        currentSavings,
-        savingMonthly,
-        annualSpend,
-        retMode,
-        withdrawalSlider,
-        stocksRateKind,
-        stocksRate,
-        fixedRateKind,
-        fixedRate,
-        cashPct,
-        inflationPct,
-    ]);
-
-
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    }, [search, currency, totalSavings, years, inflationPct, growthPct]);
 
     useEffect(() => {
-        const id = window.setTimeout(() => {
-            const url = paramsString ? `${pathname}?${paramsString}` : pathname;
-            router.replace(url, { scroll: false });
-        }, 500);
-
-        return () => window.clearTimeout(id);
+        const url = paramsString ? `${pathname}?${paramsString}` : pathname;
+        router.replace(url, { scroll: false });
     }, [paramsString, pathname, router]);
 
+    // --- расчёты для графика (минимально) ---
+    const R_nominal = Math.max(0, growthPct) / 100;
+    const infl = Math.max(0, inflationPct) / 100;
+    const R_real = realReturnFromNominal(R_nominal, infl);
 
+    const contribYear = 0; // пока без пополнений, как договорились
 
-
-
-
-
-    const R_stocks = (stocksRateKind === "custom" ? stocksRate : 0) / 100;
-    const R_fixed  = (fixedRateKind  === "custom" ? fixedRate  : 0) / 100;
-    const wS = stocksPct / 100;
-    const wF = fixedPct / 100;
-    const R_nominal = R_stocks * wS + R_fixed * wF;
-    // const infl = Math.max(0, inflationPct) / 100;
-
-    const inflRaw = Math.max(0, inflationPct) / 100;
-    const infl = inflRaw <= 0 ? 0 : inflRaw;
-
-    const R_real = realReturnFromNominal(R_nominal, infl); // доходность в "деньгах сегодня"
-
-    // параметры режима
-    const withdrawalRate = withdrawalSlider / 100; // 2 => 0.02
-    const lifeExpectancy = 10 + Math.round((withdrawalSlider / 100) * 110);
-
-    // целевая "цена" FI в сегодняшних деньгах
-    let goalNominalAtRet = 0;
-    let monthsToFi = 0;
-
-    if (retMode === "withdrawal") {
-        const wr = Math.max(1e-6, withdrawalRate);
-        // Цель в "деньгах сегодня"
-        goalNominalAtRet = annualSpend / wr;
-        // Срок до цели — считаем в "реальных" деньгах
-        monthsToFi = monthsToTargetStandard(currentSavings, savingMonthly, R_real, goalNominalAtRet);
-    } else {
-        // Режим Life — используем "реальную" доходность тоже,
-        // чтобы инфляция влияла на срок до цели.
-        monthsToFi = monthsToTargetLifeExp_LY(
-            currentSavings,
-            savingMonthly,
-            R_real,          // ← было R_nominal
-            annualSpend,
-            age,
-            lifeExpectancy
-        );
-        const yearsToFi = Math.max(0, monthsToFi / 12);
-        const yearsInRet = Math.max(0, lifeExpectancy - (age + yearsToFi));
-        // Цель (KPI.target) у тебя уже в "деньгах сегодня"
-        goalNominalAtRet = annualSpend * yearsInRet;
-    }
-
-    if (!Number.isFinite(monthsToFi) || monthsToFi < 0) monthsToFi = 0;
-
-    const yearsToFiRounded = Math.max(1, Math.ceil(monthsToFi / 12));
-    const retireAge = age + yearsToFiRounded;
-    const retireSpanYears = retMode === "life" ? Math.max(0, Math.round(lifeExpectancy - retireAge)) : undefined;
-
-    const contribYear = savingMonthly * 12;
-
-    // строим ряд ПРОЕКЦИИ до выхода на пенсию
     const rows = projectWithInflation({
-        startAge: age,
-        years: yearsToFiRounded,
-        principal: currentSavings,
+        startAge: 0,                // не используется в KPI сейчас
+        years: Math.max(0, Math.round(years)),
+        principal: totalSavings,
         contribYear,
         nominalReturn: R_nominal,
-        inflation: infl, // не влияет на номинальные totalEnd, но пригодится если захочешь реальную таблицу
+        inflation: infl,
     });
+
+    const rowsForChart = rows.map((r) => ({
+        yearIdx: r.yearIdx,
+        age: r.age,
+        depositStart: r.depositStart, // номинал тут не важен, график позже подправим
+        contribYear: r.contribYear,
+        interestYear: r.interestYear,
+        totalEnd: r.totalEndReal,
+    }));
 
     const kpi = {
-        target: goalNominalAtRet,   // <-- справа в KPI показывается 200 000
-        retireAge: Math.round(retireAge),
+        target: 0,             // временно
+        retireAge: 0,          // временно
         annualSavings: contribYear,
-        retireSpanYears,
+        retireSpanYears: undefined as number | undefined,
     };
-
-
-    const rowsForChart = rows.map(r => {
-        // для "Initial deposit" в таблице тоже приведём к "деньгам сегодня"
-        const discountPowForStart = Math.max(0, r.yearIdx - 1);
-        const depositStartReal =
-            r.yearIdx === 0 ? r.depositStart : r.depositStart / Math.pow(1 + infl, discountPowForStart);
-
-        return {
-            yearIdx: r.yearIdx,
-            age: r.age,
-            depositStart: depositStartReal, // real
-            contribYear: r.contribYear,     // можно оставить номинал, он в таблице сейчас не выводится
-            interestYear: r.interestYear,   // "за год", номинал — в тултипе не используется
-            totalEnd: r.totalEndReal,       // ← real: именно это рисуем и показываем
-        };
-    });
 
     const legend = {
-        initial: currentSavings,
-        contribMonthly: savingMonthly,
-        growthPct: R_real * 100, // реальная p/a
+        initial: totalSavings,
+        contribMonthly: 0,
+        growthPct: R_real * 100,
     };
-
-
-
-
 
     return (
         <>
             <div className="mx-auto py-6 grid gap-8 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
                 <div className="relative flex flex-col">
                     <div className="flex flex-col items-center gap-12">
-
                         <div className="flex flex-col items-center gap-4 pb-4 pt-20">
-                            <h1 className="text-7xl font-[Mulish]">Inflation Calculator for <br/> Investments & Savings</h1>
+                            <h1 className="text-7xl font-[Mulish]">
+                                Inflation Calculator for <br /> Investments & Savings
+                            </h1>
                             <div className="mb-2 text-center">
-                                <span>Use this tool to forecast how much your investments could be worth in the future, based on the growth rate and inflation rate you expect. Past performance is not a reliable indicator of future returns.</span>
+                <span>
+                  Use this tool to forecast how much your investments could be worth in the future, based on the growth rate and inflation rate you expect. Past performance is not a reliable indicator of future returns.
+                </span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
 
             <div className="mx-auto grid gap-8 py-16 max-tablet:mx-4 max-tablet:w-[calc(100%-32px)] max-tablet:grid-cols-1 max-tablet:py-12 w-[1024px] grid-cols-1">
                 <div className="relative flex flex-col">
@@ -303,7 +136,7 @@ export default function Inflation() {
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col items-end">
                                 <div className="flex justify-end">
-                                    <CurrencySelect value={currency} onValueChangeAction={(v) => setCurrency(v)}/>
+                                    <CurrencySelect value={currency} onValueChangeAction={(v) => setCurrency(v)} />
                                 </div>
                             </div>
 
@@ -323,14 +156,15 @@ export default function Inflation() {
                                         <div className="flex flex-col">
                                             <SavingsBlock
                                                 currencySymbol={symbol}
-                                                currentSavings={currentSavings}
-                                                setCurrentSavings={setCurrentSavings}
-                                                savingMonthly={savingMonthly}
-                                                setSavingMonthly={setSavingMonthly}
+                                                totalSavings={totalSavings}
+                                                setTotalSavings={setTotalSavings}
+                                                years={years}
+                                                setYears={setYears}
                                             />
                                         </div>
                                     </div>
                                 </div>
+
                                 <div className="flex w-full flex-col gap-4">
                                     <div className={baseBlockStyle}>
                                         <div className="flex flex-col items-center gap-3">
@@ -345,19 +179,10 @@ export default function Inflation() {
                                         </div>
                                         <div className="flex flex-col">
                                             <GrowthBlock
-                                                currency={currency}
-                                                stocksPct={stocksPct}
-                                                fixedPct={fixedPct}
-                                                setStocksPct={setStocksPct}
-                                                setFixedPct={setFixedPct}
-                                                stocksRateKind={stocksRateKind}
-                                                setStocksRateKind={setStocksRateKind}
-                                                stocksRate={stocksRate}
-                                                setStocksRate={setStocksRate}
-                                                fixedRateKind={fixedRateKind}
-                                                setFixedRateKind={setFixedRateKind}
-                                                fixedRate={fixedRate}
-                                                setFixedRate={setFixedRate}
+                                                inflationPct={inflationPct}
+                                                setInflationPct={setInflationPct}
+                                                growthPct={growthPct}
+                                                setGrowthPct={setGrowthPct}
                                             />
                                         </div>
                                     </div>
@@ -370,9 +195,9 @@ export default function Inflation() {
                                 currencySymbol={symbol}
                                 kpi={kpi}
                                 rows={rowsForChart}
-                                goal={goalNominalAtRet}
+                                goal={0}
                                 legend={legend}
-                                mode={retMode}
+                                mode="life" // временно — график не зависит сейчас
                             />
                         </div>
                     </div>
