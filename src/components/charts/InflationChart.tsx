@@ -5,6 +5,7 @@ import {
     AreaChart, Area, Line, XAxis, YAxis, Tooltip,
     CartesianGrid, ResponsiveContainer
 } from "recharts";
+import ShareMenu from "@/components/ShareMenu";
 
 type Props = {
     currencySymbol: string;
@@ -18,6 +19,9 @@ const card = "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_30px_-1
 const fmtMoney = (v: number, sym: string) =>
     `${sym}${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const clampYears = (n: number) => Math.max(0, Math.round(n));
+
+const COLOR_BALANCE = "#3b82f6";
+const COLOR_BUYING  = "#8b5cf6";
 
 export default function InflationChart({
     currencySymbol, initial, years, growthPct, inflationPct
@@ -53,6 +57,13 @@ export default function InflationChart({
         for (const x of xs) if (x === first || x === last || x % 5 === 0) t.push(x);
         return Array.from(new Set(t));
     }, [data]);
+
+    const DotSwatch = ({ color }: { color: string }) => (
+        <span
+            className="inline-block h-2.5 w-2.5 rounded-full"
+            style={{ background: color }}
+        />
+    );
 
     return (
         <>
@@ -110,21 +121,21 @@ export default function InflationChart({
                             <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="fillBalance" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
-                                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
+                                        <stop offset="0%"  stopColor={COLOR_BALANCE} stopOpacity={0.25} />
+                                        <stop offset="100%" stopColor={COLOR_BALANCE} stopOpacity={0.05} />
                                     </linearGradient>
                                     <linearGradient id="fillBuying" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.25} />
-                                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.05} />
+                                        <stop offset="0%"  stopColor={COLOR_BUYING} stopOpacity={0.25} />
+                                        <stop offset="100%" stopColor={COLOR_BUYING} stopOpacity={0.05} />
                                     </linearGradient>
                                 </defs>
 
-                                <CartesianGrid stroke="#eef2ff" vertical={false} />
+                                <CartesianGrid stroke="#eef2ff" vertical={true} />
                                 <XAxis
                                     dataKey="x"
                                     ticks={ticksX}
                                     interval={0}
-                                    tickFormatter={(v: number) => (v === 0 ? "0" : `${v}`)}
+                                    tickFormatter={(v: number) => `${v}`}
                                     tick={{ fontSize: 12, fill: "#64748b" }}
                                     tickLine={false}
                                     axisLine={{ stroke: "#e5e7eb" }}
@@ -147,9 +158,15 @@ export default function InflationChart({
                                                 <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
                                                     <div className="text-slate-600">End of year</div>
                                                     <div className="font-medium">{p.x}</div>
-                                                    <div className="text-slate-600">Balance</div>
+
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_BALANCE} /> Balance
+                                                    </div>
                                                     <div className="font-medium">{fmtMoney(p.balance, currencySymbol)}</div>
-                                                    <div className="text-slate-600">Buying power</div>
+
+                                                    <div className="text-slate-600 flex items-center gap-2">
+                                                        <DotSwatch color={COLOR_BUYING} /> Buying power
+                                                    </div>
                                                     <div className="font-medium">{fmtMoney(p.buying, currencySymbol)}</div>
                                                 </div>
                                             </div>
@@ -157,9 +174,9 @@ export default function InflationChart({
                                     }}
                                 />
 
-                                {/* Линии/площади */}
-                                <Area type="monotone" dataKey="balance" stroke="#3b82f6" strokeWidth={2} fill="url(#fillBalance)" dot={{ r: 2 }} activeDot={{ r: 4 }} />
-                                <Line type="monotone" dataKey="buying"  stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                                {/* линии/площади */}
+                                <Area type="monotone" dataKey="balance" stroke={COLOR_BALANCE} strokeWidth={2} fill="url(#fillBalance)" dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                                <Line type="monotone" dataKey="buying"  stroke={COLOR_BUYING}  strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -186,8 +203,39 @@ export default function InflationChart({
                     </div>
                 )}
 
+                {/* Легенда снизу — цвета соответствуют графику */}
+                <div className="mt-8 mb-2 flex items-start justify-between text-sm font-semibold relative">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_BALANCE} />
+                            <span>Balance</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DotSwatch color={COLOR_BUYING} />
+                            <span>Buying power (inflation adjusted)</span>
+                        </div>
+                    </div>
 
+
+                    <ShareMenu
+                        title="My savings projection"
+                        text="Check out my savings projection"
+                        onCopied={() => {
+
+                        }}
+                        trigger={({ onClick, "aria-expanded": expanded }) => (
+                            <button
+                                onClick={onClick}
+                                aria-expanded={expanded}
+                                className="rounded-full px-4 py-2 text-sm font-semibold text-indigo-800 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:translate-y-[1px] transition"
+                            >
+                                Share
+                            </button>
+                        )}
+                    />
+                </div>
             </div>
+
         </>
     );
 }
