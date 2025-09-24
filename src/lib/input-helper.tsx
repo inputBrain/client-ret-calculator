@@ -58,8 +58,14 @@ export function PercentInput({value, onChange}: { value: number; onChange: (n: n
             <input
                 type="number"
                 step="1"
+                min={0}
+                max={5000}
                 value={Number.isFinite(value) ? value : 0}
-                onChange={(e) => onChange(parseFloat(e.target.value || "0"))}
+                onChange={(e) => {
+                    const raw = parseFloat(e.target.value || "0");
+                    const clamped = Math.min(Math.max(raw, 0), 5000); // от 0 до 500
+                    onChange(clamped);
+                }}
                 className="w-full bg-transparent text-center outline-none"
             />
             <span className="pl-1 text-slate-500">%</span>
@@ -108,7 +114,7 @@ export function SelectBox({
     return (
         <Select.Root value={value} onValueChange={onValueChange}>
             <Select.Trigger
-                className="inline-flex h-11 min-w-[220px] items-center justify-between  rounded-xl border text-nowrap border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
+                className="inline-flex h-11 min-w-[220px] items-center justify-between  rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-800 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200"
                 aria-label="Select option"
             >
                 <Select.Value placeholder={placeholder}/>
