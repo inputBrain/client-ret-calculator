@@ -71,8 +71,8 @@ export default function GrowthBlock({
                             }}
                             options={[
                                 { value: "none", label: "None (0%)" },
-                                { value: "ecb_2", label: "European Central Bank target (2%)" },
-                                { value: "euro_aug2024_22", label: "Aug 2024 Eurozone inflation (2.2%)" },
+                                { value: "ecb_2", label: "European Central Bank" },
+                                { value: "euro_aug2024_22", label: "Aug 2024 Eurozone" },
                                 { value: "custom", label: "Custom" }, // поставит 2%
                             ]}
                             placeholder="Choose..."
@@ -84,6 +84,7 @@ export default function GrowthBlock({
                                 setInflKind("custom");
                                 setInflationPct(n);
                             }}
+                            max={1000}
                         />
                     </div>
 
@@ -102,7 +103,7 @@ export default function GrowthBlock({
                             }}
                             options={[
                                 { value: "none", label: "None (0%)" },
-                                { value: "ly_savings_201", label: "Lightyear Savings (2.01%)" },
+                                { value: "ly_savings_201", label: "Lightyear Savings" },
                                 { value: "custom", label: "Custom" }, // поставит 3.5%
                             ]}
                             placeholder="Choose..."

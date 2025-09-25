@@ -6,7 +6,7 @@ import {AllocationTriple} from "@/components/blocks/AllocationTriple";
 import CurrencySelect from "@/components/ui/CurrencySelect";
 import SituationBlock from "@/components/blocks/SituationBlock";
 import {RetirementBlock} from "@/components/blocks/RetirementBlock";
-import {CURRENCY_META} from "@/lib/currency";
+import {type Currency, CURRENCY_META} from "@/lib/currency";
 import PercentInputLikeInInflation from "@/lib/input-helper";
 import JourneyProjection from "@/components/charts/JourneyProjection";
 
@@ -22,7 +22,7 @@ import InflationBlockSimple from "@/components/blocks/InflationBlockSimple";
 const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
 
-type Currency = "EUR" | "USD" | "GBP";
+// type Currency = "EUR" | "USD" | "GBP";
 const DEFAULTS = {
     ccy: "EUR" as Currency,
 
@@ -313,7 +313,11 @@ export default function FireCalculator() {
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col items-end">
                                 <div className="flex justify-end">
-                                    <CurrencySelect value={currency} onValueChangeAction={(v) => setCurrency(v)}/>
+                                    <CurrencySelect
+                                        value={currency}
+                                        onValueChangeAction={(v) => setCurrency(v)}
+                                        exclude={["UAH"]}
+                                    />
                                 </div>
                             </div>
 

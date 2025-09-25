@@ -3,16 +3,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import CurrencySelect from "@/components/ui/CurrencySelect";
-import { CURRENCY_META } from "@/lib/currency";
+import {type Currency, CURRENCY_META} from "@/lib/currency";
 
 import SavingsBlock from "@/components/blocks/inflation-page/SavingsBlock";
 import GrowthBlock from "@/components/blocks/inflation-page/GrowthBlock";
 import InflationChart from "@/components/charts/InflationChart";
 
-const baseBlockStyle =
-    "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
+const baseBlockStyle = "flex flex-1 flex-col gap-6 rounded-2xl px-8 py-12 max-tablet:gap-4 max-tablet:px-4 max-tablet:py-6 border border-gray-100 red p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]";
 
-type Currency = "EUR" | "USD" | "GBP" | "HUF";
 const DEFAULTS = {
     ccy: "EUR" as Currency,
     ts: 10000, // totalSavings
@@ -96,7 +94,11 @@ export default function Inflation() {
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col items-end">
                                 <div className="flex justify-end">
-                                    <CurrencySelect value={currency} onValueChangeAction={(v) => setCurrency(v)} />
+                                    <CurrencySelect
+                                        value={currency}
+                                        onValueChangeAction={(v) => setCurrency(v)}
+                                        exclude={["UAH"]}
+                                    />
                                 </div>
                             </div>
 

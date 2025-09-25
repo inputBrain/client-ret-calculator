@@ -51,19 +51,19 @@ export function Thumb({label}: { label: string }) {
     );
 }
 
-export function PercentInput({value, onChange}: { value: number; onChange: (n: number) => void }) {
+export function PercentInput({value, onChange, min = 0, max = 5000}: { value: number; onChange: (n: number) => void, min?: number, max?: number }) {
     return (
         <div
             className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus-within:ring-2 focus-within:ring-indigo-400">
             <input
                 type="number"
                 step="1"
-                min={0}
-                max={5000}
+                min={min}
+                max={max}
                 value={Number.isFinite(value) ? value : 0}
                 onChange={(e) => {
                     const raw = parseFloat(e.target.value || "0");
-                    const clamped = Math.min(Math.max(raw, 0), 5000); // от 0 до 500
+                    const clamped = Math.min(Math.max(raw, min), max); // от 0 до 500
                     onChange(clamped);
                 }}
                 className="w-full bg-transparent text-center outline-none"
