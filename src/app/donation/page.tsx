@@ -23,6 +23,8 @@ export default function DonatePage() {
         EUR: (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL_EUR as string) || "",
         USD: (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL_USD as string) || "",
     } as const;
+
+
     const activeMonoUrl = monoLinks[monoCcy];
 
 
@@ -88,7 +90,6 @@ export default function DonatePage() {
                 : "") || "",
         [activeNetwork.envKey]
     );
-    const monobankJar = (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL as string) || "";
     const buyMeACoffee = (process.env.NEXT_PUBLIC_BMAC_URL as string) || "";
     const paypalDonateUrl = (process.env.NEXT_PUBLIC_PAYPAL_DONATE_URL as string) || "";
     const paypalMeUrl = (process.env.NEXT_PUBLIC_PAYPAL_ME_URL as string) || "";
@@ -103,6 +104,14 @@ export default function DonatePage() {
         }
         return amount;
     }, [amount, custom]);
+
+
+    const amountSymbol = useMemo(() => {
+        if (method === "uah") return getCurrencySymbol(monoCcy);
+        if (method === "paypal") return getCurrencySymbol(paypalCurrency);
+        return "";
+    }, [method, monoCcy, paypalCurrency]);
+
 
     const cryptoQrSrc = useMemo(() => {
         const data = address || "";
@@ -279,18 +288,15 @@ export default function DonatePage() {
                                     // ширина = max(6ch, длина строки) + запас под суффикс (2.75rem)
                                     width: `calc(${Math.max(6, (custom || "").length)}ch + 2.75rem)`,
                                 }}
-                                className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900shadow-sm focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:outline-none focus-visible:outline-none"
+                                className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:outline-none focus-visible:outline-none"
                             />
                             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                $
-              </span>
+                                 {amountSymbol}
+                            </span>
                         </div>
                     </div>
                     <p className="mt-3 text-sm text-slate-600" aria-live="polite">
-                        Selected amount:{" "}
-                        <span className="font-semibold text-slate-900">
-              {finalAmount || "—"}
-            </span>
+                        Selected amount: <span className="font-semibold text-slate-900">{finalAmount || "—"}</span> {amountSymbol}
                     </p>
                 </div>
 
@@ -432,7 +438,7 @@ export default function DonatePage() {
 
                         <div className="flex flex-wrap items-center gap-3">
                             <a
-                                href={activeMonoUrl || "#"}
+                                href={activeMonoUrl + "?amount=" + amount  || "#"}
                                 target="_blank"
                                 rel="noreferrer noopener"
                                 className={`rounded-xl px-5 py-3 text-sm font-medium shadow-sm transition ${
