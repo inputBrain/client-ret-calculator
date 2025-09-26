@@ -288,7 +288,7 @@ export default function JourneyProjection({
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                                 data={enriched}
-                                margin={{top: 10, right: 20, left: 0, bottom: 0}}
+                                margin={{ top: 10, right: 12, left: 0, bottom: 0 }} // небольшой right
                             >
                                 <defs>
                                     <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
@@ -324,6 +324,7 @@ export default function JourneyProjection({
                                     axisLine={{stroke: "#e5e7eb"}}
                                 />
                                 <YAxis
+                                    orientation="right"
                                     tickFormatter={(v) => fmt(v, currencySymbol)}
                                     width={90}
                                     tick={{fontSize: 12, fill: "#64748b"}}
