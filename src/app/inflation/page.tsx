@@ -65,8 +65,12 @@ export default function Inflation() {
     }, [search, currency, totalSavings, years, inflationPct, growthPct]);
 
     useEffect(() => {
-        const url = paramsString ? `${pathname}?${paramsString}` : pathname;
-        router.replace(url, { scroll: false });
+        const id = window.setTimeout(() => {
+            const url = paramsString ? `${pathname}?${paramsString}` : pathname;
+            router.replace(url, { scroll: false });
+        }, 500);
+
+        return () => window.clearTimeout(id);
     }, [paramsString, pathname, router]);
 
     return (

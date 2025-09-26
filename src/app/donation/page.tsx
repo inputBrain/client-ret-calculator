@@ -12,7 +12,6 @@ import {
 import {Banknote} from "lucide-react";
 import {getCurrencySymbol, CURRENCY_META, type Currency, isCurrency} from "@/lib/currency";
 import {buyMeACoffee, monoLinks, paypalCurrency, paypalDonateUrl, paypalEmail, paypalMeUrl, preset, tokens} from "@/lib/donation-helper";
-import {AmountWithCurrency} from "@/components/ui/AmountWithCurrency";
 import {CurrencyDropdown} from "@/components/ui/CurrencyDropdown";
 
 export default function DonatePage() {
