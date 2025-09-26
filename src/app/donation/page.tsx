@@ -1,10 +1,9 @@
 ﻿"use client";
 import Image from "next/image";
 
-import { toast } from "react-toastify";
-import { CheckCircle2 } from "lucide-react";
+import {toast} from "react-toastify";
 
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     SiBitcoin,
     SiEthereum,
@@ -17,7 +16,6 @@ import {Banknote} from "lucide-react";
 import {getCurrencySymbol, CURRENCY_META, type Currency, isCurrency} from "@/lib/currency";
 import {buyMeACoffee, monoLinks, paypalCurrency, paypalDonateUrl, paypalEmail, paypalMeUrl, preset, tokens} from "@/lib/donation-helper";
 import {CurrencyDropdown} from "@/components/ui/CurrencyDropdown";
-import Script from "next/script";
 
 export default function DonatePage() {
     const [method, setMethod] = useState<"crypto" | "uah" | "paypal" | "bmac">("bmac");
@@ -34,11 +32,43 @@ export default function DonatePage() {
         return Number.isFinite(n) && n > 0 ? n : null;
     }, [amountInput]);
 
+
+    const paypalDefaultCcyEnv = ((process.env.NEXT_PUBLIC_PAYPAL_DEFAULT_CCY as string) || "USD").toUpperCase();
+    const paypalAvailableEnv = ((process.env.NEXT_PUBLIC_PAYPAL_AVAILABLE_CCYS as string) || "USD").toUpperCase();
+
+    const paypalAvailableCcys = useMemo<Currency[]>(() => {
+        return paypalAvailableEnv
+            .split(",")
+            .map((s) => s.trim())
+            .filter(isCurrency) as Currency[];
+    }, [paypalAvailableEnv]);
+
+    const paypalDefaultCcy: Currency =
+        (isCurrency(paypalDefaultCcyEnv) && paypalAvailableCcys.includes(paypalDefaultCcyEnv as Currency)
+            ? (paypalDefaultCcyEnv as Currency)
+            : (paypalAvailableCcys[0] ?? "USD")) as Currency;
+
+    const [paypalCcy, setPaypalCcy] = useState<Currency>(paypalDefaultCcy);
+
+    const paypalAvailableMap = useMemo(() => {
+        const o: Record<string, string> = {};
+        for (const c of paypalAvailableCcys) o[c] = c;
+        return o;
+    }, [paypalAvailableCcys]);
+
+
+    useEffect(() => {
+        if (method === "paypal" && !paypalAvailableCcys.includes(paypalCcy)) {
+            setPaypalCcy(paypalDefaultCcy);
+        }
+    }, [method, paypalCcy, paypalAvailableCcys, paypalDefaultCcy]);
+
+
     const amountSymbol = useMemo(() => {
         if (method === "uah") return getCurrencySymbol(monoCcy);
-        if (method === "paypal") return getCurrencySymbol(paypalCurrency);
+        if (method === "paypal") return getCurrencySymbol(paypalCcy);
         return "";
-    }, [method, monoCcy, paypalCurrency]);
+    }, [method, monoCcy, paypalCcy]);
 
 
     const activeMonoUrl = (monoCcy && (monoLinks as any)?.[monoCcy as keyof typeof monoLinks]) || "";
@@ -48,7 +78,6 @@ export default function DonatePage() {
             ? `${activeMonoUrl}?amount=${finalAmount}`
             : activeMonoUrl;
     }, [activeMonoUrl, finalAmount]);
-
 
 
     const buyMeACoffee = (process.env.NEXT_PUBLIC_BMAC_URL as string) || "";
@@ -63,11 +92,6 @@ export default function DonatePage() {
         }
     }, [buyMeACoffee]);
 
-
-
-
-
-    /* актуальная ссылка mono по выбранной валюте */
 
     const [tokenKey, setTokenKey] = useState(tokens[0].key);
     const activeToken = useMemo(
@@ -98,42 +122,39 @@ export default function DonatePage() {
     }, [address]);
 
     const paypalUrl = useMemo(() => {
+        const amt = typeof finalAmount === "number" ? finalAmount : undefined;
         const email = (paypalEmail || "").trim();
-        const ccy = (paypalCurrency || "USD").toUpperCase();
-        const amtNum = typeof finalAmount === "number" ? finalAmount : null;
-
         if (email) {
             const base = "https://www.paypal.com/donate";
             const qs = new URLSearchParams({
                 business: email,
-                currency_code: ccy,
+                currency_code: paypalCcy,
             });
-            if (amtNum && amtNum > 0) qs.set("amount", amtNum.toFixed(2));
+            if (amt) qs.set("amount", amt.toFixed(2));
             return `${base}?${qs.toString()}`;
         }
         if (paypalMeUrl) {
-            if (amtNum && amtNum > 0) {
+            if (amt) {
                 const base = paypalMeUrl.endsWith("/") ? paypalMeUrl.slice(0, -1) : paypalMeUrl;
-                return `${base}/${amtNum}${ccy}`;
+                return `${base}/${amt}${paypalCcy}`;
             }
             return paypalMeUrl;
         }
-
         return "";
-    }, [paypalEmail, paypalCurrency, paypalMeUrl, finalAmount]);
+    }, [paypalEmail, paypalMeUrl, paypalCcy, finalAmount]);
 
 
     const iconCls = "h-4 w-4";
 
     const tokenIcon = (k: string) => {
-        if (k === "btc") return <SiBitcoin className={iconCls} />;
-        if (k === "eth") return <SiEthereum className={iconCls} />;
-        return <SiTether className={iconCls} />;
+        if (k === "btc") return <SiBitcoin className={iconCls}/>;
+        if (k === "eth") return <SiEthereum className={iconCls}/>;
+        return <SiTether className={iconCls}/>;
     };
 
     const networkIcon = (k: string) => {
-        if (k === "bitcoin") return <SiBitcoin className={iconCls} />;
-        if (k === "ethereum" || k === "erc20") return <SiEthereum className={iconCls} />;
+        if (k === "bitcoin") return <SiBitcoin className={iconCls}/>;
+        if (k === "ethereum" || k === "erc20") return <SiEthereum className={iconCls}/>;
         if (k === "tron" || k === "trc20") {
             return (
                 <Image
@@ -272,11 +293,21 @@ export default function DonatePage() {
                         </div>
 
                         {/* Селект валют сразу после поля */}
-                        <CurrencyDropdown
-                            value={monoCcy}
-                            onChange={(ccy) => isCurrency(ccy) && setMonoCcy(ccy)}
-                            availableMap={monoLinks}
-                        />
+                        {method === "uah" && (
+                            <CurrencyDropdown
+                                value={monoCcy}
+                                onChange={(ccy) => isCurrency(ccy) && setMonoCcy(ccy)}
+                                availableMap={monoLinks}
+                            />
+                        )}
+
+                        {method === "paypal" && (
+                            <CurrencyDropdown
+                                value={paypalCcy}
+                                onChange={(ccy) => isCurrency(ccy) && setPaypalCcy(ccy)}
+                                availableMap={paypalAvailableMap as any}
+                            />
+                        )}
                     </div>
 
                     <p className="mt-3 text-sm text-slate-600" aria-live="polite">
