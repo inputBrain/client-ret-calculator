@@ -108,14 +108,14 @@ export default function JourneyProjection({
             const growthCum = Math.max(0, total - legend.initial - contribCum);
             return {
                 x: r.yearIdx,
-                y: total, // Total (nominal)
+                y: total,
                 age: r.age,
                 contribYear: r.contribYear,
-                growthYear: r.interestYear,
+                growthYear: r.interestYear,  // ← годовой процент по факту (номинал)
 
-                contribCum, // Contributions (cum.)
-                growthCum, // Growth (cum.)
-                initial: legend.initial, // горизонтальная Initial
+                contribCum,
+                growthCum,
+                initial: legend.initial,
             };
         });
     }, [rows, legend.initial]);
@@ -184,32 +184,28 @@ export default function JourneyProjection({
 
     const enriched = useMemo(() => {
         const infl = Math.max(0, inflationPct ?? 0) / 100;
-        const yieldPct = Math.max(0, incomeYieldPct ?? 0) / 100;
-
-        const baseAge =
-            typeof startAgeForSpending === "number"
-                ? startAgeForSpending
-                : (data[0]?.age ?? 0);
+        const baseAge = typeof startAgeForSpending === "number"
+            ? startAgeForSpending
+            : (data[0]?.age ?? 0);
 
         return data.map((d, idx) => {
             const age = (data[idx]?.age ?? baseAge) as number;
 
-            // Expenses(t): индексируем базовые расходы инфляцией
             let exp = (annualSpend ?? 0) * Math.pow(1 + infl, d.x);
             if (considerCutAfter60 && age >= 60) {
-                exp = exp * (1 - spendingDropAfter60Pct / 100);
+                exp = exp * (1 - (spendingDropAfter60Pct ?? 20) / 100);
             }
 
-            // Investment income(t): y(t) * доходная ставка
-            const invIncome = (d.y ?? 0) * yieldPct;
+            const invIncome = (d as any).growthYear
+                ? (d as any).growthYear / Math.pow(1 + infl, d.x)
+                : 0;
 
-            return {...d, exp, invIncome, age};
+            return { ...d, exp, invIncome, age };
         });
     }, [
         data,
         annualSpend,
         inflationPct,
-        incomeYieldPct,
         considerCutAfter60,
         spendingDropAfter60Pct,
         startAgeForSpending,
@@ -231,6 +227,9 @@ export default function JourneyProjection({
         [enriched]
     );
     const xAt60 = idx60 >= 0 ? enriched[idx60].x : null;
+
+
+    const goalForChart = useMemo(() => goal, [goal]);
 
     return (
         <>
@@ -313,7 +312,7 @@ export default function JourneyProjection({
                                     </linearGradient>
                                 </defs>
 
-                                <CartesianGrid stroke="#eef2ff" vertical={false}/>
+                                <CartesianGrid stroke="#eef2ff" vertical={true}/>
                                 <XAxis
                                     dataKey="x"
                                     ticks={ticksEvery5}
@@ -330,6 +329,7 @@ export default function JourneyProjection({
                                     tick={{fontSize: 12, fill: "#64748b"}}
                                     tickLine={false}
                                     axisLine={{stroke: "#e5e7eb"}}
+                                    tickMargin={2}
                                 />
 
                                 <Tooltip
@@ -388,10 +388,10 @@ export default function JourneyProjection({
 
                                 {/* линия цели */}
                                 <ReferenceLine
-                                    y={goal}
+                                    y={goalForChart}
                                     stroke={COLOR_GROWTH}
                                     strokeDasharray="6 6"
-                                    label={<GoalPill value={fmt(goal, currencySymbol)}/>}
+                                    label={<GoalPill value={fmt(goalForChart, currencySymbol)}/>}
                                 />
 
                                 {/* NEW: вертикальная линия в месте перетина доход/витрати */}
@@ -475,6 +475,7 @@ export default function JourneyProjection({
                                     fill="url(#fillExpenses)"
                                     dot={{r: 2}}
                                     activeDot={{r: 4}}
+                                    style={{ mixBlendMode: "multiply" }}
                                 />
 
                                 {considerCutAfter60 && xAt60 != null && (
