@@ -1,6 +1,3 @@
-import {useMemo, useState} from "react";
-import {getCurrencySymbol} from "@/lib/currency";
-
 export const preset = [100, 200, 500, 1000];
 
 export const buyMeACoffee = (process.env.NEXT_PUBLIC_BMAC_URL as string) || "";

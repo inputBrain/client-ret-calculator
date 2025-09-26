@@ -13,23 +13,57 @@ import {Banknote} from "lucide-react";
 import {getCurrencySymbol, CURRENCY_META, type Currency, isCurrency} from "@/lib/currency";
 import {buyMeACoffee, monoLinks, paypalCurrency, paypalDonateUrl, paypalEmail, paypalMeUrl, preset, tokens} from "@/lib/donation-helper";
 import {CurrencyDropdown} from "@/components/ui/CurrencyDropdown";
+import Script from "next/script";
 
 export default function DonatePage() {
     const [method, setMethod] = useState<"crypto" | "uah" | "paypal" | "bmac">("bmac");
-    const [custom, setCustom] = useState<string>("");
-
-    const [amount, setAmount] = React.useState<number | null>(null);
+    // const [custom, setCustom] = useState<string>("");
+    // const [amount, setAmount] = React.useState<number | null>(null);
     const [monoCcy, setMonoCcy] = React.useState<Currency>("UAH");
 
-    const availableMap  = {
-        UAH: (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL_UAH as string) || (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL as string) || "",
-        EUR: (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL_EUR as string) || "",
-        USD: (process.env.NEXT_PUBLIC_MONOBANK_JAR_URL_USD as string) || "",
-    } as const;
+    const [amountInput, setAmountInput] = useState<string>("");
+    const finalAmount = useMemo(() => {
+        const raw = (amountInput ?? "").toString().trim().replace(",", ".");
+        const cleaned = raw.replace(/[^\d.]/g, "");
+        if (!cleaned) return null;
+        const n = Number(cleaned);
+        return Number.isFinite(n) && n > 0 ? n : null;
+    }, [amountInput]);
+
+    const amountSymbol = useMemo(() => {
+        if (method === "uah") return getCurrencySymbol(monoCcy);
+        if (method === "paypal") return getCurrencySymbol(paypalCurrency);
+        return "";
+    }, [method, monoCcy, paypalCurrency]);
+
+
+    const activeMonoUrl = (monoCcy && (monoLinks as any)?.[monoCcy as keyof typeof monoLinks]) || "";
+    const monoHref = useMemo(() => {
+        if (!activeMonoUrl) return "#";
+        return finalAmount != null
+            ? `${activeMonoUrl}?amount=${finalAmount}`
+            : activeMonoUrl;
+    }, [activeMonoUrl, finalAmount]);
+
+
+
+    const buyMeACoffee = (process.env.NEXT_PUBLIC_BMAC_URL as string) || "";
+    // вытягиваем slug из https://www.buymeacoffee.com/<slug>
+    const bmacSlug = useMemo(() => {
+        try {
+            const u = new URL(buyMeACoffee);
+            const p = u.pathname.replace(/\//g, "");
+            return p || "";
+        } catch {
+            return "";
+        }
+    }, [buyMeACoffee]);
+
+
+
+
 
     /* актуальная ссылка mono по выбранной валюте */
-    const activeMonoUrl =
-        (monoCcy && (monoLinks as any)?.[monoCcy as keyof typeof monoLinks]) || "";
 
     const [tokenKey, setTokenKey] = useState(tokens[0].key);
     const activeToken = useMemo(
@@ -51,20 +85,6 @@ export default function DonatePage() {
         [activeNetwork.envKey]
     );
 
-    const finalAmount = useMemo(() => {
-        if (custom !== "") {
-            const n = Number(custom.replace(/,/g, "."));
-            if (!Number.isNaN(n) && n > 0) return n;
-            return "";
-        }
-        return amount;
-    }, [amount, custom]);
-
-    const amountSymbol = useMemo(() => {
-        if (method === "uah") return getCurrencySymbol(monoCcy);
-        if (method === "paypal") return getCurrencySymbol(paypalCurrency);
-        return "";
-    }, [method, monoCcy, paypalCurrency]);
 
     const cryptoQrSrc = useMemo(() => {
         const data = address || "";
@@ -192,65 +212,65 @@ export default function DonatePage() {
                 </div>
 
                 {/* AMOUNT */}
-                <div className="mb-8 rounded-3xl border  border-gray-100 bg-white p-5 sm:p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
+                <div className="mb-8 rounded-3xl border border-gray-100 bg-white p-5 sm:p-6 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
                     <h2 className="mb-4 text-lg font-semibold text-slate-900">Amount</h2>
 
                     <div className="flex flex-wrap gap-2">
-                        {preset.map((v) => (
-                            <button
-                                key={v}
-                                onClick={() => {
-                                    setAmount(v);
-                                    setCustom("");
-                                }}
-                                className={`rounded-xl px-4 py-2 text-sm font-medium border transition ${
-                                    amount === v && custom === ""
-                                        ? "border-indigo-300 bg-indigo-50 text-indigo-800 shadow-sm"
-                                        : "border-slate-200 text-slate-700 hover:bg-slate-50"
-                                }`}
-                            >
-                                {v}
-                            </button>
-                        ))}
+                        {preset.map((v) => {
+                            const isActive = finalAmount === v; // пресет активен, если совпадает с инпутом
+                            return (
+                                <button
+                                    key={v}
+                                    onClick={() => setAmountInput(String(v))} // синхронизируем ИНПУТ
+                                    className={`rounded-xl px-4 py-2 text-sm font-medium border transition ${
+                                        isActive
+                                            ? "border-indigo-300 bg-indigo-50 text-indigo-800 shadow-sm"
+                                            : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                                    }`}
+                                >
+                                    {v}
+                                </button>
+                            );
+                        })}
 
-                        {/* custom amount */}
+                        {/* кастомная сумма — тот же источник правды */}
                         <div className="relative">
                             <input
                                 aria-label="Custom amount"
-                                inputMode="numeric"
+                                inputMode="decimal"
                                 type="text"
                                 placeholder=""
-                                min={1}
-                                max={2}
-                                value={custom}
+                                value={amountInput}
                                 onFocus={(e) => e.currentTarget.select()}
                                 onChange={(e) => {
-                                    const raw = e.target.value
-                                        .replace(/[^\d.,]/g, "")
-                                        .replace(",", ".");
-                                    setCustom(raw);
-                                    setAmount(0);
+                                    // допускаем цифры, запятую/точку; нормализуем в useMemo
+                                    const raw = e.target.value.replace(/[^\d.,]/g, "");
+                                    setAmountInput(raw);
                                 }}
                                 style={{
-                                    width: `calc(${Math.max(6, (custom || "").length)}ch + 2.75rem)`,
+                                    width: `calc(${Math.max(6, (amountInput || "").length)}ch + 2.75rem)`,
                                 }}
                                 className="flex h-11 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-900 shadow-sm focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:outline-none focus-visible:outline-none"
                             />
                             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                {amountSymbol}
-              </span>
+        {amountSymbol}
+      </span>
                         </div>
 
-                        {/* СЕЛЕКТ ВАЛЮТ СРАЗУ ПОСЛЕ КАСТОМНОГО ПОЛЯ */}
+                        {/* Селект валют сразу после поля */}
                         <CurrencyDropdown
                             value={monoCcy}
                             onChange={(ccy) => isCurrency(ccy) && setMonoCcy(ccy)}
-                            availableMap={availableMap}
+                            availableMap={monoLinks}
                         />
                     </div>
 
                     <p className="mt-3 text-sm text-slate-600" aria-live="polite">
-                        Selected amount: <span className="font-semibold text-slate-900">{finalAmount || "—"}</span> {amountSymbol}
+                        Selected amount:{" "}
+                        <span className="font-semibold text-slate-900">
+      {finalAmount ?? "—"}
+    </span>{" "}
+                        {amountSymbol}
                     </p>
                 </div>
 
@@ -361,15 +381,14 @@ export default function DonatePage() {
 
                         <div className="flex flex-wrap items-center gap-3">
                             <a
-                                href={(activeMonoUrl ? activeMonoUrl : "#") + (activeMonoUrl ? `?amount=${amount ?? ""}` : "")}
+                                href={monoHref}
                                 target="_blank"
                                 rel="noreferrer noopener"
-                                className={`rounded-xl px-5 py-3 text-sm font-medium shadow-sm transition ${
-                                    activeMonoUrl
-                                        ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                        : "pointer-events-none bg-slate-200 text-slate-400"
+                                className={`rounded-xl px-5 py-3 text-sm font-medium shadow-sm transition inline-flex items-center gap-2 ${
+                                    activeMonoUrl ? "bg-indigo-600 text-white hover:bg-indigo-700" : "pointer-events-none bg-slate-200 text-slate-400"
                                 }`}
                             >
+                                <Banknote className={iconCls}/>
                                 Open Monobank ({monoCcy})
                             </a>
                             <span className="text-xs text-slate-600">
