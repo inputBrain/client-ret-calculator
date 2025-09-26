@@ -7,14 +7,11 @@ import CurrencySelect from "@/components/ui/CurrencySelect";
 import SituationBlock from "@/components/blocks/SituationBlock";
 import {RetirementBlock} from "@/components/blocks/RetirementBlock";
 import {type Currency, CURRENCY_META} from "@/lib/currency";
-import PercentInputLikeInInflation from "@/lib/input-helper";
 import JourneyProjection from "@/components/charts/JourneyProjection";
 
 import {
     projectWithInflation,
     monthsToTargetStandard,
-    monthsToTargetLifeExpGrowing,
-    pvAtRetirementFiniteGrowing,
     monthsToTargetLifeExp_LY, realReturnFromNominal,
 } from "@/lib/finance";
 import InflationBlockSimple from "@/components/blocks/InflationBlockSimple";

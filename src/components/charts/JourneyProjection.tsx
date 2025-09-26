@@ -11,7 +11,7 @@ import {
     CartesianGrid,
     ResponsiveContainer,
     ReferenceLine,
-    Label, ReferenceDot, ReferenceArea,
+    Label,
 } from "recharts";
 import ShareMenu from "@/components/ShareMenu";
 

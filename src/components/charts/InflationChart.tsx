@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import {
-    AreaChart, Area, Line, XAxis, YAxis, Tooltip,
+    AreaChart, Area, XAxis, YAxis, Tooltip,
     CartesianGrid, ResponsiveContainer
 } from "recharts";
 import ShareMenu from "@/components/ShareMenu";
