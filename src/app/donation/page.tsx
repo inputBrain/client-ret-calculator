@@ -1,5 +1,9 @@
 ﻿"use client";
 import Image from "next/image";
+
+import { toast } from "react-toastify";
+import { CheckCircle2 } from "lucide-react";
+
 import React, {useMemo, useState} from "react";
 import {
     SiBitcoin,
@@ -443,11 +447,22 @@ export default function DonatePage() {
                                     value={paypalEmail}
                                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
                                 />
+
                                 <button
-                                    onClick={() =>
-                                        paypalEmail && navigator.clipboard.writeText(paypalEmail)
-                                    }
-                                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                                    onClick={async () => {
+                                        if (!paypalEmail) return;
+                                        try {
+                                            await navigator.clipboard.writeText(paypalEmail);
+                                            toast.success("copied!"); // можно без extra-опций — возьмёт из контейнера
+                                        } catch {
+                                            toast.error("not copied :(");
+                                        }
+                                    }}
+                                    className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5
+                                     text-sm font-medium transition select-none border-slate-200 bg-white/90
+                                      text-slate-800 shadow-sm hover:bg-slate-50 hover:shadow active:scale-95
+                                      active:bg-slate-100 active:shadow-sm focus:outline-none focus-visible:ring-2
+                                       focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                                 >
                                     Copy
                                 </button>

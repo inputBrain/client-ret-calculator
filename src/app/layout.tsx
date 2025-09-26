@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 // import { Mulish } from "next/font/google";
 import Header from "@/components/Header";
-import VwVhProvider from "@/components/VwVhProvider";
+import VwVhProvider from "@/app/VwVhProvider";
 import {Suspense} from "react";
+import ToastProvider from "./ToastProvider";
 
 export const metadata: Metadata = {
     title: "Fire Calculator",
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en">
         <body className="antialiased min-h-screen flex flex-col">
         <VwVhProvider />
+        <ToastProvider />
         <Suspense fallback={null}>
             <Header />
         </Suspense>
