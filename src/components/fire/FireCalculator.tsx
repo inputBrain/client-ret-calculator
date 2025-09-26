@@ -436,17 +436,12 @@ export default function FireCalculator() {
                                 legend={legend}
                                 mode={retMode}
 
-                                annualSpend={annualSpend}          // твоя існуюча змінна з батька
-                                inflationPct={inflationPct}        // % з блока інфляції
-                                incomeYieldPct={legend.growthPct}  // % p/a (те, що зараз показуєш у легенді)
+                                annualSpend={annualSpend}
+                                inflationPct={inflationPct}
+                                incomeYieldPct={legend.growthPct}
                                 considerCutAfter60={considerCutAfter60}
-                                spendingDropAfter60Pct={20}        // за замовчуванням 20%. Можемо вивести окремим інпутом
+                                spendingDropAfter60Pct={20}
                                 startAgeForSpending={age}
-
-                                // annualSpend={annualSpend}          // базові річні витрати з вашого стану
-                                // inflationPct={inflationPct}        // % інфляції
-                                // lowerExpensesAfter60={lowerAfter60}
-                                // expenseDropFactor={0.8}            // -20% після 60 (можна підкрутити)
                             />
                         </div>
                     </div>

@@ -291,80 +291,25 @@ export default function JourneyProjection({
                                 margin={{top: 10, right: 20, left: 0, bottom: 0}}
                             >
                                 <defs>
-                                    {/* Total */}
                                     <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"  stopColor={COLOR_TOTAL}   stopOpacity={0.25} />
-                                        <stop offset="100%" stopColor={COLOR_TOTAL}   stopOpacity={0.05} />
+                                        <stop offset="0%"   stopColor={COLOR_TOTAL} stopOpacity={0.30}/>
+                                        <stop offset="100%" stopColor={COLOR_TOTAL} stopOpacity={0.04}/>
                                     </linearGradient>
-                                    {/* Contributions cum */}
-                                    <linearGradient
-                                        id="fillContrib"
-                                        x1="0"
-                                        y1="0"
-                                        x2="0"
-                                        y2="1"
-                                    >
-                                        <stop
-                                            offset="0%"
-                                            stopColor={COLOR_CONTRIB}
-                                            stopOpacity={0.2}
-                                        />
-                                        <stop
-                                            offset="100%"
-                                            stopColor={COLOR_CONTRIB}
-                                            stopOpacity={0.04}
-                                        />
+                                    <linearGradient id="fillContrib" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%"   stopColor={COLOR_CONTRIB} stopOpacity={0.30}/>
+                                        <stop offset="100%" stopColor={COLOR_CONTRIB} stopOpacity={0.03}/>
                                     </linearGradient>
-                                    {/* Growth cum */}
                                     <linearGradient id="fillGrowth" x1="0" y1="0" x2="0" y2="1">
-                                        <stop
-                                            offset="0%"
-                                            stopColor={COLOR_GROWTH}
-                                            stopOpacity={0.2}
-                                        />
-                                        <stop
-                                            offset="100%"
-                                            stopColor={COLOR_GROWTH}
-                                            stopOpacity={0.04}
-                                        />
+                                        <stop offset="0%"   stopColor={COLOR_GROWTH} stopOpacity={0.30}/>
+                                        <stop offset="100%" stopColor={COLOR_GROWTH} stopOpacity={0.03}/>
                                     </linearGradient>
-                                    {/* NEW: Investment income (blue area) */}
-                                    <linearGradient
-                                        id="fillInvIncome"
-                                        x1="0"
-                                        y1="0"
-                                        x2="0"
-                                        y2="1"
-                                    >
-                                        <stop
-                                            offset="0%"
-                                            stopColor={COLOR_INV_INCOME}
-                                            stopOpacity={0.2}
-                                        />
-                                        <stop
-                                            offset="100%"
-                                            stopColor={COLOR_INV_INCOME}
-                                            stopOpacity={0.04}
-                                        />
+                                    <linearGradient id="fillInvIncome" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%"   stopColor={COLOR_INV_INCOME} stopOpacity={0.30}/>
+                                        <stop offset="100%" stopColor={COLOR_INV_INCOME} stopOpacity={0.03}/>
                                     </linearGradient>
-                                    {/* NEW: Expenses (green area) */}
-                                    <linearGradient
-                                        id="fillExpenses"
-                                        x1="0"
-                                        y1="0"
-                                        x2="0"
-                                        y2="1"
-                                    >
-                                        <stop
-                                            offset="0%"
-                                            stopColor={COLOR_EXPENSES}
-                                            stopOpacity={0.2}
-                                        />
-                                        <stop
-                                            offset="100%"
-                                            stopColor={COLOR_EXPENSES}
-                                            stopOpacity={0.04}
-                                        />
+                                    <linearGradient id="fillExpenses" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%"   stopColor={COLOR_EXPENSES} stopOpacity={0.30}/>
+                                        <stop offset="100%" stopColor={COLOR_EXPENSES} stopOpacity={0.03}/>
                                     </linearGradient>
                                 </defs>
 
