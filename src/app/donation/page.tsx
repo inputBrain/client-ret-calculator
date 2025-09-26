@@ -94,20 +94,30 @@ export default function DonatePage() {
     }, [address]);
 
     const paypalUrl = useMemo(() => {
-        const amt = typeof finalAmount === "number" ? finalAmount : undefined;
-        if (paypalDonateUrl) {
-            const sep = paypalDonateUrl.includes("?") ? "&" : "?";
-            return amt ? `${paypalDonateUrl}${sep}amount=${amt}` : paypalDonateUrl;
+        const email = (paypalEmail || "").trim();
+        const ccy = (paypalCurrency || "USD").toUpperCase();
+        const amtNum = typeof finalAmount === "number" ? finalAmount : null;
+
+        if (email) {
+            const base = "https://www.paypal.com/donate";
+            const qs = new URLSearchParams({
+                business: email,
+                currency_code: ccy,
+            });
+            if (amtNum && amtNum > 0) qs.set("amount", amtNum.toFixed(2));
+            return `${base}?${qs.toString()}`;
         }
         if (paypalMeUrl) {
-            if (amt) {
+            if (amtNum && amtNum > 0) {
                 const base = paypalMeUrl.endsWith("/") ? paypalMeUrl.slice(0, -1) : paypalMeUrl;
-                return `${base}/${amt}${paypalCurrency ? paypalCurrency : ""}`;
+                return `${base}/${amtNum}${ccy}`;
             }
             return paypalMeUrl;
         }
+
         return "";
-    }, [paypalDonateUrl, paypalMeUrl, paypalCurrency, finalAmount]);
+    }, [paypalEmail, paypalCurrency, paypalMeUrl, finalAmount]);
+
 
     const iconCls = "h-4 w-4";
 
@@ -420,8 +430,8 @@ export default function DonatePage() {
                                 <SiPaypal className={iconCls}/> Open PayPal
                             </a>
                             <span className="text-xs text-slate-600">
-                Suggested: {finalAmount || "—"} {paypalCurrency}
-              </span>
+                                 Suggested: {finalAmount ?? "—"} {paypalCurrency}
+                            </span>
                         </div>
                         <div className="mt-5">
                             <label className="mb-1 block text-sm text-slate-700">
