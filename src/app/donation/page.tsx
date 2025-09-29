@@ -486,7 +486,7 @@ export default function DonatePage() {
                                             await navigator.clipboard.writeText(paypalEmail);
                                             toast.success("copied!"); // можно без extra-опций — возьмёт из контейнера
                                         } catch {
-                                            toast.error("not copied :(");
+                                            toast.error("Only available in secure contexts");
                                         }
                                     }}
                                     className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5
