@@ -111,8 +111,7 @@ export default function JourneyProjection({
                 y: total,
                 age: r.age,
                 contribYear: r.contribYear,
-                growthYear: r.interestYear,  // ← годовой процент по факту (номинал)
-
+                growthYear: r.interestYear,
                 contribCum,
                 growthCum,
                 initial: legend.initial,
@@ -191,25 +190,19 @@ export default function JourneyProjection({
         return data.map((d, idx) => {
             const age = (data[idx]?.age ?? baseAge) as number;
 
+            // расходы с индексацией и возможным cut
             let exp = (annualSpend ?? 0) * Math.pow(1 + infl, d.x);
             if (considerCutAfter60 && age >= 60) {
-                exp = exp * (1 - (spendingDropAfter60Pct ?? 20) / 100);
+                exp *= 1 - (spendingDropAfter60Pct ?? 20) / 100;
             }
 
-            const invIncome = (d as any).growthYear
-                ? (d as any).growthYear / Math.pow(1 + infl, d.x)
-                : 0;
+            // инвестдоход за год с компаундом → в "деньги сегодня"
+            const invIncomeNominal = (d as any).growthYear ?? 0;
+            const invIncomeReal = infl ? invIncomeNominal / Math.pow(1 + infl, d.x) : invIncomeNominal;
 
-            return { ...d, exp, invIncome, age };
+            return { ...d, exp, invIncome: invIncomeReal, age };
         });
-    }, [
-        data,
-        annualSpend,
-        inflationPct,
-        considerCutAfter60,
-        spendingDropAfter60Pct,
-        startAgeForSpending,
-    ]);
+    }, [data, annualSpend, inflationPct, considerCutAfter60, spendingDropAfter60Pct, startAgeForSpending]);
 
 
     const crossIdx = useMemo(() => {
@@ -388,10 +381,10 @@ export default function JourneyProjection({
 
                                 {/* линия цели */}
                                 <ReferenceLine
-                                    y={goalForChart}
+                                    y={goal}
                                     stroke={COLOR_GROWTH}
                                     strokeDasharray="6 6"
-                                    label={<GoalPill value={fmt(goalForChart, currencySymbol)}/>}
+                                    label={<GoalPill value={fmt(goal, currencySymbol)} />}
                                 />
 
                                 {/* NEW: вертикальная линия в месте перетина доход/витрати */}
