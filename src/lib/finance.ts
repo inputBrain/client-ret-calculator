@@ -19,7 +19,7 @@ export function realReturnFromNominal(R_nominal: number, i_infl: number) {
 }
 
 
-export type ProjectionRow = {
+type ProjectionRow = {
     yearIdx: number;      // Y0..Yn
     age: number;          // возраст в конце года
     depositStart: number; // сумма на начало года (номинал)
@@ -40,7 +40,8 @@ export function projectWithInflation(params: {
     const { startAge, years, principal, contribYear, nominalReturn, inflation } = params;
 
     const PM = round2(contribYear / 12);       // месячный взнос (в конце месяца)
-    const rM = effMonthly(nominalReturn);      // эффективная месячная ставка
+    // const rM = effMonthly(nominalReturn); // эффективная месячная
+    const rM = nominalReturn / 12; // эффективная месячная ставка
 
     const rows: ProjectionRow[] = [];
     // Y0 — точка «сейчас»
@@ -121,7 +122,9 @@ export function pvAtRetirementFiniteGrowing(W_at_retirement: number, R_nominal: 
 }
 
 export function monthsToTargetStandard(P0: number, C: number, annualReturn: number, target: number) {
-    const r = Math.pow(1 + annualReturn, 1 / 12) - 1;
+    // const r = Math.pow(1 + annualReturn, 1 / 12) - 1;
+    const r = annualReturn / 12;
+
     if (!isFinite(target)) return Infinity;
     if (C <= 0 && P0 >= target) return 0;
     if (r === 0) {
@@ -154,7 +157,8 @@ export function monthsToTargetLifeExpGrowing(P0: number, C: number, R_nominal: n
 }
 
 export function projectSeries(P0: number, C: number, annualReturn: number, months: number) {
-    const r = effMonthly(annualReturn);
+    // const r = effMonthly(annualReturn);
+    const r = annualReturn / 12;
     const out: { month: number; value: number }[] = [];
     let fv = P0;
     for (let m = 0; m <= months; m++) {
