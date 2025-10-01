@@ -42,7 +42,7 @@ export function AllocationTriple({
     setFixedRate: (n: number) => void;
 }) {
     const fixedPresets = CURRENCY_META[currency].fixedPresets;
-    type FixedKind = "none" | "custom" | "preset";
+    type FixedKind = "none" | "custom";
 
     React.useEffect(() => {
         if (fixedPresets.length) {
@@ -161,14 +161,9 @@ export function AllocationTriple({
                                 const val = v as FixedKind;
                                 setFixedRateKind(val);
                                 if (val === "none") setFixedRate(0);
-                                if (val === "preset") setFixedRate(fixedPresets[0].rate);
                             }}
                             options={[
                                 {value: "none", label: "None (0%)"},
-                                ...fixedPresets.map((p) => ({
-                                    value: "preset",
-                                    label: `${p.label}`,
-                                })),
                                 {value: "custom", label: "Custom"},
                             ]}
                             placeholder="Choose..."

@@ -38,10 +38,10 @@ const DEFAULTS = {
     fp: 20,     // fixedPct
     csh: 10,
 
-    srk: "none" as "none" | "custom",   // stocksRateKind
-    sr: 0,                              // stocksRate
+    srk: "custom" as "custom" | "none",   // stocksRateKind
+    sr: 7,                              // stocksRate
     frk: "custom" as "none" | "custom" | "preset", // fixedRateKind
-    fr: 0,
+    fr: 4,
 
     //Inflation
     infl: 0
