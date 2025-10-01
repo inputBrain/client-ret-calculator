@@ -199,7 +199,7 @@ export default function JourneyProjection({
             // Investment income (без компаунда) → real:
             // база = initial + накопленные взносы (обе real)
             const baseReal = (d.initial ?? 0) + (d.contribCum ?? 0);
-            const invIncome = baseReal * wrEff; // linear, real
+            const invIncome = (d.y ?? 0) * wrEff; // linear, real
 
             return { ...d, exp, invIncome, age };
         });
