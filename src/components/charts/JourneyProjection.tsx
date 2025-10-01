@@ -40,18 +40,11 @@ export type JourneyProjectionProps = {
         growthPct: number;
     };
     mode?: "withdrawal" | "life";
-
-    /** NEW: базові річні витрати на старті (номінал) */
     annualSpend?: number;
-    /** NEW: інфляція для індексації витрат (% p/a) */
     inflationPct?: number;
-    /** NEW: ставка «дохідності портфеля» для інвест. доходу (% p/a) */
     incomeYieldPct?: number;
-    /** NEW: враховувати пониження витрат після 60 */
     considerCutAfter60?: boolean;
-    /** NEW: на скільки % зменшувати витрати після 60 (за замовчуванням 20%) */
     spendingDropAfter60Pct?: number;
-    /** NEW: стартовий вік для обчислення віку в рядах (якщо в rows.age уже є — можна не передавати) */
     startAgeForSpending?: number;
 };
 
@@ -63,17 +56,14 @@ const fmt = (v: number, sym: string) =>
         maximumFractionDigits: 2,
     })}`;
 
-// === Единые цвета серий ===
-const COLOR_TOTAL = "#4f46e5"; // indigo: Total (итог)
-const COLOR_INITIAL = "#3b82f6"; // blue: Initial (штрих)
-const COLOR_CONTRIB = "#8b5cf6"; // purple: Contributions (cum.)
-const COLOR_GROWTH = "#10b981"; // emerald: Growth (cum.)
+const COLOR_TOTAL = "#4f46e5";
+const COLOR_INITIAL = "#3b82f6";
+const COLOR_CONTRIB = "#8b5cf6";
+const COLOR_GROWTH = "#10b981";
 
-// NEW: цвета для главного смысла по ТЗ украинского клиента
-const COLOR_INV_INCOME = "#2563eb"; // синій: Investment income
-const COLOR_EXPENSES = "#16a34a"; // зелений: Expenses (infl.-adj.)
+const COLOR_INV_INCOME = "#2563eb";
+const COLOR_EXPENSES = "#16a34a";
 
-// маленькая цветная точка
 const DotSwatch = ({color}: { color: string }) => (
     <span
         className="inline-block h-2.5 w-2.5 rounded-full"
@@ -88,8 +78,6 @@ export default function JourneyProjection({
     goal,
     legend,
     mode,
-
-    // NEW props
     annualSpend,
     inflationPct,
     incomeYieldPct,
@@ -99,27 +87,38 @@ export default function JourneyProjection({
 }: JourneyProjectionProps) {
     const [tab, setTab] = useState<"chart" | "table">("chart");
 
-    // Подготавливаем исходные данные как раньше
     const fullData = useMemo(() => {
-        let contribCum = 0;
+        const infl = Math.max(0, (inflationPct ?? 0)) / 100;
+
+        let contribRealCum = 0;
+        let interestRealCum = 0;
+
         return rows.map((r) => {
-            contribCum += r.contribYear;
-            const total = Number(r.totalEnd.toFixed(2));
-            const growthCum = Math.max(0, total - legend.initial - contribCum);
+            const x = r.yearIdx;
+            const totalReal = Number(r.totalEnd.toFixed(2));
+            const contribYearReal = infl ? r.contribYear / Math.pow(1 + infl, x) : r.contribYear;
+            contribRealCum += contribYearReal;
+
+            const interestYearReal = infl ? r.interestYear / Math.pow(1 + infl, x) : r.interestYear;
+            interestRealCum += interestYearReal;
+
+            const growthRealCum = Math.max(0, totalReal - legend.initial - contribRealCum);
+
             return {
-                x: r.yearIdx,
-                y: total,
+                x,
                 age: r.age,
-                contribYear: r.contribYear,
-                growthYear: r.interestYear,
-                contribCum,
-                growthCum,
+                y: totalReal,
                 initial: legend.initial,
+                contribYearReal,
+                contribCum: contribRealCum,
+                interestYearReal,
+                interestRealCum,
+                growthCum: growthRealCum,
             };
         });
-    }, [rows, legend.initial]);
+    }, [rows, legend.initial, inflationPct]);
 
-    // Даунсэмплинг на длинных периодах
+
     function downsampleToMax<T>(arr: T[], max: number): T[] {
         if (arr.length <= max) return arr;
         const step = (arr.length - 1) / (max - 1);
@@ -128,7 +127,7 @@ export default function JourneyProjection({
 
     const data = useMemo(() => downsampleToMax(fullData, 120), [fullData]);
 
-    // Тики по X каждые 5 лет + крайние
+
     const ticksEvery5 = useMemo(() => {
         const xs = data.map((d) => d.x);
         const first = xs[0],
@@ -140,7 +139,6 @@ export default function JourneyProjection({
         return Array.from(new Set(t));
     }, [data]);
 
-    // Аккуратная плашка Goal
     function GoalPill({value}: { value: string }) {
         return (
             <Label
@@ -148,9 +146,9 @@ export default function JourneyProjection({
                 content={(props) => {
                     const {viewBox} = props as any;
                     const y = viewBox.y;
-                    const x = viewBox.x + 8; // небольшой отступ слева
+                    const x = viewBox.x + 8;
                     const text = `Goal: ${value}`;
-                    const w = 10 + text.length * 7; // грубая ширина
+                    const w = 10 + text.length * 7;
                     const h = 22;
                     return (
                         <g transform={`translate(${x},${y - h - 6})`}>
@@ -182,27 +180,34 @@ export default function JourneyProjection({
 
 
     const enriched = useMemo(() => {
-        const infl = Math.max(0, inflationPct ?? 0) / 100;
         const baseAge = typeof startAgeForSpending === "number"
             ? startAgeForSpending
             : (data[0]?.age ?? 0);
 
+        // wr, с которым определена цель FI: goal = annualSpend / wr
+        const wrEff = goal > 0 && (annualSpend ?? 0) > 0 ? (annualSpend as number) / goal : 0;
+
         return data.map((d, idx) => {
             const age = (data[idx]?.age ?? baseAge) as number;
 
-            // расходы с индексацией и возможным cut
-            let exp = (annualSpend ?? 0) * Math.pow(1 + infl, d.x);
+            // Expenses (infl.-adj.) → real (в «деньгах сегодня»)
+            let exp = (annualSpend ?? 0);
             if (considerCutAfter60 && age >= 60) {
                 exp *= 1 - (spendingDropAfter60Pct ?? 20) / 100;
             }
 
-            // инвестдоход за год с компаундом → в "деньги сегодня"
-            const invIncomeNominal = (d as any).growthYear ?? 0;
-            const invIncomeReal = infl ? invIncomeNominal / Math.pow(1 + infl, d.x) : invIncomeNominal;
+            // Investment income (без компаунда) → real:
+            // база = initial + накопленные взносы (обе real)
+            const baseReal = (d.initial ?? 0) + (d.contribCum ?? 0);
+            const invIncome = baseReal * wrEff; // linear, real
 
-            return { ...d, exp, invIncome: invIncomeReal, age };
+            return { ...d, exp, invIncome, age };
         });
-    }, [data, annualSpend, inflationPct, considerCutAfter60, spendingDropAfter60Pct, startAgeForSpending]);
+    }, [
+        data, annualSpend, goal,
+        considerCutAfter60, spendingDropAfter60Pct,
+        startAgeForSpending
+    ]);
 
 
     const crossIdx = useMemo(() => {
@@ -498,18 +503,31 @@ export default function JourneyProjection({
                             <tr className="text-left text-slate-600">
                                 <th className="py-3 px-4 font-medium">End of Year</th>
                                 <th className="py-3 px-4 font-medium">Initial deposit</th>
-                                <th className="py-3 px-4 font-medium">Total value</th>
+                                <th className="py-3 px-4 font-medium">Contributions (total)</th>
+                                <th className="py-3 px-4 font-medium">Interest (this year)</th>
+                                <th className="py-3 px-4 font-medium">Interest (total)</th>
+                                <th className="py-3 px-4 font-medium">Growth (total)</th>
+                                <th className="py-3 px-4 font-medium">Total saved</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {rows.map((r, i) => (
+                            {fullData.map((d, i) => (
                                 <tr key={i} className={i % 2 ? "bg-slate-50/60" : ""}>
                                     <td className="py-3 px-4 text-slate-700">
-                                        {r.yearIdx} (age {r.age})
+                                        Year {d.x} <br/> (age {d.age})
                                     </td>
-                                    <td className="py-3 px-4">{fmt(r.depositStart, currencySymbol)}</td>
+
+                                    {/* 2) Initial deposit фиксированный */}
+                                    <td className="py-3 px-4">{fmt(d.initial, currencySymbol)}</td>
+
+                                    <td className="py-3 px-4">{fmt(d.contribCum, currencySymbol)}</td>
+                                    <td className="py-3 px-4">{fmt(d.interestYearReal, currencySymbol)}</td>
+                                    <td className="py-3 px-4">{fmt(d.interestRealCum, currencySymbol)}</td>
+                                    <td className="py-3 px-4">{fmt(d.growthCum, currencySymbol)}</td>
+
+                                    {/* 1) Total saved (real) */}
                                     <td className="py-3 px-4 font-medium text-slate-900">
-                                        {fmt(r.totalEnd, currencySymbol)}
+                                        {fmt(d.y, currencySymbol)}
                                     </td>
                                 </tr>
                             ))}

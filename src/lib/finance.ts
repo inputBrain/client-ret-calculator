@@ -20,31 +20,31 @@ export function realReturnFromNominal(R_nominal: number, i_infl: number) {
 
 
 type ProjectionRow = {
-    yearIdx: number;      // Y0..Yn
-    age: number;          // возраст в конце года
-    depositStart: number; // сумма на начало года (номинал)
-    contribYear: number;  // взносы за год (номинал)
-    interestYear: number; // начисленные проценты за год (номинал)
-    totalEnd: number;     // итог на конец года (номинал)
-    totalEndReal: number; // итог в реальных ценах (дисконт по инфляции)
+    yearIdx: number;
+    age: number;
+    depositStart: number;
+    contribYear: number;
+    interestYear: number;
+    totalEnd: number;
+    totalEndReal: number;
 };
 
 export function projectWithInflation(params: {
     startAge: number;
     years: number;
-    principal: number;        // стартовый капитал (номинал)
-    contribYear: number;      // ежегодные взносы (номинал, без индексации)
-    nominalReturn: number;    // номинальная годовая доходность (0..1)
-    inflation: number;        // годовая инфляция (0..1)
+    principal: number;
+    contribYear: number;
+    nominalReturn: number;
+    inflation: number;
 }): ProjectionRow[] {
     const { startAge, years, principal, contribYear, nominalReturn, inflation } = params;
 
-    const PM = round2(contribYear / 12);       // месячный взнос (в конце месяца)
-    // const rM = effMonthly(nominalReturn); // эффективная месячная
-    const rM = nominalReturn / 12; // эффективная месячная ставка
+    const PM = round2(contribYear / 12);
+    // const rM = effMonthly(nominalReturn);
+    const rM = nominalReturn / 12;
 
     const rows: ProjectionRow[] = [];
-    // Y0 — точка «сейчас»
+
     rows.push({
         yearIdx: 0,
         age: startAge,
@@ -62,7 +62,7 @@ export function projectWithInflation(params: {
 
         let interestYear = 0;
 
-        // 12 месяцев: проценты на текущий баланс, затем взнос в конце месяца
+
         for (let m = 0; m < 12; m++) {
             const interest = round2(bal * rM);
             interestYear = round2(interestYear + interest);
@@ -71,7 +71,7 @@ export function projectWithInflation(params: {
         }
 
         const endNominal = round2(bal);
-        // Дисконт по инфляции можно оставить годовым — как было
+
         const discount = inflation === 0 ? 1 : Math.pow(1 + inflation, y);
         const endReal = endNominal / discount;
 
@@ -79,8 +79,8 @@ export function projectWithInflation(params: {
             yearIdx: y,
             age,
             depositStart: round2(depositStart),
-            contribYear: round2(PM * 12), // годовой взнос (номинал)
-            interestYear: round2(interestYear), // проценты ЗА ГОД (не накопительно)
+            contribYear: round2(PM * 12),
+            interestYear: round2(interestYear),
             totalEnd: endNominal,
             totalEndReal: endReal,
         });
@@ -92,16 +92,13 @@ export function monthsToTargetLifeExp_LY(
     P0: number, C_year: number, R_nominal: number,
     W_today: number, currentAge: number, lifeExpectancyAge: number
 ) {
-    // переводим к "в месяц" для формулы monthsToTargetStandard
-    const C = C_year; // у нас monthsToTargetStandard уже ждёт С в год? — см. ниже.
-    // В твоей monthsToTargetStandard: C трактуется как МЕСЯЧНЫЙ взнос.
-    // У тебя выше ты передавал savingMonthly, так что сюда передай savingMonthly, а не C_year.
 
-    let n = monthsToTargetStandard(P0, C, R_nominal, W_today / 0.04); // стартовая оценка
+    const C = C_year;
+    let n = monthsToTargetStandard(P0, C, R_nominal, W_today / 0.04);
     for (let i = 0; i < 120; i++) {
         const yearsToFi = n / 12;
         const yearsInRet = Math.max(0, lifeExpectancyAge - (currentAge + yearsToFi));
-        const target = W_today * yearsInRet; // простая модель: 0% real return на пенсии
+        const target = W_today * yearsInRet;
         const n2 = monthsToTargetStandard(P0, C, R_nominal, target);
         if (!isFinite(n2)) return Infinity;
         if (Math.abs(n2 - n) < 0.5) return n2;
