@@ -512,7 +512,7 @@ export default function JourneyProjection({
                             </thead>
                             <tbody>
                             {fullData.map((d, i) => (
-                                <tr key={i} className={i % 2 ? "bg-slate-50/60" : ""}>
+                                <tr key={i} className={i % 2 ? "bg-slate-100/80" : ""}>
                                     <td className="py-3 px-4 text-slate-700">
                                         Year {d.x} <br/> (age {d.age})
                                     </td>

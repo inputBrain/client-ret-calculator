@@ -11,7 +11,7 @@ type Props = {
 };
 
 type InflKind = "none" | "ecb_2" | "euro_aug2024_22" | "custom";
-type GroKind  = "none" | "ly_savings_201" | "custom";
+type GroKind  = "none" | "custom";
 
 const INFL_VALS: Record<InflKind, number> = {
     none: 0,
@@ -22,7 +22,6 @@ const INFL_VALS: Record<InflKind, number> = {
 
 const GROWTH_VALS: Record<GroKind, number> = {
     none: 0,
-    ly_savings_201: 2.01,
     custom: 3.5,          // при выборе Custom из селекта ставим 3.5%
 };
 
@@ -47,7 +46,6 @@ export default function GrowthBlock({
 
     React.useEffect(() => {
         if (approx(growthPct, 0)) setGroKind("none");
-        else if (approx(growthPct, 2.01)) setGroKind("ly_savings_201");
         else setGroKind("custom");
     }, [growthPct]);
 
@@ -103,7 +101,6 @@ export default function GrowthBlock({
                             }}
                             options={[
                                 { value: "none", label: "None (0%)" },
-                                { value: "ly_savings_201", label: "Lightyear Savings" },
                                 { value: "custom", label: "Custom" }, // поставит 3.5%
                             ]}
                             placeholder="Choose..."

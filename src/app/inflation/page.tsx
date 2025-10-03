@@ -16,7 +16,7 @@ const DEFAULTS = {
     ts: 10000, // totalSavings
     yrs: 5,   // years horizon
     infl: 2,   // inflation %
-    gr: 2.01,     // growth %
+    gr: 3.5,     // growth %
 };
 
 export default function Inflation() {
