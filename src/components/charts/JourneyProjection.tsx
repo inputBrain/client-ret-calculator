@@ -47,12 +47,12 @@ const fmt = (v: number, sym: string) =>
         maximumFractionDigits: 2,
     })}`;
 
-const COLOR_TOTAL = "#4f46e5";
-const COLOR_INITIAL = "#3b82f6";
-const COLOR_CONTRIB = "#8b5cf6";
-const COLOR_GROWTH = "#10b981";
-const COLOR_INV_INCOME = "#2563eb";
-const COLOR_EXPENSES = "#16a34a";
+const COLOR_TOTAL = "#3b82f6";
+const COLOR_INITIAL = "#94a3b8";
+const COLOR_CONTRIB = "#a855f7";
+const COLOR_GROWTH = "#22c55e";
+const COLOR_INV_INCOME = "#0ea5e9";
+const COLOR_EXPENSES = "#f97316";
 
 
 const DotSwatch = React.memo(({color}: {color: string}) => (
