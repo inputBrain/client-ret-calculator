@@ -1,6 +1,4 @@
-﻿// src/components/ui/AllocationTriple.tsx
-"use client";
-
+﻿"use client";
 import * as React from "react";
 import {type Currency, CURRENCY_META} from "@/lib/currency";
 import {PercentInput, Row, Info, SelectBox} from "@/lib/input-helper";
@@ -15,7 +13,6 @@ export function AllocationTriple({
     fixedPct,
     setStocksPct,
     setFixedPct,
-
     stocksRateKind,
     setStocksRateKind,
     stocksRate,
@@ -30,78 +27,110 @@ export function AllocationTriple({
     fixedPct: number;
     setStocksPct: (n: number) => void;
     setFixedPct: (n: number) => void;
-
     stocksRateKind: "none" | "custom";
     setStocksRateKind: (v: "none" | "custom") => void;
     stocksRate: number;
     setStocksRate: (n: number) => void;
-
     fixedRateKind: "none" | "custom" | "preset";
     setFixedRateKind: (v: "none" | "custom" | "preset") => void;
     fixedRate: number;
     setFixedRate: (n: number) => void;
 }) {
-    const fixedPresets = CURRENCY_META[currency].fixedPresets;
-    type FixedKind = "none" | "custom";
+    const fixedPresets = React.useMemo(
+        () => CURRENCY_META[currency].fixedPresets || [],
+        [currency]
+    );
+
+    const setFixedRateKindMemo = React.useCallback(
+        (kind: "none" | "custom" | "preset") => setFixedRateKind(kind),
+        [setFixedRateKind]
+    );
+
+    const setFixedRateMemo = React.useCallback(
+        (rate: number) => setFixedRate(rate),
+        [setFixedRate]
+    );
 
     React.useEffect(() => {
-        if (fixedPresets.length) {
-            setFixedRateKind("preset");
-            setFixedRate(fixedPresets[0].rate);
+        if (fixedPresets.length > 0) {
+            setFixedRateKindMemo("preset");
+            setFixedRateMemo(fixedPresets[0].rate);
         } else {
-            setFixedRateKind("custom");
-            setFixedRate(0);
+            setFixedRateKindMemo("custom");
+            setFixedRateMemo(0);
         }
-    }, [currency]);
+    }, [fixedPresets, setFixedRateKindMemo, setFixedRateMemo]);
 
-    const cashPct = React.useMemo(() => clamp(100 - stocksPct - fixedPct, 0, 100), [stocksPct, fixedPct]);
+    const cashPct = React.useMemo(
+        () => clamp(100 - stocksPct - fixedPct, 0, 100),
+        [stocksPct, fixedPct]
+    );
 
-    const onStocks = (next: number) => {
+    const onStocks = React.useCallback((next: number) => {
         next = clamp(next, 0, 100);
         const remain = 100 - next;
         const fixed = clamp(fixedPct, 0, remain);
         setFixedPct(fixed);
         setStocksPct(next);
-    };
-    const onFixed = (next: number) => {
+    }, [fixedPct, setFixedPct, setStocksPct]);
+
+    const onFixed = React.useCallback((next: number) => {
         next = clamp(next, 0, 100);
         const need = Math.max(0, stocksPct + fixedPct + cashPct - 100 + (next - fixedPct));
+
         if (need <= 0) {
             setFixedPct(next);
             return;
         }
+
         let takeFromCash = Math.min(need, cashPct);
         let left = need - takeFromCash;
         let takeFromStocks = Math.min(left, stocksPct);
-        left -= takeFromStocks;
+
         setFixedPct(next);
         setStocksPct(stocksPct - takeFromStocks);
-    };
-    const onCash = (nextCash: number) => {
+    }, [stocksPct, fixedPct, cashPct, setFixedPct, setStocksPct]);
+
+    const onCash = React.useCallback((nextCash: number) => {
         nextCash = clamp(nextCash, 0, 100);
         const deltaCash = nextCash - cashPct;
+
         if (deltaCash === 0) return;
+
         if (nextCash > cashPct) {
             let give = nextCash - cashPct;
             let takeFromStocks = Math.min(give, stocksPct);
             give -= takeFromStocks;
             let takeFromFixed = Math.min(give, fixedPct);
+
             setStocksPct(stocksPct - takeFromStocks);
             setFixedPct(fixedPct - takeFromFixed);
         } else {
             let free = cashPct - nextCash;
             setStocksPct(clamp(stocksPct + free, 0, 100));
         }
-    };
+    }, [cashPct, stocksPct, fixedPct, setStocksPct, setFixedPct]);
 
-    const sr = stocksRateKind === "none" ? 0 : stocksRate;     // % для акций
-    const fr = fixedRateKind === "none" ? 0 : fixedRate;       // % для депозита/облигаций
+    const sr = React.useMemo(
+        () => (stocksRateKind === "none" ? 0 : stocksRate),
+        [stocksRateKind, stocksRate]
+    );
+
+    const fr = React.useMemo(
+        () => (fixedRateKind === "none" ? 0 : fixedRate),
+        [fixedRateKind, fixedRate]
+    );
+
     const effectiveRate = React.useMemo(() => {
-        // (52 * 11 + 19 * 55) / 100 = 16.17
         return (stocksPct * sr + fixedPct * fr) / 100;
     }, [stocksPct, fixedPct, sr, fr]);
-    const formulaText = `( ${Math.round(stocksPct)}% × ${sr.toFixed(2)} ) + ( ${Math.round(fixedPct)}% × ${fr.toFixed(2)} ) = ${effectiveRate.toFixed(2)}`;
 
+    const formulaText = React.useMemo(
+        () => `( ${Math.round(stocksPct)}% × ${sr.toFixed(2)} ) + ( ${Math.round(fixedPct)}% × ${fr.toFixed(2)} ) = ${effectiveRate.toFixed(2)}`,
+        [stocksPct, sr, fixedPct, fr, effectiveRate]
+    );
+
+    type FixedKind = "none" | "custom";
 
     return (
         <div className="flex flex-col gap-8">
@@ -112,10 +141,9 @@ export function AllocationTriple({
 
                 <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
-                        Growth rate <Info tooltip="Your expected annual growth rate (market gains), expressed as AER/APY."/>
+                        Growth rate
+                        <Info tooltip="Your expected annual growth rate (market gains), expressed as AER/APY."/>
                     </div>
-
-
                     <SelectBox
                         value={stocksRateKind}
                         onValueChange={(v) => {
@@ -129,7 +157,6 @@ export function AllocationTriple({
                         ]}
                         placeholder="Choose..."
                     />
-
                     <PercentInput
                         value={stocksRateKind === "none" ? 0 : stocksRate}
                         onChange={(n) => {
@@ -142,14 +169,16 @@ export function AllocationTriple({
 
             {/* Savings / Bonds */}
             <div className="flex flex-col gap-3">
-                <h6 className="text-sm font-semibold text-gray-800 text-shadow-2xs">Savings Account / Bonds / Dividends</h6>
+                <h6 className="text-sm font-semibold text-gray-800 text-shadow-2xs">
+                    Savings Account / Bonds / Dividends
+                </h6>
                 <Row label="Allocation:" value={fixedPct} onChange={onFixed}/>
 
                 <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <div className="flex items-center text-sm text-nowrap text-slate-800 font-normal">
-                        Growth rate <Info tooltip="Your expected annual interest rate, expressed as AER/APY."/>
+                        Growth rate
+                        <Info tooltip="Your expected annual interest rate, expressed as AER/APY."/>
                     </div>
-
                     {fixedPresets.length === 0 ? (
                         <div className="h-11 min-w-[220px] text-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-slate-400 flex items-center">
                             Custom
@@ -169,7 +198,6 @@ export function AllocationTriple({
                             placeholder="Choose..."
                         />
                     )}
-
                     <PercentInput
                         value={fixedRateKind === "none" ? 0 : fixedRate}
                         onChange={(n) => {
@@ -193,9 +221,11 @@ export function AllocationTriple({
                     <Info tooltip={formulaText}/>
                 </div>
                 <p className="text-xs text-slate-600">
-                    Returns may vary. You are responsible for the rate you enter - we make no assessment on how likely you are to secure your chosen rate. Calculations do not take into account the
-                    effect of costs, inflation or tax. For simplicity, this calculator assumes your chosen rates remain stable throughout the selected duration, and that all present and future savings
-                    follow your chosen allocation.
+                    Returns may vary. You are responsible for the rate you enter - we make no assessment on
+                    how likely you are to secure your chosen rate. Calculations do not take into account the
+                    effect of costs, inflation or tax. For simplicity, this calculator assumes your chosen
+                    rates remain stable throughout the selected duration, and that all present and future
+                    savings follow your chosen allocation.
                 </p>
             </div>
         </div>

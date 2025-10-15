@@ -1,17 +1,8 @@
 ﻿"use client";
-
-import React, {useMemo, useState} from "react";
+import React, {useMemo, useState, useCallback} from "react";
 import {
-    AreaChart,
-    Area,
-    Line,
-    XAxis,
-    YAxis,
-    Tooltip,
-    CartesianGrid,
-    ResponsiveContainer,
-    ReferenceLine,
-    Label,
+    AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid,
+    ResponsiveContainer, ReferenceLine, Label,
 } from "recharts";
 import ShareMenu from "@/components/ShareMenu";
 
@@ -60,18 +51,24 @@ const COLOR_TOTAL = "#4f46e5";
 const COLOR_INITIAL = "#3b82f6";
 const COLOR_CONTRIB = "#8b5cf6";
 const COLOR_GROWTH = "#10b981";
-
 const COLOR_INV_INCOME = "#2563eb";
 const COLOR_EXPENSES = "#16a34a";
 
-const DotSwatch = ({color}: { color: string }) => (
-    <span
-        className="inline-block h-2.5 w-2.5 rounded-full"
-        style={{background: color}}
-    />
-);
 
-export default function JourneyProjection({
+const DotSwatch = React.memo(({color}: {color: string}) => (
+    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{background: color}} />
+));
+DotSwatch.displayName = "DotSwatch";
+
+
+function downsampleToMax<T>(arr: T[], max: number): T[] {
+    if (arr.length <= max) return arr;
+    const step = (arr.length - 1) / (max - 1);
+    return Array.from({length: max}, (_, i) => arr[Math.round(i * step)]);
+}
+
+
+const JourneyProjection = React.memo(function JourneyProjection({
     currencySymbol,
     kpi,
     rows,
@@ -89,17 +86,21 @@ export default function JourneyProjection({
 
     const fullData = useMemo(() => {
         const infl = Math.max(0, (inflationPct ?? 0)) / 100;
-
         let contribRealCum = 0;
         let interestRealCum = 0;
 
         return rows.map((r) => {
             const x = r.yearIdx;
             const totalReal = Number(r.totalEnd.toFixed(2));
-            const contribYearReal = infl ? r.contribYear / Math.pow(1 + infl, x) : r.contribYear;
+
+            const contribYearReal = infl
+                ? r.contribYear / Math.pow(1 + infl, x)
+                : r.contribYear;
             contribRealCum += contribYearReal;
 
-            const interestYearReal = infl ? r.interestYear / Math.pow(1 + infl, x) : r.interestYear;
+            const interestYearReal = infl
+                ? r.interestYear / Math.pow(1 + infl, x)
+                : r.interestYear;
             interestRealCum += interestYearReal;
 
             const growthRealCum = Math.max(0, totalReal - legend.initial - contribRealCum);
@@ -116,22 +117,13 @@ export default function JourneyProjection({
                 growthCum: growthRealCum,
             };
         });
-    }, [rows, legend.initial, inflationPct]);
-
-
-    function downsampleToMax<T>(arr: T[], max: number): T[] {
-        if (arr.length <= max) return arr;
-        const step = (arr.length - 1) / (max - 1);
-        return Array.from({length: max}, (_, i) => arr[Math.round(i * step)]);
-    }
+    }, [rows, legend, inflationPct]);
 
     const data = useMemo(() => downsampleToMax(fullData, 120), [fullData]);
 
-
     const ticksEvery5 = useMemo(() => {
         const xs = data.map((d) => d.x);
-        const first = xs[0],
-            last = xs[xs.length - 1];
+        const first = xs[0], last = xs[xs.length - 1];
         const t: number[] = [];
         for (const x of xs) {
             if (x === first || x === last || x % 5 === 0) t.push(x);
@@ -139,7 +131,7 @@ export default function JourneyProjection({
         return Array.from(new Set(t));
     }, [data]);
 
-    function GoalPill({value}: { value: string }) {
+    const GoalPill = useCallback(({value}: {value: string}) => {
         return (
             <Label
                 position="insideLeft"
@@ -152,7 +144,7 @@ export default function JourneyProjection({
                     const h = 22;
                     return (
                         <g transform={`translate(${x},${y - h - 6})`}>
-                            <rect width={w} height={h} rx={11} ry={11} fill="#065f46"/>
+                            <rect width={w} height={h} rx={11} ry={11} fill="#065f46" />
                             <text x={10} y={14} fontSize={12} fill="#ecfdf5">
                                 {text}
                             </text>
@@ -161,7 +153,7 @@ export default function JourneyProjection({
                 }}
             />
         );
-    }
+    }, []);
 
     const retireAgeMeta = useMemo(() => {
         const over = kpi.retireAge > 120;
@@ -178,37 +170,35 @@ export default function JourneyProjection({
         return {number: kpi.retireAge, subtitle: baseSub};
     }, [kpi.retireAge, kpi.retireSpanYears, mode]);
 
-
     const enriched = useMemo(() => {
-        const baseAge = typeof startAgeForSpending === "number"
-            ? startAgeForSpending
-            : (data[0]?.age ?? 0);
+        const baseAge =
+            typeof startAgeForSpending === "number"
+                ? startAgeForSpending
+                : (data[0]?.age ?? 0);
 
-        // wr, с которым определена цель FI: goal = annualSpend / wr
         const wrEff = goal > 0 && (annualSpend ?? 0) > 0 ? (annualSpend as number) / goal : 0;
 
         return data.map((d, idx) => {
             const age = (data[idx]?.age ?? baseAge) as number;
 
-            // Expenses (infl.-adj.) → real (в «деньгах сегодня»)
-            let exp = (annualSpend ?? 0);
+            let exp = annualSpend ?? 0;
             if (considerCutAfter60 && age >= 60) {
                 exp *= 1 - (spendingDropAfter60Pct ?? 20) / 100;
             }
 
-            // Investment income (без компаунда) → real:
-            // база = initial + накопленные взносы (обе real)
             const baseReal = (d.initial ?? 0) + (d.contribCum ?? 0);
-            const invIncome = (d.y ?? 0) * wrEff; // linear, real
+            const invIncome = (d.y ?? 0) * wrEff;
 
-            return { ...d, exp, invIncome, age };
+            return {...d, exp, invIncome, age};
         });
     }, [
-        data, annualSpend, goal,
-        considerCutAfter60, spendingDropAfter60Pct,
-        startAgeForSpending
+        data,
+        annualSpend,
+        goal,
+        considerCutAfter60,
+        spendingDropAfter60Pct,
+        startAgeForSpending,
     ]);
-
 
     const crossIdx = useMemo(() => {
         for (let i = 0; i < enriched.length; i++) {
@@ -218,44 +208,110 @@ export default function JourneyProjection({
         return -1;
     }, [enriched]);
 
-    const crossPoint = crossIdx >= 0 ? enriched[crossIdx] : null;
-    const crossLabel = crossPoint ? `Crossover @ Y${crossPoint.x}` : undefined;
+    const crossPoint = useMemo(
+        () => (crossIdx >= 0 ? enriched[crossIdx] : null),
+        [crossIdx, enriched]
+    );
+
     const idx60 = useMemo(
-        () => enriched.findIndex(p => (p.age ?? 0) >= 60),
+        () => enriched.findIndex((p) => (p.age ?? 0) >= 60),
         [enriched]
     );
-    const xAt60 = idx60 >= 0 ? enriched[idx60].x : null;
 
+    const xAt60 = useMemo(
+        () => (idx60 >= 0 ? enriched[idx60].x : null),
+        [idx60, enriched]
+    );
 
-    const goalForChart = useMemo(() => goal, [goal]);
+    const TooltipContent = useCallback(
+        ({active, payload}: any) => {
+            if (!active || !payload?.length) return null;
+            const p: any = payload[0].payload;
+            return (
+                <div className="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
+                    <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
+                        <div className="text-slate-600 flex items-center gap-2">
+                            <DotSwatch color={COLOR_INV_INCOME} />
+                            Investment income
+                        </div>
+                        <div className="font-medium">{fmt(p.invIncome ?? 0, currencySymbol)}</div>
+
+                        <div className="text-slate-600 flex items-center gap-2">
+                            <DotSwatch color={COLOR_EXPENSES} />
+                            Expenses (infl.-adj.)
+                        </div>
+                        <div className="font-medium">{fmt(p.exp ?? 0, currencySymbol)}</div>
+
+                        <div className="text-slate-600 flex items-center gap-2">
+                            <DotSwatch color={COLOR_CONTRIB} />
+                            Contributions (total)
+                        </div>
+                        <div className="font-medium">{fmt(p.contribCum, currencySymbol)}</div>
+
+                        <div className="text-slate-600 flex items-center gap-2">
+                            <DotSwatch color={COLOR_GROWTH} />
+                            Growth (total)
+                        </div>
+                        <div className="font-medium">{fmt(p.growthCum, currencySymbol)}</div>
+
+                        <div className="text-slate-600 flex items-center gap-2">
+                            <DotSwatch color={COLOR_INITIAL} />
+                            Initial lump sum
+                        </div>
+                        <div className="font-medium">{fmt(p.initial, currencySymbol)}</div>
+                    </div>
+
+                    <div className="my-3 h-px bg-gray-100" />
+
+                    <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
+                        <div className="text-slate-600">Age</div>
+                        <div className="font-semibold">{p.age}</div>
+
+                        <div className="text-slate-600 flex items-center gap-2">
+                            <DotSwatch color={COLOR_TOTAL} />
+                            Total saved
+                        </div>
+                        <div className="font-semibold">{fmt(p.y, currencySymbol)}</div>
+                    </div>
+                </div>
+            );
+        },
+        [currencySymbol]
+    );
 
     return (
         <>
             {/* KPI trio */}
             <div className="grid grid-cols-3 gap-6 text-center mb-4">
                 <div>
-                    <div className="text-2xl font-semibold text-slate-900">{fmt(kpi.target, currencySymbol)}</div>
+                    <div className="text-2xl font-semibold text-slate-900">
+                        {fmt(kpi.target, currencySymbol)}
+                    </div>
                     <div className="text-sm text-slate-600">Your FIRE target</div>
                 </div>
                 <div>
-                    <div className="text-5xl leading-none font-semibold text-slate-900">{retireAgeMeta.number}</div>
-                    <div className="text-sm text-slate-600">{retireAgeMeta.subtitle || "Retirement age"}</div>
+                    <div className="text-5xl leading-none font-semibold text-slate-900">
+                        {retireAgeMeta.number}
+                    </div>
+                    <div className="text-sm text-slate-600">
+                        {retireAgeMeta.subtitle || "Retirement age"}
+                    </div>
                 </div>
                 <div>
-                    <div className="text-2xl font-semibold text-slate-900">{fmt(kpi.annualSavings, currencySymbol)}</div>
+                    <div className="text-2xl font-semibold text-slate-900">
+                        {fmt(kpi.annualSavings, currencySymbol)}
+                    </div>
                     <div className="text-sm text-slate-600">Annual savings</div>
                 </div>
             </div>
 
             {/* Inner card with tabs */}
-            <div className={`${card}  p-4 sm:p-6`}>
+            <div className={`${card} p-4 sm:p-6`}>
                 <div className="gap-2 flex flex-col">
                     <div className="text-sm font-semibold uppercase text-rose-900 text-center">
                         The journey ahead
                     </div>
-                    <h5 className="text-2xl font-semibold text-center">
-                        Your FIRE projection
-                    </h5>
+                    <h5 className="text-2xl font-semibold text-center">Your FIRE projection</h5>
                     <div className="flex items-center justify-center gap-3 text-xs mb-4">
                         <button
                             onClick={() => setTab("chart")}
@@ -285,32 +341,33 @@ export default function JourneyProjection({
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                                 data={enriched}
-                                margin={{ top: 10, right: 12, left: 0, bottom: 0 }} // небольшой right
+                                margin={{top: 10, right: 12, left: 0, bottom: 0}}
                             >
                                 <defs>
                                     <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"   stopColor={COLOR_TOTAL} stopOpacity={0.30}/>
-                                        <stop offset="100%" stopColor={COLOR_TOTAL} stopOpacity={0.04}/>
+                                        <stop offset="0%" stopColor={COLOR_TOTAL} stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor={COLOR_TOTAL} stopOpacity={0.04} />
                                     </linearGradient>
                                     <linearGradient id="fillContrib" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"   stopColor={COLOR_CONTRIB} stopOpacity={0.30}/>
-                                        <stop offset="100%" stopColor={COLOR_CONTRIB} stopOpacity={0.03}/>
+                                        <stop offset="0%" stopColor={COLOR_CONTRIB} stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor={COLOR_CONTRIB} stopOpacity={0.03} />
                                     </linearGradient>
                                     <linearGradient id="fillGrowth" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"   stopColor={COLOR_GROWTH} stopOpacity={0.30}/>
-                                        <stop offset="100%" stopColor={COLOR_GROWTH} stopOpacity={0.03}/>
+                                        <stop offset="0%" stopColor={COLOR_GROWTH} stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor={COLOR_GROWTH} stopOpacity={0.03} />
                                     </linearGradient>
                                     <linearGradient id="fillInvIncome" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"   stopColor={COLOR_INV_INCOME} stopOpacity={0.30}/>
-                                        <stop offset="100%" stopColor={COLOR_INV_INCOME} stopOpacity={0.03}/>
+                                        <stop offset="0%" stopColor={COLOR_INV_INCOME} stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor={COLOR_INV_INCOME} stopOpacity={0.03} />
                                     </linearGradient>
                                     <linearGradient id="fillExpenses" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%"   stopColor={COLOR_EXPENSES} stopOpacity={0.30}/>
-                                        <stop offset="100%" stopColor={COLOR_EXPENSES} stopOpacity={0.03}/>
+                                        <stop offset="0%" stopColor={COLOR_EXPENSES} stopOpacity={0.3} />
+                                        <stop offset="100%" stopColor={COLOR_EXPENSES} stopOpacity={0.03} />
                                     </linearGradient>
                                 </defs>
 
-                                <CartesianGrid stroke="#eef2ff" vertical={true}/>
+                                <CartesianGrid stroke="#eef2ff" vertical={true} />
+
                                 <XAxis
                                     dataKey="x"
                                     ticks={ticksEvery5}
@@ -320,6 +377,7 @@ export default function JourneyProjection({
                                     tickLine={false}
                                     axisLine={{stroke: "#e5e7eb"}}
                                 />
+
                                 <YAxis
                                     orientation="right"
                                     tickFormatter={(v) => fmt(v, currencySymbol)}
@@ -332,59 +390,9 @@ export default function JourneyProjection({
 
                                 <Tooltip
                                     cursor={{stroke: "#c7d2fe", strokeDasharray: 4}}
-                                    content={({active, payload}) => {
-                                        if (!active || !payload?.length) return null;
-                                        const p: any = payload[0].payload;
-                                        return (
-                                            <div className="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-[0_10px_30px_-1px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.04)]">
-                                                <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
-                                                    <div className="text-slate-600 flex items-center gap-2">
-                                                        <DotSwatch color={COLOR_INV_INCOME}/> Investment income
-                                                    </div>
-                                                    <div className="font-medium">{fmt(p.invIncome ?? 0, currencySymbol)}</div>
-
-                                                    <div className="text-slate-600 flex items-center gap-2">
-                                                        <DotSwatch color={COLOR_EXPENSES}/> Expenses (infl.-adj.)
-                                                    </div>
-                                                    <div className="font-medium">{fmt(p.exp ?? 0, currencySymbol)}</div>
-
-                                                    <div className="text-slate-600 flex items-center gap-2">
-                                                        <DotSwatch color={COLOR_CONTRIB}/> Contributions (total)
-                                                    </div>
-                                                    <div className="font-medium">{fmt(p.contribCum, currencySymbol)}</div>
-
-                                                    <div className="text-slate-600 flex items-center gap-2">
-                                                        <DotSwatch color={COLOR_GROWTH}/> Growth (total)
-                                                    </div>
-                                                    <div className="font-medium">{fmt(p.growthCum, currencySymbol)}</div>
-
-                                                    <div className="text-slate-600 flex items-center gap-2">
-                                                        <DotSwatch color={COLOR_INITIAL}/> Initial lump sum
-                                                    </div>
-                                                    <div className="font-medium">
-                                                        {fmt(p.initial, currencySymbol)}
-                                                    </div>
-                                                </div>
-
-                                                <div className="my-3 h-px bg-gray-100"/>
-
-                                                <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
-                                                    <div className="text-slate-600">Age</div>
-                                                    <div className="font-semibold">{p.age}</div>
-
-                                                    <div className="text-slate-600 flex items-center gap-2">
-                                                        <DotSwatch color={COLOR_TOTAL}/> Total saved
-                                                    </div>
-                                                    <div className="font-semibold">
-                                                        {fmt(p.y, currencySymbol)}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    }}
+                                    content={TooltipContent}
                                 />
 
-                                {/* линия цели */}
                                 <ReferenceLine
                                     y={goal}
                                     stroke={COLOR_GROWTH}
@@ -392,7 +400,6 @@ export default function JourneyProjection({
                                     label={<GoalPill value={fmt(goal, currencySymbol)} />}
                                 />
 
-                                {/* NEW: вертикальная линия в месте перетина доход/витрати */}
                                 {crossPoint && (
                                     <ReferenceLine
                                         x={crossPoint.x}
@@ -410,8 +417,6 @@ export default function JourneyProjection({
                                     />
                                 )}
 
-
-                                {/* Total (заливка) */}
                                 <Area
                                     type="monotone"
                                     dataKey="y"
@@ -422,7 +427,6 @@ export default function JourneyProjection({
                                     activeDot={{r: 4}}
                                 />
 
-                                {/* Initial — штриховая линия без заливки */}
                                 <Line
                                     type="monotone"
                                     dataKey="initial"
@@ -431,7 +435,6 @@ export default function JourneyProjection({
                                     dot={false}
                                 />
 
-                                {/* Contributions (cum) — полупрозрачная area + тонкий контур */}
                                 <Area
                                     type="monotone"
                                     dataKey="contribCum"
@@ -442,7 +445,6 @@ export default function JourneyProjection({
                                     activeDot={{r: 3}}
                                 />
 
-                                {/* Growth (cum) — полупрозрачная area + тонкий контур */}
                                 <Area
                                     type="monotone"
                                     dataKey="growthCum"
@@ -453,7 +455,6 @@ export default function JourneyProjection({
                                     activeDot={{r: 3}}
                                 />
 
-                                {/* NEW: Investment income (blue) */}
                                 <Area
                                     type="monotone"
                                     dataKey="invIncome"
@@ -464,7 +465,6 @@ export default function JourneyProjection({
                                     activeDot={{r: 4}}
                                 />
 
-                                {/* NEW: Expenses (green) */}
                                 <Area
                                     type="monotone"
                                     dataKey="exp"
@@ -473,7 +473,7 @@ export default function JourneyProjection({
                                     fill="url(#fillExpenses)"
                                     dot={{r: 2}}
                                     activeDot={{r: 4}}
-                                    style={{ mixBlendMode: "multiply" }}
+                                    style={{mixBlendMode: "multiply"}}
                                 />
 
                                 {considerCutAfter60 && xAt60 != null && (
@@ -493,7 +493,6 @@ export default function JourneyProjection({
                                     />
                                 )}
                             </AreaChart>
-
                         </ResponsiveContainer>
                     </div>
                 ) : (
@@ -514,18 +513,15 @@ export default function JourneyProjection({
                             {fullData.map((d, i) => (
                                 <tr key={i} className={i % 2 ? "bg-slate-100/80" : ""}>
                                     <td className="py-3 px-4 text-slate-700">
-                                        Year {d.x} <br/> (age {d.age})
+                                        Year {d.x}
+                                        <br />
+                                        (age {d.age})
                                     </td>
-
-                                    {/* 2) Initial deposit фиксированный */}
                                     <td className="py-3 px-4">{fmt(d.initial, currencySymbol)}</td>
-
                                     <td className="py-3 px-4">{fmt(d.contribCum, currencySymbol)}</td>
                                     <td className="py-3 px-4">{fmt(d.interestYearReal, currencySymbol)}</td>
                                     <td className="py-3 px-4">{fmt(d.interestRealCum, currencySymbol)}</td>
                                     <td className="py-3 px-4">{fmt(d.growthCum, currencySymbol)}</td>
-
-                                    {/* 1) Total saved (real) */}
                                     <td className="py-3 px-4 font-medium text-slate-900">
                                         {fmt(d.y, currencySymbol)}
                                     </td>
@@ -536,33 +532,35 @@ export default function JourneyProjection({
                     </div>
                 )}
 
-                {/* Легенда + Share */}
+                {/* Legend + Share */}
                 <div className="mt-8 mb-10 flex items-start justify-between text-sm font-semibold relative">
-                    {/* Легенда (цвета совпадают с графиком) */}
                     <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
                         <div className="flex items-center gap-2">
-                            <DotSwatch color={COLOR_INV_INCOME}/> <span>Investment income</span>
+                            <DotSwatch color={COLOR_INV_INCOME} />
+                            <span>Investment income</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DotSwatch color={COLOR_EXPENSES}/> <span>Expenses (infl.-adj.)</span>
+                            <DotSwatch color={COLOR_EXPENSES} />
+                            <span>Expenses (infl.-adj.)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DotSwatch color={COLOR_TOTAL}/> <span>Total</span>
+                            <DotSwatch color={COLOR_TOTAL} />
+                            <span>Total</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DotSwatch color={COLOR_CONTRIB}/> <span>Contributions</span>
+                            <DotSwatch color={COLOR_CONTRIB} />
+                            <span>Contributions</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DotSwatch color={COLOR_GROWTH}/> <span>Growth</span>
+                            <DotSwatch color={COLOR_GROWTH} />
+                            <span>Growth</span>
                         </div>
                     </div>
 
-                    {/* Share button */}
                     <ShareMenu
                         title="My FIRE projection"
                         text="Check out my FIRE projection"
-                        onCopied={() => {
-                        }}
+                        onCopied={() => {}}
                         trigger={({onClick, "aria-expanded": expanded}) => (
                             <button
                                 onClick={onClick}
@@ -577,4 +575,6 @@ export default function JourneyProjection({
             </div>
         </>
     );
-}
+});
+
+export default JourneyProjection;
