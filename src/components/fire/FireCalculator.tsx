@@ -429,7 +429,6 @@ export default function FireCalculator() {
                         </div>
 
                         <div className={`${baseBlockStyle} bg-gradient-to-b from-violet-50`}>
-                            {/* ✅ НОВИЙ КОД: Використовуємо debounced props */}
                             <JourneyProjection {...chartProps} />
                         </div>
                     </div>

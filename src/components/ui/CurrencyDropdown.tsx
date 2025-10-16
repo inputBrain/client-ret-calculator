@@ -1,55 +1,43 @@
-// CurrencyDropdown.tsx
-import * as React from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
-import {type Currency, CURRENCY_META, isCurrency} from "@/lib/currency"; // ваши экспортированные утилы
+import { type Currency, CURRENCY_META } from "@/lib/currency";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
-type Option = {
-    code: Currency;
-    available?: boolean; // можно отключать (например, если нет monoLinks[code])
-};
-
-type Props = {
+interface CurrencyDropdownProps {
     value: Currency;
-    onChange: (ccy: Currency) => void;
-    options?: Option[];   // по умолчанию: ["UAH","EUR","USD"]
-    ariaLabel?: string;
+    onChange: (c: Currency) => void;
+    availableMap?: Partial<Record<Currency, string | boolean>>;
     className?: string;
-};
+}
 
 export function CurrencyDropdown({
     value,
     onChange,
     availableMap,
     className = "",
-}: {
-    value: Currency;
-    onChange: (c: Currency) => void;
-    availableMap?: Partial<Record<Currency, string | boolean>>;
-    className?: string;
-}) {
-    const [open, setOpen] = React.useState(false);
-    const btnRef = React.useRef<HTMLButtonElement | null>(null);
+}: CurrencyDropdownProps) {
+    const [open, setOpen] = useState(false);
 
-    React.useEffect(() => {
-        const onDocClick = (e: MouseEvent) => {
-            if (!btnRef.current) return;
-            if (!btnRef.current.parentElement?.contains(e.target as Node)) setOpen(false);
-        };
-        if (open) document.addEventListener("mousedown", onDocClick);
-        return () => document.removeEventListener("mousedown", onDocClick);
-    }, [open]);
+    // ✅ Використовуємо наш hook замість useEffect
+    const ref = useClickOutside<HTMLDivElement>(() => setOpen(false), open);
 
-    const codes = ["UAH", "EUR", "USD"] as const;
+    // ✅ Список доступних валют
+    const currencies = useMemo(() => {
+        return (["UAH", "EUR", "USD"] as const).map((code) => ({
+            code,
+            available: availableMap ? !!availableMap[code] : true,
+        }));
+    }, [availableMap]);
 
     return (
-        <div className={`relative ${className}`}>
+        <div ref={ref} className={`relative ${className}`}>
+            {/* ✅ Кнопка відкриття dropdown */}
             <button
-                ref={btnRef}
                 type="button"
                 aria-haspopup="listbox"
                 aria-expanded={open}
-                onClick={() => setOpen((s) => !s)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200"
+                onClick={() => setOpen((prev) => !prev)}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 transition"
             >
         <span className="inline-flex h-5 w-5 overflow-hidden rounded-full ring-1 ring-slate-200">
           <Image
@@ -62,7 +50,13 @@ export function CurrencyDropdown({
         </span>
                 <span className="tabular-nums">{CURRENCY_META[value].symbol}</span>
                 <span className="font-medium">{value}</span>
-                <svg viewBox="0 0 20 20" className="h-4 w-4 opacity-70" aria-hidden="true">
+                <svg
+                    viewBox="0 0 20 20"
+                    className={`h-4 w-4 opacity-70 transition-transform ${
+                        open ? "rotate-180" : ""
+                    }`}
+                    aria-hidden="true"
+                >
                     <path
                         d="M5.5 7.5l4.5 5 4.5-5"
                         fill="none"
@@ -74,44 +68,42 @@ export function CurrencyDropdown({
                 </svg>
             </button>
 
+            {/* ✅ Dropdown список */}
             {open && (
                 <ul
                     role="listbox"
-                    tabIndex={-1}
-                    className="absolute z-20 mt-2 min-w-[160px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+                    className="absolute z-20 mt-2 min-w-[160px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
                 >
-                    {(["UAH","EUR","USD"] as const).map((code) => {
-                        const available = availableMap ? !!availableMap[code] : true;
-                        const disabled = !available;
-                        return (
-                            <li key={code} role="option" aria-selected={code === value}>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (disabled) return;
-                                        onChange(code);
-                                        setOpen(false);
-                                    }}
-                                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm transition
-                    ${disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-50"}
-                    ${code === value ? "bg-indigo-50" : ""}
-                  `}
-                                >
-                  <span className="inline-flex h-5 w-5 overflow-hidden rounded-full ring-1 ring-slate-200">
-                    <Image
-                        src={CURRENCY_META[code].flag}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 object-cover"
-                    />
-                  </span>
-                                    <span className="tabular-nums">{CURRENCY_META[code].symbol}</span>
-                                    <span className="font-medium">{code}</span>
-                                </button>
-                            </li>
-                        );
-                    })}
+                    {currencies.map(({ code, available }) => (
+                        <li key={code} role="option" aria-selected={code === value}>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!available) return;
+                                    onChange(code);
+                                    setOpen(false);
+                                }}
+                                disabled={!available}
+                                className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm transition ${
+                                    !available
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-slate-50"
+                                } ${code === value ? "bg-indigo-50 text-indigo-800" : ""}`}
+                            >
+                <span className="inline-flex h-5 w-5 overflow-hidden rounded-full ring-1 ring-slate-200">
+                  <Image
+                      src={CURRENCY_META[code].flag}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="h-5 w-5 object-cover"
+                  />
+                </span>
+                                <span className="tabular-nums">{CURRENCY_META[code].symbol}</span>
+                                <span className="font-medium">{code}</span>
+                            </button>
+                        </li>
+                    ))}
                 </ul>
             )}
         </div>
