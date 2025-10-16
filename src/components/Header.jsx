@@ -12,7 +12,7 @@ export default function Header() {
 
                 <div className="hidden md:flex flex-1 items-center gap-3">
                     <Link href="/" className={navLinkBase}>Home</Link>
-                    <Link href="/inflation" className={navLinkBase}>Inflation</Link>
+                    {/*<Link href="/inflation" className={navLinkBase}>Inflation</Link>*/}
                     {/*<Link href="/donation" className={navLinkBase}>Donation</Link>*/}
                     {/*<Link href="/donation-v1" className={navLinkBase}>Donation-v1</Link>*/}
                 </div>

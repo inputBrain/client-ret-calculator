@@ -31,8 +31,8 @@ export function AllocationTriple({
     setStocksRateKind: (v: "none" | "custom") => void;
     stocksRate: number;
     setStocksRate: (n: number) => void;
-    fixedRateKind: "none" | "custom" | "preset";
-    setFixedRateKind: (v: "none" | "custom" | "preset") => void;
+    fixedRateKind: "none" | "custom";
+    setFixedRateKind: (v: "none" | "custom") => void;
     fixedRate: number;
     setFixedRate: (n: number) => void;
 }) {
@@ -42,7 +42,7 @@ export function AllocationTriple({
     );
 
     const setFixedRateKindMemo = React.useCallback(
-        (kind: "none" | "custom" | "preset") => setFixedRateKind(kind),
+        (kind: "none" | "custom") => setFixedRateKind(kind),
         [setFixedRateKind]
     );
 
@@ -53,7 +53,7 @@ export function AllocationTriple({
 
     React.useEffect(() => {
         if (fixedPresets.length > 0) {
-            setFixedRateKindMemo("preset");
+            setFixedRateKindMemo("none");
             setFixedRateMemo(fixedPresets[0].rate);
         } else {
             setFixedRateKindMemo("custom");
