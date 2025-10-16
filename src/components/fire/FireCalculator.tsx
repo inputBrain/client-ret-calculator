@@ -30,7 +30,7 @@ const DEFAULTS = {
     csh: 10,
     srk: "custom" as "custom" | "none",
     sr: 7,
-    frk: "custom" as "none" | "custom" | "preset",
+    frk: "custom" as "none" | "custom",
     fr: 4,
     infl: 0
 };
@@ -52,8 +52,8 @@ export default function FireCalculator() {
     const [stocksRateKind, setStocksRateKind] = useState<"none" | "custom">(DEFAULTS.srk);
     const [stocksRate, setStocksRate] = useState<number>(DEFAULTS.sr);
 
-    type FixedKind = "none" | "custom" | "preset";
-    const [fixedRateKind, setFixedRateKind] = useState<FixedKind>(DEFAULTS.frk);
+    const [fixedRateKind, setFixedRateKind] = useState<"none" | "custom">(DEFAULTS.frk);
+
     const [fixedRate, setFixedRate] = useState<number>(DEFAULTS.fr);
     const [inflationPct, setInflationPct] = useState(DEFAULTS.infl);
     const [considerCutAfter60, setConsiderCutAfter60] = useState(false);
@@ -81,7 +81,7 @@ export default function FireCalculator() {
         setWithdrawalSlider(num("wr", DEFAULTS.wr));
         setStocksRateKind(str("srk", DEFAULTS.srk));
         setStocksRate(num("sr", DEFAULTS.sr));
-        setFixedRateKind(str("frk", DEFAULTS.frk) as FixedKind);
+        setFixedRateKind(str("frk", DEFAULTS.frk));
         setFixedRate(num("fr", DEFAULTS.fr));
         setInflationPct(num("infl", DEFAULTS.infl));
     }, []);
