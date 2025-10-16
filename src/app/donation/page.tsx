@@ -18,42 +18,31 @@ import { PayPalPayment } from "@/components/donation/PayPalPayment";
 import { BuyMeACoffeePayment } from "@/components/donation/BuyMeACoffeePayment";
 
 export default function DonatePage() {
-    // ✅ PayPal конфігурація (один раз)
     const paypalAvailableCcys = useMemo(() => getPaypalAvailableCurrencies(), []);
     const paypalDefaultCcy = useMemo(
         () => getPaypalDefaultCurrency(paypalAvailableCcys),
         [paypalAvailableCcys]
     );
 
-    // ✅ PayPal availableMap
     const paypalAvailableMap = useMemo(() => {
         const map: Record<string, string> = {};
         for (const c of paypalAvailableCcys) map[c] = c;
         return map;
     }, [paypalAvailableCcys]);
 
-    // ✅ Весь стейт в одному hook
     const state = useDonationState({
         paypalDefaultCcy,
         paypalAvailableCcys,
     });
 
-    // ✅ Crypto адреса
-    const cryptoAddress = useMemo(
-        () => getCryptoAddress(state.activeNetwork.envKey),
-        [state.activeNetwork.envKey]
-    );
-
-    // ✅ Всі URL в одному hook
     const urls = usePaymentUrls({
         monoCcy: state.monoCcy,
         monoAmount: state.finalAmount,
         paypalCcy: state.paypalCcy,
         paypalAmount: state.finalAmount,
-        cryptoAddress,
+        cryptoAddress: "", // не потрібно
     });
 
-    // ✅ Символ валюти для AmountSelector
     const amountSymbol = useMemo(() => {
         if (state.method === "uah") return getCurrencySymbol(state.monoCcy);
         if (state.method === "paypal") return getCurrencySymbol(state.paypalCcy);
@@ -63,7 +52,7 @@ export default function DonatePage() {
     return (
         <main className="min-h-screen text-slate-900">
             <section className="mx-auto max-w-3xl px-4 py-10">
-                {/* ✅ Header */}
+
                 <header className="mb-8 text-center">
                     <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
                         Support this project
@@ -73,11 +62,9 @@ export default function DonatePage() {
                     </p>
                 </header>
 
-                {/* ✅ Таби методів оплати */}
                 <PaymentMethodTabs method={state.method} onMethodChange={state.setMethod} />
 
-                {/* ✅ Вибір суми (НЕ показуємо для BMAC) */}
-                {state.method !== "bmac" && (
+                {(state.method === "uah" || state.method === "paypal") && (
                     <AmountSelector
                         method={state.method}
                         amountInput={state.amountInput}
@@ -94,19 +81,9 @@ export default function DonatePage() {
                     />
                 )}
 
-                {/* ✅ Рендер відповідного методу оплати */}
-                <div className={state.method === "bmac" ? "" : "mt-8"}>
+                <div className={state.method === "bmac" || state.method === "crypto" ? "" : "mt-8"}>
                     {state.method === "crypto" && (
-                        <CryptoPayment
-                            tokenKey={state.tokenKey}
-                            onTokenChange={state.setTokenKey}
-                            networkKey={state.networkKey}
-                            onNetworkChange={state.setNetworkKey}
-                            activeToken={state.activeToken}
-                            activeNetwork={state.activeNetwork}
-                            address={cryptoAddress}
-                            qrUrl={urls.cryptoQrUrl}
-                        />
+                        <CryptoPayment />
                     )}
 
                     {state.method === "uah" && (
@@ -135,7 +112,6 @@ export default function DonatePage() {
                     )}
                 </div>
 
-                {/* ✅ Footer */}
                 <footer className="mt-10 text-center text-xs text-slate-500">
                     <p>Thank you for your support 💛</p>
                 </footer>

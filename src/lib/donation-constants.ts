@@ -50,6 +50,12 @@ export function getBuyMeACoffeeSlug(): string {
 }
 
 export function getCryptoAddress(envKey: string): string {
-    if (typeof window === "undefined") return "";
-    return (process.env[envKey as any] as string) || "";
+    const envMap: Record<string, string> = {
+        'NEXT_PUBLIC_WALLET_BTC': ENV.walletBTC,
+        'NEXT_PUBLIC_WALLET_ETH': ENV.walletETH,
+        'NEXT_PUBLIC_WALLET_USDT_ETH': ENV.walletUSDT_ETH,
+        'NEXT_PUBLIC_WALLET_USDT_TRON': ENV.walletUSDT_TRON,
+    };
+
+    return envMap[envKey] || "";
 }
