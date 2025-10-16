@@ -76,60 +76,64 @@ export default function DonatePage() {
                 {/* ✅ Таби методів оплати */}
                 <PaymentMethodTabs method={state.method} onMethodChange={state.setMethod} />
 
-                {/* ✅ Вибір суми */}
-                <AmountSelector
-                    method={state.method}
-                    amountInput={state.amountInput}
-                    onAmountInputChange={state.setAmountInput}
-                    finalAmount={state.finalAmount}
-                    onPresetClick={state.setPresetAmount}
-                    amountSymbol={amountSymbol}
-                    monoCcy={state.monoCcy}
-                    onMonoCcyChange={state.setMonoCcy}
-                    monoAvailableMap={monoLinks}
-                    paypalCcy={state.paypalCcy}
-                    onPaypalCcyChange={state.setPaypalCcy}
-                    paypalAvailableMap={paypalAvailableMap}
-                />
+                {/* ✅ Вибір суми (НЕ показуємо для BMAC) */}
+                {state.method !== "bmac" && (
+                    <AmountSelector
+                        method={state.method}
+                        amountInput={state.amountInput}
+                        onAmountInputChange={state.setAmountInput}
+                        finalAmount={state.finalAmount}
+                        onPresetClick={state.setPresetAmount}
+                        amountSymbol={amountSymbol}
+                        monoCcy={state.monoCcy}
+                        onMonoCcyChange={state.setMonoCcy}
+                        monoAvailableMap={monoLinks}
+                        paypalCcy={state.paypalCcy}
+                        onPaypalCcyChange={state.setPaypalCcy}
+                        paypalAvailableMap={paypalAvailableMap}
+                    />
+                )}
 
                 {/* ✅ Рендер відповідного методу оплати */}
-                {state.method === "crypto" && (
-                    <CryptoPayment
-                        tokenKey={state.tokenKey}
-                        onTokenChange={state.setTokenKey}
-                        networkKey={state.networkKey}
-                        onNetworkChange={state.setNetworkKey}
-                        activeToken={state.activeToken}
-                        activeNetwork={state.activeNetwork}
-                        address={cryptoAddress}
-                        qrUrl={urls.cryptoQrUrl}
-                    />
-                )}
+                <div className={state.method === "bmac" ? "" : "mt-8"}>
+                    {state.method === "crypto" && (
+                        <CryptoPayment
+                            tokenKey={state.tokenKey}
+                            onTokenChange={state.setTokenKey}
+                            networkKey={state.networkKey}
+                            onNetworkChange={state.setNetworkKey}
+                            activeToken={state.activeToken}
+                            activeNetwork={state.activeNetwork}
+                            address={cryptoAddress}
+                            qrUrl={urls.cryptoQrUrl}
+                        />
+                    )}
 
-                {state.method === "uah" && (
-                    <MonobankPayment
-                        currency={state.monoCcy}
-                        amount={state.finalAmount}
-                        monoHref={urls.monoHref}
-                        hasMonoUrl={!!urls.monoUrl}
-                    />
-                )}
+                    {state.method === "uah" && (
+                        <MonobankPayment
+                            currency={state.monoCcy}
+                            amount={state.finalAmount}
+                            monoHref={urls.monoHref}
+                            hasMonoUrl={!!urls.monoUrl}
+                        />
+                    )}
 
-                {state.method === "paypal" && (
-                    <PayPalPayment
-                        currency={state.paypalCcy}
-                        amount={state.finalAmount}
-                        paypalUrl={urls.paypalUrl}
-                        paypalEmail={paypalEmail}
-                    />
-                )}
+                    {state.method === "paypal" && (
+                        <PayPalPayment
+                            currency={state.paypalCcy}
+                            amount={state.finalAmount}
+                            paypalUrl={urls.paypalUrl}
+                            paypalEmail={paypalEmail}
+                        />
+                    )}
 
-                {state.method === "bmac" && (
-                    <BuyMeACoffeePayment
-                        bmacUrl={ENV.bmacUrl}
-                        amount={state.finalAmount}
-                    />
-                )}
+                    {state.method === "bmac" && (
+                        <BuyMeACoffeePayment
+                            bmacUrl={ENV.bmacUrl}
+                            amount={state.finalAmount}
+                        />
+                    )}
+                </div>
 
                 {/* ✅ Footer */}
                 <footer className="mt-10 text-center text-xs text-slate-500">
