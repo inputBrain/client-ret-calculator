@@ -93,14 +93,10 @@ const JourneyProjection = React.memo(function JourneyProjection({
             const x = r.yearIdx;
             const totalReal = Number(r.totalEnd.toFixed(2));
 
-            const contribYearReal = infl
-                ? r.contribYear / Math.pow(1 + infl, x)
-                : r.contribYear;
+            const contribYearReal = r.contribYear;
             contribRealCum += contribYearReal;
 
-            const interestYearReal = infl
-                ? r.interestYear / Math.pow(1 + infl, x)
-                : r.interestYear;
+            const interestYearReal = r.interestYear;
             interestRealCum += interestYearReal;
 
             const growthRealCum = Math.max(0, totalReal - legend.initial - contribRealCum);
@@ -176,17 +172,20 @@ const JourneyProjection = React.memo(function JourneyProjection({
                 ? startAgeForSpending
                 : (data[0]?.age ?? 0);
 
+        const infl = Math.max(0, (inflationPct ?? 0)) / 100;
         const wrEff = goal > 0 && (annualSpend ?? 0) > 0 ? (annualSpend as number) / goal : 0;
 
         return data.map((d, idx) => {
             const age = (data[idx]?.age ?? baseAge) as number;
 
-            let exp = annualSpend ?? 0;
+            // ✅ Витрати ростуть з інфляцією
+            const yearsFromStart = d.x;
+            let exp = (annualSpend ?? 0) * Math.pow(1 + infl, yearsFromStart);
+
             if (considerCutAfter60 && age >= 60) {
                 exp *= 1 - (spendingDropAfter60Pct ?? 20) / 100;
             }
 
-            const baseReal = (d.initial ?? 0) + (d.contribCum ?? 0);
             const invIncome = (d.y ?? 0) * wrEff;
 
             return {...d, exp, invIncome, age};
@@ -195,6 +194,7 @@ const JourneyProjection = React.memo(function JourneyProjection({
         data,
         annualSpend,
         goal,
+        inflationPct,
         considerCutAfter60,
         spendingDropAfter60Pct,
         startAgeForSpending,
@@ -238,7 +238,7 @@ const JourneyProjection = React.memo(function JourneyProjection({
 
                         <div className="text-slate-600 flex items-center gap-2">
                             <DotSwatch color={COLOR_EXPENSES} />
-                            Expenses (infl.-adj.)
+                            Expenses (nominal)
                         </div>
                         <div className="font-medium">{fmt(p.exp ?? 0, currencySymbol)}</div>
 
@@ -541,7 +541,7 @@ const JourneyProjection = React.memo(function JourneyProjection({
                         </div>
                         <div className="flex items-center gap-2">
                             <DotSwatch color={COLOR_EXPENSES} />
-                            <span>Expenses (infl.-adj.)</span>
+                            <span>Expenses (nominal)</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <DotSwatch color={COLOR_TOTAL} />
