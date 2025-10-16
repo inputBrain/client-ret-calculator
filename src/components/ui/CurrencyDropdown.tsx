@@ -37,7 +37,7 @@ export function CurrencyDropdown({
                 aria-haspopup="listbox"
                 aria-expanded={open}
                 onClick={() => setOpen((prev) => !prev)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 transition"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 transition"
             >
         <span className="inline-flex h-5 w-5 overflow-hidden rounded-full ring-1 ring-slate-200">
           <Image
@@ -72,7 +72,7 @@ export function CurrencyDropdown({
             {open && (
                 <ul
                     role="listbox"
-                    className="absolute z-20 mt-2 min-w-[160px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
+                    className="absolute z-20 mt-2 w-full space-y-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
                 >
                     {currencies.map(({ code, available }) => (
                         <li key={code} role="option" aria-selected={code === value}>
