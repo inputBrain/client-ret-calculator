@@ -166,13 +166,21 @@ export default function FireCalculator() {
         [withdrawalSlider]
     );
 
-    const {goalNominalAtRet, monthsToFi, yearsToFiRounded, retireAge, retireSpanYears} = useMemo(() => {
+    const {goalNominalAtRet, monthsToFi, yearsToFiRounded, retireAge, retireSpanYears, spendingAtRetirement} = useMemo(() => {
         let goal = 0;
         let months = 0;
+        let spendingAtRet = annualSpend;
 
         if (retMode === "withdrawal") {
             const wr = Math.max(1e-6, withdrawalRate);
-            goal = annualSpend / wr;
+
+            const prelimGoal = annualSpend / wr;
+            const prelimMonths = monthsToTargetStandard(currentSavings, savingMonthly, R_real, prelimGoal);
+            const prelimYears = Math.max(0, prelimMonths / 12);
+
+            spendingAtRet = annualSpend * Math.pow(1 + infl, prelimYears);
+
+            goal = spendingAtRet / wr;
             months = monthsToTargetStandard(currentSavings, savingMonthly, R_real, goal);
         } else {
             months = monthsToTargetLifeExp_LY(
@@ -180,8 +188,11 @@ export default function FireCalculator() {
                 annualSpend, age, lifeExpectancy
             );
             const yearsToFi = Math.max(0, months / 12);
+
+            spendingAtRet = annualSpend * Math.pow(1 + infl, yearsToFi);
+
             const yearsInRet = Math.max(0, lifeExpectancy - (age + yearsToFi));
-            goal = annualSpend * yearsInRet;
+            goal = spendingAtRet * yearsInRet;
         }
 
         if (!Number.isFinite(months) || months < 0) months = 0;
@@ -194,9 +205,10 @@ export default function FireCalculator() {
             monthsToFi: months,
             yearsToFiRounded: years,
             retireAge: retAge,
-            retireSpanYears: span
+            retireSpanYears: span,
+            spendingAtRetirement: spendingAtRet
         };
-    }, [retMode, withdrawalRate, annualSpend, currentSavings, savingMonthly, R_real, age, lifeExpectancy]);
+    }, [retMode, withdrawalRate, annualSpend, currentSavings, savingMonthly, R_real, age, lifeExpectancy, infl]);
 
     const contribYear = useMemo(() => savingMonthly * 12, [savingMonthly]);
 
@@ -216,7 +228,9 @@ export default function FireCalculator() {
         retireAge: Math.round(retireAge),
         annualSavings: contribYear,
         retireSpanYears,
-    }), [goalNominalAtRet, retireAge, contribYear, retireSpanYears]);
+        spendingToday: annualSpend,
+        spendingAtRetirement: spendingAtRetirement,
+    }), [goalNominalAtRet, retireAge, contribYear, retireSpanYears, annualSpend, spendingAtRetirement]);
 
     const rowsForChart = useMemo(() => {
         return rows.map(r => {
